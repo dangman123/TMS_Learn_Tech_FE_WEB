@@ -1,0 +1,97 @@
+.modal-payment.show {
+  display: block;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  z-index: 1050;
+}
+
+.modal-payment-dialog {
+  position: relative;
+  margin: 10% auto;
+  max-width: 900px;
+  width: 90%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: modal-payment-slide-down 0.3s ease-out;
+}
+
+@keyframes modal-payment-slide-down {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-payment-header {
+  padding: 15px;
+  border-bottom: 1px solid #e5e5e5;
+  background-color: #f7f7f7;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.modal-payment-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-payment-body {
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.modal-payment-footer {
+  padding: 10px;
+  border-top: 1px solid #e5e5e5;
+  text-align: right;
+  background-color: #f7f7f7;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+.table th, .table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table img {
+  display: block;
+  /* margin: 0 auto 10px; */
+  border-radius: 4px;
+}

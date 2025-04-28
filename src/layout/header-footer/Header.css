@@ -1,0 +1,133 @@
+/* CSS cho dropdown menu */
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+  padding: 10px 0px;
+}
+
+.user-dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 190px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  top: 42px;
+  right: 0;
+}
+
+.user-dropdown:hover .dropdown-menu {
+  display: block; /* Hiển thị dropdown khi hover */
+  background-color: #fff;
+}
+
+.dropdown-menu li {
+  list-style: none;
+  padding: 8px 12px;
+}
+
+.dropdown-menu li a,
+.dropdown-menu li button {
+  text-decoration: none;
+  color: black;
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li button:hover {
+  background-color: #f1f1f1;
+}
+
+.logout-btn {
+  cursor: pointer;
+}
+span.cart-count {
+  position: absolute;
+  top: -10px;
+  right: -13px;
+  height: 23px;
+  line-height: 23px;
+  text-align: center;
+  width: 20px;
+  background-color: black;
+  color: white;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+a.gio-hang-icon {
+  position: relative;
+}
+.gio-hang-icon .icon-giohang {
+  font-size: 26px; /* Điều chỉnh kích thước icon */
+}
+
+/* Mặc định cho desktop */
+.header__main .main-menu {
+  display: flex; /* Hiển thị menu ngang */
+}
+
+.header__main .menubars {
+  display: none; /* Ẩn icon menu cho desktop */
+}
+.offcanvas-menu {
+  position: fixed;
+  top: 0;
+  right: -100%; /* Ẩn menu ngoài màn hình */
+  width: 80%;
+  height: 100%;
+  background: #fff;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: right 0.3s ease; /* Hiệu ứng trượt */
+}
+
+.offcanvas-menu.open {
+  right: 0; /* Hiển thị menu */
+}
+
+.offcanvas-menu ul {
+  list-style: none;
+  padding: 20px;
+}
+
+.offcanvas-menu li {
+  margin-bottom: 10px;
+}
+
+.offcanvas-menu a {
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.offcanvas-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.offcanvas-overlay.active {
+  display: block;
+}
+
+/* Khi ở chế độ mobile */
+@media (max-width: 768px) {
+  .header__main .main-menu {
+    display: none; /* Ẩn menu ngang */
+  }
+
+  .header__main .menubars {
+    display: block; /* Hiển thị icon menu */
+  }
+}

@@ -1,0 +1,24 @@
+
+.swiper-button-prev,
+.swiper-button-next {
+  border: 1px solid #ccc;
+  color: #b7b7b7 !important;
+  background-color: transparent;
+  border-radius: 50%;
+  padding: 32px;
+  font-weight: 100;
+}
+.swiper-button-prev:hover,
+.swiper-button-next:hover{
+  color: #2eb97e !important;
+}
+.swiper-scrollbar-drag {
+  display: none;
+}
+
+.section-header.mb-60.text-center span{
+  margin-left: 10px;
+}
+.banner__content span{
+  margin-left: 10px;
+}

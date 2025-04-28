@@ -1,0 +1,128 @@
+[
+    {
+        "studentId": "2001210231",
+        "age": 0,
+        "studyHoursPerWeek": 0,
+        "onlineCoursesCompleted": 0,
+        "assignmentCompletionRate": 0.0,
+        "examScore": 0.0,
+        "attendanceRate": 0.0,
+        "timeSpentOnSocialMedia": 0,
+        "sleepHoursPerNight": 0,
+        "gender": 0,
+        "preferredLearningStyle": 0,
+        "participationInDiscussions": 0,
+        "useOfEducationalTech": 0,
+        "selfReportedStressLevel": 0,
+        "courseProgress": {
+            "Ch2": {
+                "chapterTitle": "Chương 2",
+                "chapterQuizScore": null,
+                "lessons": [
+                    {
+                        "lessonTitle": "Lesson 4",
+                        "lessonScore": 10.0,
+                        "attempts": [
+                            {
+                                "score": 10.0,
+                                "timestamp": "2025-03-31T04:35:12.876966"
+                            }
+                        ]
+                    },
+                    {
+                        "lessonTitle": "Lesson 5",
+                        "lessonScore": 4.0,
+                        "attempts": [
+                            {
+                                "score": 4.0,
+                                "timestamp": "2025-03-31T04:35:52.774713"
+                            }
+                        ]
+                    },
+                    {
+                        "lessonTitle": "Lesson null",
+                        "lessonScore": 6.0,
+                        "attempts": [
+                            {
+                                "score": 6.0,
+                                "timestamp": "2025-03-31T04:37:02.326532"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Ch1": {
+                "chapterTitle": "Chương 1",
+                "chapterQuizScore": null,
+                "lessons": [
+                    {
+                        "lessonTitle": "Lesson 1",
+                        "lessonScore": 10.0,
+                        "attempts": [
+                            {
+                                "score": 10.0,
+                                "timestamp": "2025-03-31T02:03:25.252374"
+                            }
+                        ]
+                    },
+                    {
+                        "lessonTitle": "Lesson 2",
+                        "lessonScore": 6.0,
+                        "attempts": [
+                            {
+                                "score": 6.0,
+                                "timestamp": "2025-03-31T04:31:41.118800"
+                            }
+                        ]
+                    },
+                    {
+                        "lessonTitle": "Lesson 3",
+                        "lessonScore": 6.0,
+                        "attempts": [
+                            {
+                                "score": 6.0,
+                                "timestamp": "2025-03-31T04:32:36.180051"
+                            }
+                        ]
+                    },
+                    {
+                        "lessonTitle": "Lesson null",
+                        "lessonScore": 6.0,
+                        "attempts": [
+                            {
+                                "score": 6.0,
+                                "timestamp": "2025-03-31T04:34:12.596383"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Ch3": {
+                "chapterTitle": "Chương 3",
+                "chapterQuizScore": null,
+                "lessons": [
+                    {
+                        "lessonTitle": "Lesson 6",
+                        "lessonScore": 10.0,
+                        "attempts": [
+                            {
+                                "score": 10.0,
+                                "timestamp": "2025-03-31T04:37:35.088773"
+                            }
+                        ]
+                    },
+                    {
+                        "lessonTitle": "Lesson 7",
+                        "lessonScore": null,
+                        "attempts": [
+                            {
+                                "score": null,
+                                "timestamp": "2025-03-31T04:38:49.720796"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

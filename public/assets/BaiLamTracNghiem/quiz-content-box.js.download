@@ -1,0 +1,293 @@
+﻿let QuizContentBox = function () {
+    let _QuizContentBox = function () {
+        const Question_NoAnswer = 0;
+        const Question_ChoiceCheckBox = 1;
+        const Question_ChoiceRadio = 2;
+        const Question_TypeInputText = 3;
+        const AnswerType_CheckBox = 1;
+        const AnswerType_Radio = 2;
+        const AnswerType_InputText = 3;
+        var interval;
+        var $radioButtons = $('input[type="radio"]');
+        $radioButtons.click(function () {
+            $radioButtons.each(function () {
+                $(this).parent().parent().toggleClass('answer-selected', this.checked);
+            });
+        });
+
+        var $checkboxButtons = $('input[type="checkbox"]');
+        $checkboxButtons.click(function () {
+            $checkboxButtons.each(function () {
+                $(this).parent().parent().toggleClass('answer-selected', this.checked);
+            });
+        });
+
+        $("#btnCheckQuiz").click(function (e) {
+            
+            var listAnswerOfMember = [];
+            var jsonListQuestionInfo = JSON.parse($('#json-list-question-info').val());
+
+            var totalQuestion = 0;
+            var totalQuestionDone = 0;
+            for (let i = 0; i < jsonListQuestionInfo.length; i++) {
+                let questionInfo = jsonListQuestionInfo[i];
+                if (questionInfo.Type == Question_ChoiceCheckBox) {
+                    totalQuestion += 1;
+                    let selectorAnswer = "input[name='option-" + questionInfo.Id + "']:checked";
+                    let listAnswer = [];
+                    $(selectorAnswer).each(function () {
+                        let answerValue = Number($(this).attr('answer-id'));
+                        let answer = { Type: AnswerType_CheckBox, IdChoice: answerValue, AnswerValue: "" };
+                        listAnswer.push(answer);
+                    });
+                    if (listAnswer.length > 0) {
+                        totalQuestionDone += 1;
+                    }
+                    questionInfo.ListAnswer = JSON.stringify(listAnswer);
+                }
+                if (questionInfo.Type == Question_ChoiceRadio) {
+                    totalQuestion += 1;
+                    let selectorAnswer = "input[name='option-" + questionInfo.Id + "']:checked";
+                    let listAnswer = [];
+                    $(selectorAnswer).each(function () {
+                        let answerValue = Number($(this).attr('answer-id'));
+                        let answer = { Type: AnswerType_Radio, IdChoice: answerValue, AnswerValue: "" };
+                        listAnswer.push(answer);
+                    });
+                    if (listAnswer.length > 0) {
+                        totalQuestionDone += 1;
+                    }
+                    questionInfo.ListAnswer = JSON.stringify(listAnswer);
+                }
+                if (questionInfo.Type == Question_TypeInputText) {
+                    totalQuestion += 1;
+                    let selectorAnswer = "input[name='option-" + questionInfo.Id + "']";
+                    let listAnswer = [];
+                    let answer = { Type: AnswerType_InputText, IdChoice: 0, AnswerValue: $(selectorAnswer).val() };
+                    listAnswer.push(answer);
+                    if (listAnswer.length > 0 && listAnswer[0].AnswerValue.trim() != "") {
+                        totalQuestionDone += 1;
+                    }
+                    questionInfo.ListAnswer = JSON.stringify(listAnswer);
+                }
+                listAnswerOfMember.push(questionInfo);
+            }
+            if (totalQuestionDone < (0.6 * totalQuestion)) {
+                $("#error-check-quiz").empty();
+                $("#error-check-quiz").append("<p class='text-danger'>* Vui lòng hoàn thành trên 80% câu hỏi.</p>");
+                $("#error-check-quiz").show();
+                let duration = Number($("#duration-quiz").val());
+                let haveDuration = $("#duration-quiz").attr('have-duration');
+                if (duration <= 0 && haveDuration == "true") {
+                    $("#div-check-quiz").hide();
+                    $("#quiz-help").hide();
+                    $("#quiz-result").hide();
+                    $("#div-check-quiz-again").show();
+                    $("#btnSaveResult").hide();
+                }
+                return;
+            }
+            else {
+                $("#error-check-quiz").empty();
+                $("#error-check-quiz").hide();
+                $("#TotalQuestionDoneValue").val(totalQuestionDone);
+                $("#ListQuestionInfoValue").val(JSON.stringify(listAnswerOfMember));
+                clearInterval(interval);
+            }
+            var form = $("form#frmCheckQuiz")[0];
+            var formData = new FormData(form);
+            formData.append("QuizCode", $('#product-code').val());
+            formData.append("QuizPack", $('#package-code').val());
+            formData.append("ListQuestionInfo", JSON.stringify(listAnswerOfMember));
+
+            $.ajax({
+                type: "POST",
+                url: "/Quiz/Quiz/CheckQuiz",
+                contentType: false,
+                processData: false,
+                async: false,
+                cache: false,
+                timeout: 120000,
+                data: formData,
+                success: function (result) {
+                    refeshToken(result.token);
+                    if (result.isSuccess == true) {
+                        $("#TotalPointValue").val(result.totalPoint);
+                        $("#TotalPointMemberValue").val(result.totalPointMember);
+                        $("#TotalQuestionValue").val(result.totalQuestion);
+                        $("#TotalAnswerValue").val(result.totalAnswerSuccess);
+                        $("#totalAnswer").text(result.totalAnswerSuccess + "/" + result.totalQuestion);
+                        $("#totalPoint").text(result.totalPointMember + "/" + result.totalPoint);
+                        viewAnswerResultCheck(result.listQuestionInfo, result.listQuestionInfoResult);
+                        $("#div-check-quiz").hide();
+                        $("#quiz-result").show();
+                        $("#div-check-quiz-again").show();
+                        $("#quiz-help").show();
+                    }
+                    else {
+                        $("#error-check-quiz").empty();
+                        $("#error-check-quiz").append("<p class='text-danger'>* Lỗi trong quá trình kiểm tra. Vui lòng thử lại sau.</p>");
+                        $("#error-check-quiz").show();
+                    }
+                },
+                error: function () {
+                    $("#error-check-quiz").empty();
+                    $("#error-check-quiz").append("<p class='text-danger'>* Lỗi trong quá trình kiểm tra. Vui lòng thử lại sau.</p>");
+                    $("#error-check-quiz").show();
+                }
+            });
+
+        });
+
+        $("#btnSaveResult").click(function () {
+            $("#btnSaveResult").attr("disabled", true);
+            var form = $("form#frmResultCheck")[0];
+            var formData = new FormData(form);
+            $.ajax({
+                type: "POST",
+                url: "/quiz/save-result",
+                contentType: false,
+                processData: false,
+                async: false,
+                cache: false,
+                timeout: 120000,
+                data: formData,
+                success: function (result) {
+                    $("#btnSaveResult").hide();
+                    refeshTokenSaveResult(result.token);
+                    $("#txtMessageModal").text(result.message);
+                    $("#messageModal").modal('show');
+                },
+                error: function () {
+                    $("#btnSaveResult").hide();
+                    $("#txtMessageModal").text("Lỗi quá trình lưu thông tin. Vui lòng thử lại sau!");
+                    $("#messageModal").modal('show');
+                }
+            });
+        });
+
+        $("#btnStartQuiz").click(function () {
+            $(".list-question").show();
+            $("#quiz-check").show();
+            $("#div-start-quiz").hide();
+            $("#countdown").show();
+            let duration = Number($("#duration-quiz").val());
+
+            duration = duration * 60;
+            
+            interval = setInterval(function () {
+                duration--;
+                $("#duration-quiz").val(duration);
+                if (duration >= 0) {
+                    let hours = parseInt(duration / 3600);
+                    let minutes = parseInt((duration - hours * 3600) / 60);
+                    let seconds = duration - hours * 3600 - minutes * 60;
+                    let strHours = hours < 10 ? ("0" + hours) : hours;
+                    let strMinutes = minutes < 10 ? ("0" + minutes) : minutes;
+                    let strSeconds = seconds < 10 ? ("0" + seconds) : seconds;
+                    let strTime = strHours + ":" + strMinutes + ":" + strSeconds;
+                    $("#countdown").html(strTime);
+                }
+                else {
+                    clearInterval(interval);
+                    $('#btnCheckQuiz').trigger('click');
+                    $("#timeupModal").modal('show');
+                }
+            }, 1000);
+        })
+
+        $(function () {
+            let duration = Number($("#duration-quiz").val());
+            let memberCode = Number($("#memberCode").val());
+            if (duration > 0 && memberCode > 0) {
+                $("#duration-quiz").attr('have-duration', true);
+                $(".list-question").hide();
+                $("#quiz-check").hide();
+                $("#div-start-quiz").show();
+
+            }
+        })
+
+
+        function refeshToken(token) {
+            $("#divHtmlAntiForgeryToken").empty();
+            $("#divHtmlAntiForgeryToken").append(token);
+        }
+        function refeshTokenSaveResult(token) {
+            $("#divHtmlAntiForgeryTokenSaveResult").empty();
+            $("#divHtmlAntiForgeryTokenSaveResult").append(token);
+        }
+        function viewAnswerResultCheck(listQuestionInfo, listQuestionInfoResult) {
+            $radioButtons.remove();
+            $checkboxButtons.remove();
+            $(".a-value-fill").remove();
+            $("li").removeClass('ansewe-info');
+            $("li").removeClass('answer-selected');
+
+            for (let i = 0; i < listQuestionInfo.length; i++) {
+                let questionSelect = listQuestionInfo[i];
+                let questionResult = listQuestionInfoResult.find(x => x.Id == questionSelect.Id);
+                if (questionSelect.Type == Question_ChoiceCheckBox || questionSelect.Type == Question_ChoiceRadio) {
+                    let listAnswerSelect = JSON.parse(questionSelect.ListAnswer);
+                    let listAnswerResult = JSON.parse(questionResult.ListAnswer);
+                    for (let j = 0; j < listAnswerResult.length; j++) {
+                        let idCheckIcon = "#icon-check-" + listAnswerResult[j].IdChoice;
+                        $(idCheckIcon).empty();
+                        $(idCheckIcon).append("<i class='fa fa-check fa-2x'></i>");
+                        $(idCheckIcon).addClass("text-info");
+                        $(idCheckIcon).show();
+                    }
+                    if (listAnswerSelect != null && listAnswerSelect.length > 0) {
+                        for (let j = 0; j < listAnswerSelect.length; j++) {
+                            let answerIdCheckbox = listAnswerSelect[j].IdChoice;
+                            let idCheckIcon = "#icon-check-" + answerIdCheckbox;
+                            $(idCheckIcon).empty();
+                            if (listAnswerResult.find(x => x.IdChoice == answerIdCheckbox)) {
+                                $(idCheckIcon).append("<i class='fa fa-check-circle fa-2x'></i>");
+                                $(idCheckIcon).addClass("text-info");
+                            } else {
+                                $(idCheckIcon).append("<i class='fa fa-times-circle fa-2x'></i>");
+                                $(idCheckIcon).addClass("text-danger");
+                            }
+                            $(idCheckIcon).show();
+                        }
+                    }
+                }
+                if (questionSelect.Type == Question_TypeInputText) {
+                    let listAnswerSelect = JSON.parse(questionSelect.ListAnswer);
+                    let listAnswerResult = JSON.parse(questionResult.ListAnswer);
+                    let arrAnswerResult = listAnswerResult[0].AnswerValue.split('|');
+
+                    let idAnswerValueResult = "#answer-value-" + questionSelect.Id;
+                    $(idAnswerValueResult).empty();
+                    for (let k = 0; k < arrAnswerResult.length; k++) {
+                        $(idAnswerValueResult).append("<div class='pl-3'><span class='w-5'><i class='fa fa-check fa-2x mr-2 text-info'></i></span>" + arrAnswerResult[k] + "</div>");
+                    }
+                    if (listAnswerSelect != null && listAnswerSelect.length > 0 && listAnswerSelect[0].AnswerValue != "") {
+                        let answerValueMember = listAnswerSelect[0].AnswerValue;
+                        let idAnswerValueMember = "#text-answer-input-" + questionSelect.Id;
+                        $(idAnswerValueMember).empty();
+                        if (arrAnswerResult.find(x => x.trim() == answerValueMember.trim())) {
+                            $(idAnswerValueMember).append("<div class='pl-3'><span class='w-5'><i class='fa fa-check-circle fa-2x mr-2 text-info'></i></span>" + answerValueMember + "</div>");
+
+                        } else {
+                            $(idAnswerValueMember).append("<div class='pl-3'><span class='w-5'><i class='fa fa-times-circle fa-2x mr-2 text-danger'></i></span>" + answerValueMember + "</div>");
+
+                        }
+                    }
+                }
+            }
+
+        }
+
+    };
+    return {
+        init: function () {
+            _QuizContentBox();
+        }
+    }
+}();
+
+document.addEventListener("DOMContentLoaded", function () {
+    QuizContentBox.init();
+});

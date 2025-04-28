@@ -1,0 +1,59 @@
+/* HTML: <div class="loader"></div> */
+.loader.main {
+  /* display: block; */
+  position: absolute;
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  top: 0;
+  left: 0;
+  border: 4px solid #0000;
+  border-radius: 50%;
+  border-color: #ccc #0000;
+  animation: l16 1s infinite linear;
+  margin-top: 400px;
+  margin-left: 50%;
+}
+.loader.main::before,
+.loader.main::after {
+  content: "";
+  grid-area: 1/1;
+  margin: 2px;
+  border: inherit;
+  border-radius: 50%;
+}
+.loader.main::before {
+  border-color: #f03355 #0000;
+  animation: inherit;
+  animation-duration: 5s;
+  animation-direction: reverse;
+}
+.loader.main::after {
+  margin: 8px;
+}
+@keyframes l16 {
+  100% {
+    transform: rotate(5turn);
+  }
+}
+
+.overlay.main-all {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Đảm bảo overlay luôn hiển thị trên các phần khác */
+  opacity: 1;
+  transition: opacity 2s ease-out; /* Hiệu ứng mờ dần trong 2 giây */
+}
+
+/* Khi spinner ẩn đi */
+.overlay.hidden {
+  opacity: 0;
+}
+

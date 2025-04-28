@@ -1,0 +1,21 @@
+.vertical-scroll {
+  max-height: 500px; /* Giới hạn chiều cao danh sách */
+  overflow-y: hidden; /* Ẩn thanh cuộn */
+  position: relative;
+}
+
+.news-item {
+  padding: 10px 0; /* Khoảng cách giữa các item */
+  border-bottom: 1px solid #ddd; /* Đường ngăn cách mỗi mục */
+}
+.card-header.border.border-bottom-0.justify-content-md-between.d-md-flex {
+  justify-content: center !important;
+}
+@keyframes scrollVertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}

@@ -1,0 +1,87 @@
+/* Tabs Navigation */
+.profile-container .upgrade-button {
+  background-color: #28a745; /* Màu xanh lá cây */
+  color: #fff;
+  border: 1px solid #28a745;
+  border-radius: 5px;
+  padding: 10px 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.profile-container .nav-link.upgrade-button:hover {
+  background-color: #218838; /* Màu xanh lá cây đậm hơn khi hover */
+  color: #fff;
+}
+.profile-container .nav-tabs {
+  margin-top: 20px;
+}
+
+/* Popup Overlay */
+.profile-container .popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Màu nền mờ đậm hơn */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Căn giữa popup theo chiều dọc */
+  z-index: 1000;
+  overflow-y: auto; /* Cho phép cuộn nếu nội dung quá dài */
+  padding: 20px; /* Khoảng cách từ các cạnh màn hình */
+}
+
+/* Popup Content */
+.profile-container .popup-content {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 30px; /* Tăng khoảng cách bên trong */
+  width: 100%;
+  height: 800px;
+  max-width: 1000px;
+  position: relative;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Tăng độ bóng */
+  animation: fadeIn 0.3s ease;
+}
+
+/* Close Button */
+/* Close Button */
+.profile-container .close-button {
+  position: absolute;
+  top: 10px; /* Giảm khoảng cách từ trên */
+  right: 10px; /* Giảm khoảng cách từ bên phải */
+  background-color: #ff4d4f; /* Màu đỏ nổi bật */
+  border: none;
+  color: #fff; /* Màu chữ trắng */
+  font-size: 20px; /* Tăng kích thước chữ */
+  width: 40px; /* Kích thước nút */
+  height: 40px; /* Kích thước nút */
+  border-radius: 50%; /* Bo tròn nút */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.profile-container .close-button:hover {
+  background-color: #d9363e; /* Màu đỏ đậm hơn khi hover */
+  transform: scale(1.1); /* Phóng to nhẹ khi hover */
+}
+
+.profile-container .close-button:active {
+  transform: scale(0.95); /* Thu nhỏ nhẹ khi nhấn */
+}
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

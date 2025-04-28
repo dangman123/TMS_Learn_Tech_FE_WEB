@@ -1,0 +1,23 @@
+.qr-item {
+  display: flex;
+  justify-content: space-between; /* Căn đều khoảng cách giữa các button */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  gap: 10px; /* Khoảng cách giữa các button */
+}
+
+.qr-item button {
+  flex: 1; /* Đảm bảo các button có cùng kích thước */
+  text-align: center; /* Căn giữa nội dung trong button */
+  height: 150px; /* Đặt chiều cao cố định cho các button */
+  width: 350px; /* Đặt chiều rộng tối đa nếu cần */
+  display: flex;
+  flex-direction: row; /* Đặt nội dung theo chiều ngang */
+  justify-content: flex-start; /* Căn nội dung sang trái */
+  align-items: center; /* Căn giữa nội dung theo chiều dọc */
+  padding: 10px; /* Khoảng cách bên trong nút */
+  gap: 10px; /* Khoảng cách giữa hình và chữ */
+}
+.qr-item div {
+  display: flex;
+  flex-direction: column; /* Đặt text và số dư theo chiều dọc */
+}

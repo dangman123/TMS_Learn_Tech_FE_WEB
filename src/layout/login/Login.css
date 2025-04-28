@@ -1,0 +1,14 @@
+.password-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 40%;
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+  

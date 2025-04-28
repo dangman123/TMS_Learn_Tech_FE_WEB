@@ -1,0 +1,303 @@
+// Footer area start here ***
+.footer {
+	&-area {
+		overflow: hidden;
+		position: relative;
+		z-index: 1;
+		a {
+			font-family: var(--dm-sans);
+		}
+	}
+	&__shape-left {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: -1;
+
+		@include breakpoint(max-md) {
+			display: none;
+		}
+	}
+	&__shape-right {
+		position: absolute;
+		top: 20%;
+		right: 0;
+		z-index: -1;
+
+		@include breakpoint(max-md) {
+			display: none;
+		}
+	}
+	&__wrp {
+		position: relative;
+		@include justify-wrp;
+		align-items: self-start;
+		gap: 30px;
+		@include breakpoint(max-sm) {
+			flex-direction: column;
+			justify-content: left;
+		}
+	}
+	&__item {
+		.footer-title {
+			margin-bottom: 30px;
+			color: var(--heading-color);
+			font-weight: 700;
+		}
+		ul {
+			li {
+				&:not(:last-child) {
+					margin-bottom: 15px;
+				}
+				a {
+					color: var(--heading-color);
+					opacity: 0.8;
+					&:hover {
+						color: var(--primary-color);
+					}
+				}
+			}
+		}
+		p {
+			color: var(--heading-color);
+			opacity: 0.8;
+		}
+		.social-icons {
+			a {
+				@include radius(36px, 36px, 36px);
+				border-radius: 0;
+				border: 1px solid var(--primary-color);
+				color: var(--primary-color);
+				margin-right: 5px;
+				&:hover {
+					color: var(--white);
+					background-color: var(--primary-color);
+				}
+			}
+		}
+		.get-app {
+			a {
+				margin-right: 3px;
+			}
+		}
+		&.footer-about {
+			max-width: 293px;
+			width: 100%;
+		}
+		&.footer-subscribe {
+			max-width: 270px;
+			width: 100%;
+		}
+		&.footer-touch {
+			max-width: 270px;
+			width: 100%;
+		}
+		&.item-sm {
+			max-width: 175px;
+			width: 100%;
+		}
+		&.newsletter-six {
+			max-width: 299px;
+			width: 100%;
+		}
+		.footer-newsletter {
+			input {
+				width: 100%;
+				padding: 13px 15px;
+			}
+			button {
+				width: 100%;
+				padding: 13px 15px;
+				background: var(--primary-color);
+				color: var(--white);
+				font-weight: 500;
+				margin-top: 10px;
+				transition: var(--transition);
+				&:hover {
+					animation: btnAnimation 1s;
+					box-shadow: 0 0 0 10px transparent;
+					@keyframes btnAnimation {
+						0% {
+							box-shadow: 0 0 0 0 var(--primary-color);
+						}
+					}
+				}
+			}
+			&__six {
+				@extend .footer-newsletter;
+				position: relative;
+				z-index: 1;
+				input {
+					padding: 13px 22px;
+					border-radius: 6px;
+				}
+				button {
+					width: unset;
+					border-radius: 4px;
+					padding: 8px 20px;
+					font-weight: 400;
+					position: absolute;
+					top: 6px;
+					right: 6px;
+					margin-top: 0;
+				}
+			}
+		}
+	}
+	&__copyright {
+		position: relative;
+		padding: 20px 0;
+		border-top: 1px solid rgba(24, 24, 24, 0.2);
+		p {
+			color: var(--heading-color);
+		}
+		a {
+			color: var(--heading-color);
+			&:hover {
+				color: var(--primary-color);
+			}
+		}
+		.social-icons {
+			a {
+				@include radius(36px, 36px, 36px);
+				border-radius: 0;
+				border: 1px solid var(--primary-color);
+				color: var(--primary-color);
+				margin-right: 5px;
+				&:hover {
+					color: var(--white);
+					background-color: var(--primary-color);
+				}
+			}
+		}
+	}
+	&-two {
+		&-area {
+			@extend .footer-area;
+		}
+		&__shape-left {
+			@extend .footer__shape-left;
+			left: -70px;
+			top: 20%;
+		}
+		&__shape-right {
+			position: absolute;
+			right: 0;
+			bottom: 68px;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+	}
+	&-three {
+		&-area {
+			@extend.footer-two-area;
+		}
+		&__shape-left {
+			@extend .footer-two__shape-left;
+			left: 40px;
+			top: 30%;
+		}
+	}
+	&-four {
+		&-area {
+			@extend .footer-three-area;
+		}
+		&__shape-left {
+			@extend .footer-three__shape-left;
+			left: -120px;
+			top: 0;
+			animation: rotateAndScale 40s linear infinite;
+		}
+		&__shape-right {
+			@extend .footer-two__shape-right;
+			bottom: 100px;
+			right: -90px;
+		}
+	}
+	&-five {
+		&-area {
+			@extend .footer-four-area;
+		}
+		&__shape-left {
+			@extend .footer-four__shape-left;
+			animation: rotate 40s linear infinite;
+		}
+		&__shape-right {
+			position: absolute;
+			bottom: 160px;
+			right: 90px;
+			z-index: -1;
+		}
+		&__shape {
+			position: absolute;
+			top: 30%;
+			left: 20px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+	}
+	&-six {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+		}
+		&__shape {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+		}
+		&__info {
+			.info-line {
+				width: 1px;
+				height: 16px;
+				background-color: var(--primary-color);
+				margin-bottom: -3px;
+			}
+		}
+	}
+	&-nine {
+		&-area {
+			@extend .footer-six-area;
+		}
+		&__shape1 {
+			position: absolute;
+			bottom: 69px;
+			left: 8px;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape2 {
+			position: absolute;
+			top: 0;
+			right: 0;
+			z-index: -1;
+		}
+	}
+	&-ten {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+		}
+		&__shape {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+		}
+		&__dots {
+			position: absolute;
+			top: 50%;
+			right: 50px;
+			z-index: -1;
+		}
+	}
+}
+// Footer area end here ***

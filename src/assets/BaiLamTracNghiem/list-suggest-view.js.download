@@ -1,0 +1,45 @@
+﻿var SuggestQuizBox = function () {
+    var _SuggestQuizBox = function () {
+        var owlLatestNews = $("#ListSuggestViewBox");
+        owlLatestNews.owlCarousel({
+            margin: 10,
+            loop: false,
+            nav: true,
+            autoplay: false,
+            dots: false,
+            responsive: {
+                0: {
+                    items: 2
+                },
+                600: {
+                    items: 2
+                },
+                1300: {
+                    items: 4
+                }
+            }
+        });
+        var list = JSON.parse($("#hdListSuggestTopQuiz").val());
+        $("#topQuizSuggestTitle").empty();
+        $("#topQuizSuggestTitle").append($("#hdTopQuizSuggestTitle").val());        
+        var listSTD = $("#listSuggestTopQuiz");
+        if (listSTD.length > 0) {
+            $("#listSuggestTopQuiz").empty();
+            if (list != null && list.length > 0) {
+                $("#template-list-suggest-top-quiz").tmpl(list).appendTo("#listSuggestTopQuiz");
+                $("#linkGetMoreSuggestOfTopSuggest").attr("href", $("#hdLinkGetMoreSuggest").val());
+            }
+            else {
+                $("#suggest-top-quiz-box").hide();
+            }
+        }       
+    };
+    return {
+        init: function () {
+            _SuggestQuizBox();
+        }
+    };
+}();
+document.addEventListener('DOMContentLoaded', function () {
+    SuggestQuizBox.init();
+});

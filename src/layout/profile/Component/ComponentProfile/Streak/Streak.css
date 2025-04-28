@@ -1,0 +1,167 @@
+.container-steack {
+  background-color: #ffffff; /* Màu nền trắng cho nội dung */
+  width: 800px;
+  height: 700px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.highlighted-section {
+  background-color: #fff8e1; /* Màu vàng nhạt */
+  padding: 20px;
+  margin: -20px -20px;
+
+  margin-bottom: 20px;
+}
+
+.streak-count {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.streak-number {
+  font-size: 48px;
+  margin-right: 20px;
+  color: #333;
+}
+
+.streak-text {
+  font-size: 16px;
+  color: #333;
+}
+
+.motivation-box {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.motivation-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #ff8c00;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.motivation-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.motivation-link {
+  color: #1e90ff;
+  cursor: pointer;
+}
+
+.calendar-title {
+  font-size: 30px;
+  font-size: bold;
+
+  margin-bottom: 5px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calendar-header h3 {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+}
+
+.calendar-header button {
+  background-color: #ffcc80; /* Màu cam nhạt */
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.calendar-header button:hover {
+  background-color: #ffa726; /* Màu cam đậm hơn khi hover */
+  transform: scale(1.1); /* Hiệu ứng phóng to nhẹ */
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 90px); /* 7 cột cho 7 ngày */
+  gap: 10px; /* Giảm khoảng cách giữa các ô */
+  justify-content: center; /* Căn giữa lưới lịch */
+  text-align: center;
+  margin-top: 10px;
+}
+
+.day-label {
+  font-weight: bold;
+  color: #666;
+  font-size: 14px;
+}
+/* Căn chỉnh và làm đẹp các ô ngày */
+.day {
+  padding: 8px; /* Tăng kích thước padding */
+  border-radius: 50%; /* Bo tròn ô ngày */
+  font-size: 14px; /* Tăng kích thước font chữ */
+  font-weight: bold; /* Tô đậm chữ */
+  color: #333;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+  width: 40px; /* Tăng chiều rộng */
+  height: 40px; /* Tăng chiều cao */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto; /* Căn giữa các ô */
+}
+
+.day:hover {
+  background-color: #ffcc80; /* Màu cam nhạt khi hover */
+  transform: scale(1.1); /* Hiệu ứng phóng to nhẹ */
+}
+
+.day.today {
+  background-color: #1e90ff; /* Màu xanh cho ngày hôm nay */
+  color: #fff;
+  font-weight: bold;
+  border: 2px solid #1c7ed6; /* Thêm viền xanh đậm */
+}
+
+.day.marked {
+  background-color: #ffe4b5; /* Màu cam nhạt cho ngày đã đánh dấu */
+  color: #333;
+  border: 2px solid #ffcc80; /* Thêm viền cam nhạt */
+}
+
+.day.future {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #f9f9f9; /* Màu nền nhạt cho ngày tương lai */
+  border: 1px solid #e0e0e0; /* Viền nhạt */
+}
+
+.empty-day {
+  width: 40px; /* Đặt chiều rộng cố định cho ô trống */
+  height: 40px; /* Đặt chiều cao cố định cho ô trống */
+  visibility: hidden; /* Ẩn các ô trống */
+}
+.ask-streak {
+  font-size: 16px;
+  color: #666;
+  margin-top: 20px;
+  text-align: center;
+}

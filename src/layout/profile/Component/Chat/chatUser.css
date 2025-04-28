@@ -1,0 +1,123 @@
+/* .chat-user-container.user {
+  display: flex;
+  height: 90vh;
+} */
+.chat-messages.user{
+  display: flex;
+  height: 80vh;
+}
+.chat-sidebar {
+  width: 250px;
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #ececec;
+}
+.message-list.user{
+  height: 80vh;
+}
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.message-item {
+  /* margin-bottom: 10px; */
+  display: flex;
+  /* flex-direction: column; */
+}
+
+.outgoing {
+  align-self: flex-end;
+}
+
+.incoming {
+  align-self: flex-start;
+}
+
+.message-timestamp {
+  font-size: 0.8em;
+  color: #888;
+}
+
+.message-input {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #ececec;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay-content {
+  background-color: white;
+  padding: 20px;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.close-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+.search-chat-user{
+  border: 2px solid #ccc;
+    /* Độ dày và màu sắc của viền */
+    border-radius: 8px;
+    /* Bo tròn các góc */
+    padding: 8px 12px;
+    /* Khoảng cách giữa nội dung và viền */
+    outline: none;
+    /* Xóa đường viền mặc định khi nhấn */
+    font-size: 16px;
+    /* Cỡ chữ */
+    transition: border-color 0.3s ease;
+    /* Hiệu ứng mượt khi thay đổi màu viền */
+}
+
+
+.search-chat-user:focus {
+  border-color: #007bff;
+}
+.search-chat-user {
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  outline: none;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Đổ bóng nhẹ */
+}
+
+.search-chat-user:focus {
+  border-color: #007bff;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+  /* Đổ bóng nổi bật hơn khi focus */
+}

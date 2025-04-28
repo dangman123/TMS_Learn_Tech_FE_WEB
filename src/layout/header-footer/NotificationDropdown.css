@@ -1,0 +1,11 @@
+.dropdown-notification-item-content {
+    display: -webkit-box; /* Kích hoạt chế độ hiển thị flex dòng */
+    -webkit-line-clamp: 2; /* Hiển thị tối đa 2 dòng */
+    -webkit-box-orient: vertical; /* Cắt theo chiều dọc */
+    overflow: hidden; /* Ẩn phần dư */
+    text-overflow: ellipsis; /* Hiển thị ... nếu nội dung bị cắt */
+    white-space: normal; /* Cho phép xuống dòng */
+  }
+  .notification-dropdown button{
+    background-color: white;
+  }

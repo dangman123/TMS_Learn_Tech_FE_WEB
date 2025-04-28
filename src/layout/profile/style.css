@@ -1,0 +1,266 @@
+.nav-item.active {
+  background-color: #ccc; /* Màu nền cho thẻ được kích hoạt */
+}
+nav.col-md-3.col-lg-3.mt-60.d-md-block.sidebar {
+  position: unset;
+}
+
+/* Lịch sử làm bài */
+div#historyTest {
+  width: 100%;
+  margin-top: 60px;
+}
+
+body {
+  color: black;
+}
+
+.search-bar {
+  width: 100%;
+}
+
+.btn-icon {
+  background-color: blue;
+  color: white;
+}
+button.btn.btn-icon.search-test {
+  border: 1px solid #dee2e6;
+  background-color: #dee2e6;
+  border-radius: 0px 2px 2px 0px;
+}
+.filter-row {
+  margin-bottom: 5px;
+}
+
+.filter-row .form-group {
+  display: flex;
+  align-items: center;
+  /* width: 30%; */
+  float: right;
+}
+
+.filter-row .form-group label {
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.filter-row .form-control {
+  flex: 1;
+}
+
+.table-document td,
+.table-document th {
+  vertical-align: middle;
+}
+
+.table-document.table-document-striped.table-document-sm th {
+  /* font-family: "League Spartan", sans-serif; */
+  font-size: 18px;
+}
+.row.fillter-history-time {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+.row.fillter-history {
+  border: 1px solid #dee2e6;
+  padding: 20px 0px;
+  margin-bottom: 25px;
+}
+.row.fillter-history-time {
+  width: 100%;
+}
+
+/* Lịch sử tài liệu */
+div#historyDocument {
+  width: 100%;
+  margin-top: 60px;
+}
+
+.table-document .col-stt {
+  width: 5%;
+}
+
+.table-document .col-ten-bai-kiem-tra {
+  width: 40%;
+}
+
+.table-document .col-diem,
+.table-document .col-result {
+  width: 10%;
+}
+
+.table-document .col-tai-xuong,
+.table-document .col-xoa {
+  width: 10%;
+}
+.sidebar-sticky.closed {
+  width: 0;
+  overflow: hidden;
+}
+
+.table-document {
+  width: 100%;
+  /* table-layout: fixed; */
+}
+
+.table-document th,
+.table-document td {
+  text-align: left;
+  padding: 8px;
+}
+
+.col-stt {
+  width: 5%;
+}
+
+.col-ten-bai-kiem-tra {
+  width: 50%;
+}
+
+.col-diem {
+  width: 15%;
+}
+
+.col-tai-xuong,
+.col-xoa {
+  width: 15%;
+}
+
+.table-document-responsive {
+  overflow-x: auto;
+}
+
+.table-document-striped tbody tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
+
+.btn-link {
+  color: #007bff;
+  font-size: 16px;
+  padding: 0;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+
+/* Container chính cho menu */
+.sidebar-sticky {
+  position: relative; /* Để điều chỉnh vị trí của icon */
+}
+
+/* Container cho nút chuyển đổi menu */
+.menu-toggle-container {
+  position: absolute;
+  top: 0; /* Đặt ở phía trên cùng của menu */
+  left: 0; /* Canh lề trái của menu */
+  padding: 10px; /* Khoảng cách từ các cạnh */
+  z-index: 1000; /* Đảm bảo nút luôn ở trên cùng */
+}
+
+/* Nút chuyển đổi */
+.menu-toggle-btn {
+  background-color: transparent; /* Nền trong suốt */
+  color: #007bff; /* Màu icon */
+  border: none; /* Không có viền */
+  font-size: 24px; /* Kích thước icon */
+  cursor: pointer; /* Con trỏ chuột dạng tay khi di chuột qua */
+}
+/* Container chính cho menu */
+.sidebar-sticky {
+  position: relative; /* Để điều chỉnh vị trí của icon */
+}
+
+/* Container cho nút điều khiển menu */
+.menu-toggle-container {
+  position: absolute;
+  top: 0; /* Đặt ở phía trên cùng của menu */
+  left: 0; /* Canh lề trái của menu */
+  padding: 10px; /* Khoảng cách từ các cạnh */
+  z-index: 1000; /* Đảm bảo nút luôn ở trên cùng */
+}
+
+/* Icon điều khiển */
+.menu-toggle-icon {
+  font-size: 24px; /* Kích thước icon */
+  color: #007bff; /* Màu icon */
+  cursor: pointer; /* Con trỏ chuột dạng tay khi di chuột qua */
+}
+
+/* Định dạng menu */
+.sidebar-sticky {
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa; /* Màu nền menu, có thể thay đổi */
+  border-right: 1px solid #ddd; /* Đường viền bên phải */
+}
+
+/* Định dạng các mục menu */
+.nav-item {
+  margin-bottom: 10px; /* Khoảng cách giữa các mục menu */
+}
+
+/* Định dạng các liên kết trong menu */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background-color: #e9ecef; /* Hiệu ứng khi di chuột qua */
+}
+
+.nav-icon {
+  font-size: 20px; /* Kích thước icon */
+  margin-right: 10px; /* Khoảng cách giữa icon và chữ */
+}
+
+.nav-text {
+  font-size: 16px; /* Kích thước chữ */
+}
+
+/* Màu nền khi mục menu được kích hoạt */
+.nav-item.active .nav-link {
+  background-color: transparent; /* Không có màu nền khi mục được kích hoạt */
+  color: #007bff; /* Màu chữ khi mục được kích hoạt */
+}
+.table-responsive.test-history-user {
+  height: 550px;
+}
+
+.modal-content.payment-history {
+  margin-top: 50%;
+}
+.form-group.timing-test {
+  width: 50%;
+  float: left;
+}
+.test-history-search {
+  padding-right: 0px !important;
+}
+.test-history-filter {
+  padding-left: 0px !important;
+}
+.form-group.document-control {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  gap: 6px;
+}
+select.form-control.document-show-more {
+  width: 50px;
+}
+.col-stt.document {
+  width: 2%;
+}
+
+th.col-diem.text-center.time-download {
+  width: 15%;
+}
+th.col-diem.text-center.re-download {
+  width: 6%;
+}

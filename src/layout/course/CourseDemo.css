@@ -1,0 +1,174 @@
+.course-demo-container {
+  padding: 20px;
+}
+
+.course-sidebar {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  height: 100vh; /* Full height */
+}
+
+.chapter-title {
+  font-size: 1.2em;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+  cursor: pointer;
+}
+
+.lesson-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.lesson-item {
+  margin-bottom: 20px;
+}
+
+.lesson-title {
+  font-size: 1em;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.lesson-title:hover {
+  color: #007bff;
+}
+
+.quiz-container {
+  margin-top: 10px;
+}
+
+.main-content {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  margin-left: 20px;
+}
+
+.main-title {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.video-container {
+  margin-bottom: 20px;
+}
+
+.main-video {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.main-description {
+  font-size: 1.1em;
+  color: #666;
+}
+.flex-align,
+.form-check {
+  display: flex;
+  align-items: center;
+}
+.gap-8 {
+  gap: 0.5rem !important;
+}
+.mb-16 {
+  margin-block-end: 1rem !important;
+}
+.text-32 {
+  font-size: 1.2rem !important;
+}
+.text-gray-100 {
+  color: var(--gray-100) !important;
+}
+.course-demo-container {
+  font-family: "Urbanist", sans-serif !important;
+}
+.course-demo-container {
+  padding: 20px;
+}
+
+/* Sidebar styling */
+.course-sidebar {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  height: 100vh; /* Full height */
+  transition: transform 0.3s ease; /* Smooth transition */
+  transform: translateX(-100%); /* Initially hidden */
+  position: fixed; /* Fix sidebar */
+  top: 0;
+  left: 0;
+  width: 250px;
+  z-index: 1001;
+}
+@media (min-width: 768px) {
+  .col-md-3 {
+      flex: 0 0 auto;
+      width: 20.333333%
+  }
+}
+.course-sidebar.open {
+  transform: translateX(0); 
+}
+
+
+.overlay-course {
+  position: fixed; /* Đảm bảo overlay được cố định toàn màn hình */
+  top: 0;
+  left: 0;
+  width: 100%; /* Overlay chiếm toàn bộ chiều rộng màn hình */
+  height: 100%; /* Overlay chiếm toàn bộ chiều cao màn hình */
+  background: rgba(0, 0, 0, 0.5); /* Overlay có màu nền bán trong suốt */
+  z-index: 1000; /* Đảm bảo overlay nằm dưới sidebar */
+}
+
+
+/* Toggle button styling */
+.sidebar-toggle-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: none; /* Hidden on desktop */
+}
+
+/* Make sidebar visible on larger screens */
+@media (min-width: 768px) {
+  .course-sidebar {
+    transform: translateX(0);
+    position: relative;
+  }
+  .sidebar-toggle-btn {
+    display: none;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .sidebar-toggle-btn {
+    display: block; /* Show toggle button on mobile */
+  }
+
+  .course-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    z-index: 1000;
+    transform: translateX(-100%);
+  }
+
+  .course-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}

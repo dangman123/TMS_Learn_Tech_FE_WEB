@@ -1,0 +1,40 @@
+.d-flex.align-items-center.gap-4.gap-xl-5 {
+  position: relative;
+}
+
+.menu-search {
+  position: relative; /* Đảm bảo .search-results được căn chỉnh dựa vào menu-search */
+}
+
+.search-results {
+  position: absolute;
+  top: 100%; /* Đặt phần tử kết quả ngay bên dưới ô input */
+  left: 0;
+  z-index: 9999;
+  background-color: white;
+  width: 350px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-height: 300px; /* Chiều cao tối đa của phần kết quả */
+  overflow-y: auto; /* Hiển thị thanh cuộn nếu phần tử quá dài */
+  /* display: none; */
+}
+
+.search-result-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item a {
+  text-decoration: none;
+  color: #333;
+}
+
+.search-result-item a:hover {
+  text-decoration: underline;
+}
+

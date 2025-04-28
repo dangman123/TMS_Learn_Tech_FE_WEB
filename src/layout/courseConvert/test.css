@@ -1,0 +1,16 @@
+.correct {
+    background-color: #d4edda; /* Màu xanh nhạt cho đúng */
+    color: #155724; /* Màu chữ xanh */
+  }
+  
+  .incorrect {
+    background-color: #f8d7da; /* Màu đỏ nhạt cho sai */
+    color: #721c24; /* Màu chữ đỏ */
+  }
+  
+  .answer-status {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 5px;
+  }
+  

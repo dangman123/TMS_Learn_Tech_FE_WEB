@@ -1,0 +1,654 @@
+/* Reset default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Container toàn bộ trang */
+.rbtHeaderSticky.vaohoc {
+  background-color: #ffffff;
+  height: 100vh;
+}
+
+/* Bố cục khu vực bài học */
+.rbtLessonArea.vaohoc {
+  display: flex;
+  height: 100%;
+}
+
+/* Sidebar */
+.rbtLessonLeftsidebar.vaohoc {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e0e0e0;
+  transition: width 0.3s ease-in-out;
+  overflow: auto;
+}
+
+.rbtCourseFeatureInner.vaohoc {
+  margin-bottom: 20px;
+}
+
+.lessonSearchWrapper.vaohoc {
+  margin-bottom: 20px;
+}
+
+.lessonSearchWrapper.vaohoc input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle.vaohoc {
+  font-weight: bold;
+  font-size: 1.5em;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.accordionItem.vaohoc {
+  margin-bottom: 10px;
+}
+
+.accordionHeader.vaohoc {
+  background-color: #e0e0e0;
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 5px;
+}
+
+.accordionButton.vaohoc {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  outline: none;
+}
+
+.accordionBody.vaohoc {
+  padding: 15px;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Nội dung khóa học trong bài học */
+.courseContentLeft.vaohoc {
+  display: flex;
+  align-items: center;
+}
+
+.courseContentLeft.vaohoc i {
+  margin-right: 10px;
+}
+
+.courseContentRight.vaohoc {
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Right Sidebar (Video Section) */
+.rbtLessonRightsidebar.vaohoc {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+.lessonTopBar.vaohoc {
+  background-color: #4a90e2;
+  color: #ffffff;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 4px;
+}
+
+.lessonToggleActive {
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.lessonToggleActive.vaohoc i {
+  font-size: 1.5rem;
+}
+
+.lessonTopLeft.vaohoc h5 {
+  margin-left: 10px;
+}
+
+.lessonTopRight.vaohoc a {
+  color: #ffffff;
+}
+
+.inner.vaohoc {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  /* margin-top: 20px; */
+}
+
+.plyrVideoEmbed.vaohoc {
+  flex-grow: 1;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.plyrVideoEmbed.vaohoc iframe {
+  width: 100%;
+  height: 100%;
+}
+
+.content.vaohoc {
+  padding: 15px;
+}
+
+.sectionTitle.vaohoc {
+  margin-bottom: 10px;
+}
+
+.sectionTitle.vaohoc h4 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #444;
+}
+
+.sectionTitle.vaohoc p {
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Nút điều hướng "Previous" và "Next" */
+.bgColorExtra2 {
+  background-color: #f1f1f1;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.rbtButtonGroup.vaohoc {
+  display: flex;
+  justify-content: space-between;
+}
+
+.rbtBtn.vaohoc {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #333333;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.rbtBtn:hover {
+  background-color: #4a90e2;
+  color: #ffffff;
+}
+
+.rbtBtn .btnIcon {
+  margin-right: 8px;
+}
+
+/* Thanh tiến trình */
+.rbtProgressParent {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+}
+
+.rbtBackCircle {
+  fill: none;
+  stroke: #4a90e2;
+  stroke-width: 2;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 150;
+  animation: circleProgress 2s ease-out forwards;
+}
+
+@keyframes circleProgress {
+  0% {
+    stroke-dashoffset: 300;
+  }
+  100% {
+    stroke-dashoffset: 150;
+  }
+}
+
+.rbt-lesson-content-wrapper.vaohoc {
+  display: flex;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+.rbt-accordion-style.rbt-accordion-02.for-right-content.vaohoc
+  .card
+  .card-header {
+  padding: 12px 44px 12px 16px;
+}
+
+.rbt-accordion-style.for-right-content.vaohoc .card .card-header {
+  padding: 12px 32px 12px 16px !important;
+}
+.rbt-accordion-style.for-right-content.vaohoc .card .card-header.lesson {
+  padding: 12px 20px 12px 16px !important;
+}
+.rbt-accordion-style.rbt-accordion-02.vaohoc .card .card-header {
+  border-bottom: 1px solid var(--color-border);
+  padding: 0px 20px 20px 0;
+}
+.rbt-accordion-style.vaohoc .card .card-header {
+  background-color: transparent;
+  border-bottom: 0 none;
+  box-shadow: none;
+  padding: 20px 30px;
+  margin-bottom: 0;
+  padding-right: 38px;
+}
+.accordion-item.vaohoc:last-of-type
+  > .accordion-header
+  .accordion-button.collapsed {
+  border-bottom-right-radius: var(--bs-accordion-inner-border-radius);
+  border-bottom-left-radius: var(--bs-accordion-inner-border-radius);
+}
+.rbt-accordion-style.vaohoc .card .card-header button.collapsed {
+  color: var(--color-heading);
+}
+
+.accordion-item.vaohoc:first-of-type > .accordion-header .accordion-button {
+  border-top-left-radius: var(--bs-accordion-inner-border-radius);
+  border-top-right-radius: var(--bs-accordion-inner-border-radius);
+}
+.rbt-accordion-style.vaohoc .card .card-header button {
+  font-size: 18px;
+  line-height: 27px;
+  outline: none;
+  text-decoration: none;
+  box-shadow: none;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  background-color: transparent;
+  position: relative;
+  font-weight: 600;
+}
+
+.rbt-lesson-leftsidebar.vaohoc .rbt-title-style-3 {
+  margin-bottom: 10px;
+}
+
+.rbt-lesson-leftsidebar.vaohoc .rbt-title-style-3,
+.rbt-lesson-leftsidebar.vaohoc .lesson-search-wrapper {
+  padding: 16px;
+}
+.rbt-title-style-3.vaohoc {
+  margin-bottom: 24px;
+  font-size: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--color-border-2);
+}
+.rbt-badge-5.vaohoc {
+  background: var(--color-gray-light);
+  padding: 5px 7px;
+  font-size: 12px;
+  display: flex;
+  height: 22px;
+  align-items: center;
+  border-radius: var(--radius-small);
+  justify-content: center;
+  width: max-content;
+}
+.ml--10.vaohoc {
+  margin-left: 10px !important;
+}
+.accordion.vaohoc .accordion-button::before {
+  position: absolute;
+  content: "\f068";
+  font-family: "Font Awesome 6 Pro";
+  font-weight: 700;
+  top: 0px;
+  right: -25px;
+  font-size: 15px;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 6px;
+  color: var(--white);
+  background-color: var(--primary-color);
+  text-align: center;
+  transition: var(--transition);
+}
+.accordion.vaohoc .accordion-button.lesson::before {
+  position: absolute;
+  content: "\f068";
+  font-family: "Font Awesome 6 Pro";
+  font-weight: 700;
+  top: 0px;
+  right: -42px;
+  font-size: 15px;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 6px;
+  color: var(--white);
+  background-color: var(--primary-color);
+  text-align: center;
+  transition: var(--transition);
+}
+.lesson-top-bar {
+  background: #2f57ef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  padding-right: 10px;
+  color: white;
+  /* margin-top: 20px; */
+}
+.lesson-top-bar .lesson-top-left {
+  display: flex;
+  line-height: 0px;
+  align-items: center;
+}
+.lesson-top-bar .lesson-top-left .rbt-lesson-toggle {
+  margin-right: 20px;
+}
+.btn-round-white-opacity {
+  padding: 0;
+  border: 0 none;
+  background: var(--white-opacity);
+  width: 35px;
+  height: 35px;
+  border-radius: 100%;
+  /* color: #fff; */
+  font-size: 16px;
+  line-height: 37px;
+}
+.rbt-lesson-content-wrapper .rbt-lesson-leftsidebar {
+  flex: 0 0 400px;
+  width: 400px;
+  background-color: var(--color-extra2);
+  border-right: 1px solid var(--color-border);
+  max-height: 100%;
+  overflow-y: auto;
+}
+ul > li.rbt-course-main-content a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.accordion-body.card-body.vaohoc {
+  padding-bottom: 5px !important;
+}
+svg.bi.bi-play-circle,
+svg.bi.bi-file-earmark-text {
+  margin-left: -10px;
+  margin-right: 5px;
+}
+
+.rbt-lesson-rightsidebar .rbt-checkbox-wrapper label,
+.rbt-lesson-rightsidebar .rbt-form-check label {
+  border: 2px solid var(--color-border);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border-radius: 6px;
+  padding-left: 30px;
+  cursor: pointer;
+}
+input[type="checkbox"] ~ label,
+input[type="radio"] ~ label {
+  position: relative;
+  font-size: 15px;
+  line-height: 25px;
+  color: var(--body-color);
+  font-weight: 400;
+  padding-left: 20px;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.form-check-input[type="radio"] {
+  border-radius: 50%;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  padding: 0;
+}
+.form-check-input {
+  --bs-form-check-bg: var(--bs-body-bg);
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  margin-top: 0.25em;
+  vertical-align: top;
+  appearance: none;
+  background-color: var(--bs-form-check-bg);
+  background-image: var(--bs-form-check-bg-image);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  opacity: 0;
+  position: absolute;
+}
+.form-check-input:checked[type="radio"] {
+  --bs-form-check-bg-image: url(data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27%3e%3ccircle r=%272%27 fill=%27%23fff%27/%3e%3c/svg%3e);
+}
+.rbt-lesson-rightsidebar .rbt-form-check input[type="radio"] ~ label::before {
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+}
+input[type="radio"] ~ label::before {
+  border-radius: 50%;
+}
+input[type="checkbox"] ~ label::before,
+input[type="radio"] ~ label::before {
+  content: " ";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  background-color: #fff;
+  border: 2px solid var(--color-border);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.rbt-lesson-rightsidebar .rbt-form-check input[type="radio"] ~ label::after {
+  top: 41%;
+  left: 13px;
+}
+input[type="radio"] ~ label::after {
+  width: 8px;
+  height: 8px;
+  left: 3px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+input[type="checkbox"] ~ label::after,
+input[type="radio"] ~ label::after {
+  content: " ";
+  position: absolute;
+  top: 9px;
+  left: 2px;
+  width: 10px;
+  height: 5px;
+  background-color: transparent;
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-radius: 2px;
+  transform: rotate(-45deg);
+  opacity: 0;
+  transition: all 0.3s;
+}
+input[type="checkbox"] ~ label::before,
+input[type="radio"] ~ label::before {
+  content: " ";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  background-color: #fff;
+  border: 2px solid #e6e3f1;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.rbt-lesson-rightsidebar .rbt-form-check label {
+  border: 2px solid #e6e3f1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border-radius: 6px;
+  padding-left: 30px;
+  cursor: pointer;
+}
+.rbt-lesson-rightsidebar .rbt-form-check input[type="radio"]:checked ~ label {
+  border-color: #2f57ef;
+}
+.rbt-btn.btn-gradient {
+  color: #ffffff;
+  background-size: 300% 100%;
+  background-image: linear-gradient(
+    to right,
+    #2f57ef,
+    #b966e7,
+    #b966e7,
+    #2f57ef
+  );
+}
+.rbt-btn {
+  padding: 0 26px;
+  background: #2f57ef;
+  height: 60px;
+  line-height: 60px;
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  transition: all 0.4s ease-in-out;
+  border-radius: 6px;
+  border: 0 none;
+  outline: none;
+  text-decoration: none;
+  color: white;
+}
+.rbt-btn.btn-gradient:hover {
+  background-color: inherit;
+  background-position: 102% 0;
+  transition: all 0.4s ease-in-out;
+}
+.rbt-btn:hover {
+  background-color: #b966e7;
+  color: #ffffff;
+  transform: translate3d(0, -2px, 0);
+  box-shadow: var(--shadow-7);
+}
+.rbt-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  /* margin: -10px; */
+}
+.rbt-btn.btn-md {
+  padding: 0 25px;
+  font-size: var(--font-size-b3);
+  height: 50px;
+  line-height: 48px;
+}
+.rbt-lesson-leftsidebar.vaohoc {
+  border-right: 1px solid #ccc;
+}
+.content-item.test-item.locked {
+  opacity: 0.5;
+  /* cursor: not-allowed; */
+  color: red;
+}
+
+.rbt-accordion-style.rbt-accordion-02.for-right-content.accordion.vaohoc h2 {
+  margin-bottom: 0px !important;
+}
+/* Popup Overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Màu nền mờ */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Popup Content */
+/* Popup Content */
+.popup-content {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  height: 800px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow-y: auto; /* Thêm thanh cuộn dọc khi nội dung quá dài */
+}
+
+/* Close Button */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+
+.close-button:hover {
+  color: #ff0000; /* Màu đỏ khi hover */
+}

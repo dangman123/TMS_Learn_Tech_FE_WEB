@@ -1,0 +1,99 @@
+.sidebar {
+  width: 250px;
+  background-color: #f8f9fa;
+  padding: 10px;
+  position: fixed;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 10px;
+}
+
+.sidebar button {
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sidebar button:hover {
+  background-color: #e9ecef;
+}
+
+.sidebar ul ul {
+  padding-left: 20px;
+}
+
+.text-primary {
+  transition: transform 0.3s ease;
+  margin-left: 5px;
+}
+
+.rotate-down {
+  transform: rotate(90deg);
+}
+/* ul.list-unstyled.widget-spec.p-1.mb-0 {
+    margin-left: 10px;
+}*/
+ul.list-unstyled.widget-spec.p-1.mb-0.ml-5 li {
+  margin-left: 3s0px;
+}
+a.text-dark {
+  display: inline-block;
+}
+svg.bi.bi-chevron-right.text-primary {
+  display: inline-block;
+}
+span.font-weight-bold.text-primary {
+  display: inline;
+}
+/* style.css */
+.level-0 {
+  font-size: 18px; /* Kích thước chữ cho cấp 1 */
+  font-weight: bold;
+}
+
+.level-1 {
+  font-size: 16px;
+  margin-left: 10px;
+  font-weight: 600;
+}
+
+.level-2 {
+  font-size: 14px; /* Kích thước chữ cho cấp 3 */
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+.text-primary {
+  color: #007bff; /* Hoặc màu bạn muốn */
+}
+
+.selected {
+  background-color: #e7f0ff; /* Màu nền cho danh mục được chọn */
+  font-weight: bold; /* Làm đậm văn bản */
+  border-left: 4px solid #007bff; /* Đường viền bên trái để làm nổi bật */
+  padding-left: 5px; /* Khoảng cách bên trái để không bị dính vào đường viền */
+  transition: background-color 0.3s ease, border-left 0.3s ease; /* Hiệu ứng chuyển tiếp */
+}
+
+li {
+  transition: background-color 0.3s ease; /* Hiệu ứng chuyển tiếp cho tất cả các danh mục */
+}
+.top-header-level {
+  margin-bottom: 2px;
+}

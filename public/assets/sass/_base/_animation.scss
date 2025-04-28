@@ -1,0 +1,689 @@
+//  Sway animation start here ***
+@keyframes sway {
+	0% {
+		transform: translateX(-20px);
+	}
+	100% {
+		transform: translateX(0px);
+	}
+}
+.sway__animation {
+	animation: sway 3s linear infinite alternate;
+}
+
+@keyframes swayX {
+	0% {
+		transform: translateX(20px);
+	}
+	100% {
+		transform: translateX(0px);
+	}
+}
+.sway__animationX {
+	animation: swayX 3s linear infinite alternate;
+}
+
+@keyframes footer__shadow {
+	0% {
+		margin-left: -200px;
+	}
+	100% {
+		margin-right: -200px;
+	}
+}
+@keyframes sway_Y {
+	0% {
+		transform: translateY(0px);
+	}
+	100% {
+		transform: translateY(20px);
+	}
+}
+.sway_Y__animation {
+	animation: sway_Y 3s linear infinite alternate;
+}
+@keyframes sway_YY {
+	0% {
+		transform: translateY(0px);
+	}
+	100% {
+		transform: translateY(-20px);
+	}
+}
+.sway_Y__animationY {
+	animation: sway_YY 3s linear infinite alternate;
+}
+//  Sway animation end here ***
+
+// Animation sunMove area start here ***
+@-webkit-keyframes sunMove {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	25% {
+		-webkit-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+	50% {
+		-webkit-transform: rotate(90deg);
+		transform: rotate(90deg);
+	}
+	75% {
+		-webkit-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+	100% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+}
+@keyframes sunMove {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	25% {
+		-webkit-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+	50% {
+		-webkit-transform: rotate(90deg);
+		transform: rotate(90deg);
+	}
+	75% {
+		-webkit-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+	100% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+}
+.animation__sunMove {
+	-webkit-animation: sunMove 10s linear infinite;
+	animation: sunMove 10s linear infinite;
+}
+// Animation sunMove area end here ***
+
+// Animation floatBob area start here ***
+@-webkit-keyframes floatBob {
+	0% {
+		-webkit-transform: translateY(0px) translateX(0px) rotate(0deg);
+		transform: translateY(0px) translateX(0px) rotate(0deg);
+	}
+	50% {
+		-webkit-transform: translateY(10px) translateX(10px) rotate(5deg);
+		transform: translateY(10px) translateX(10px) rotate(5deg);
+	}
+	100% {
+		-webkit-transform: translateY(0px) translateX(0px) rotate(0deg);
+		transform: translateY(0px) translateX(0px) rotate(0deg);
+	}
+}
+@keyframes floatBob {
+	0% {
+		-webkit-transform: translateY(0px) translateX(0px) rotate(0deg);
+		transform: translateY(0px) translateX(0px) rotate(0deg);
+	}
+	50% {
+		-webkit-transform: translateY(10px) translateX(10px) rotate(5deg);
+		transform: translateY(10px) translateX(10px) rotate(5deg);
+	}
+	100% {
+		-webkit-transform: translateY(0px) translateX(0px) rotate(0deg);
+		transform: translateY(0px) translateX(0px) rotate(0deg);
+	}
+}
+.animation__floatBob {
+	-webkit-animation-name: floatBob;
+	animation-name: floatBob;
+	-webkit-animation-duration: 4s;
+	animation-duration: 4s;
+	-webkit-animation-iteration-count: infinite;
+	animation-iteration-count: infinite;
+	-webkit-animation-timing-function: linear;
+	animation-timing-function: linear;
+}
+// Animation floatBob area end here ***
+
+// Animation arryUpDown & leftRight area start here ***
+@keyframes arryUpDown {
+	0% {
+		transform: translateY(-10px);
+	}
+
+	100% {
+		transform: translateY(10px);
+	}
+}
+.animation__arryUpDown {
+	animation: arryUpDown 2s ease infinite alternate;
+}
+
+@keyframes arryLeftRight {
+	0% {
+		transform: translateX(-10px);
+	}
+
+	100% {
+		transform: translateX(10px);
+	}
+}
+.animation__arryLeftRight {
+	animation: arryLeftRight 2s ease infinite alternate;
+}
+// Animation arryUpDown & leftRight area end here ***
+
+// Animation area start here ***
+@keyframes pxl_zoom_reverse {
+	0% {
+		transform: scale(0.8);
+	}
+
+	50% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(0.8);
+	}
+}
+
+.pxl-image-zoom {
+	animation: pxl_zoom_reverse 5s linear infinite;
+}
+
+@keyframes zoom-in-zoom-out {
+	0% {
+		transform: scale(0.6, 0.6);
+	}
+
+	50% {
+		transform: scale(1, 1);
+	}
+
+	100% {
+		transform: scale(0.6, 0.6);
+	}
+}
+
+.pxl-image-zoom2 {
+	animation: zoom-in-zoom-out 20s linear infinite;
+}
+
+@keyframes pxl_zigzag {
+	0%,
+	100%,
+	20%,
+	50%,
+	80% {
+		-webkit-transform: translateY(0);
+		-ms-transform: translateY(0);
+		transform: translateY(0);
+	}
+
+	40% {
+		-webkit-transform: rotate(10deg);
+		-ms-transform: rotate(10deg);
+		transform: rotate(10deg);
+	}
+
+	60% {
+		-webkit-transform: rotate(-10deg);
+		-ms-transform: rotate(-10deg);
+		transform: rotate(-10deg);
+	}
+}
+
+.pxl__zigzag {
+	animation: pxl_zigzag 1s ease-out infinite;
+	-webkit-animation: pxl_zigzag 1s ease-out infinite;
+}
+
+@keyframes pxl_right_left {
+	0% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateX(40px);
+	}
+
+	50% {
+		transform: translateX(0);
+	}
+
+	75% {
+		transform: translateX(-40px);
+	}
+
+	100% {
+		transform: translateX(0);
+	}
+}
+
+.slide-right-to-left {
+	animation: pxl_right_left 12s ease-out infinite;
+	-webkit-animation: pxl_right_left 12s ease-out infinite;
+}
+
+@keyframes pxl_left_right {
+	0% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateX(-40px);
+	}
+
+	50% {
+		transform: translateX(0);
+	}
+
+	75% {
+		transform: translateX(40px);
+	}
+
+	100% {
+		transform: translateX(0);
+	}
+}
+
+.slide-left-to-right {
+	animation: pxl_left_right 12s ease-out infinite;
+	-webkit-animation: pxl_left_right 12s ease-out infinite;
+}
+
+@keyframes pxl_float_two {
+	0% {
+		transform: translateY(0);
+	}
+
+	100% {
+		transform: translateY(-20px);
+	}
+}
+
+.slide-up-down {
+	animation: pxl_float_two 2s ease infinite alternate;
+}
+
+@keyframes pxl_bottom_top {
+	0% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateY(40px);
+	}
+
+	50% {
+		transform: translateY(0);
+	}
+
+	75% {
+		transform: translateY(-40px);
+	}
+
+	100% {
+		transform: translateY(0);
+	}
+}
+
+.slide-bottom-to-top {
+	animation: pxl_bottom_top 12s ease-out infinite;
+	-webkit-animation: pxl_bottom_top 12s ease-out infinite;
+}
+
+@keyframes pxl_effect1 {
+	0% {
+		transform: translate(0, 0);
+	}
+
+	20% {
+		transform: translate(40px, -5px);
+	}
+
+	40% {
+		transform: translate(60px, 40px);
+	}
+
+	60% {
+		transform: translate(40px, 60px);
+	}
+
+	80% {
+		transform: translate(-40px, 60px);
+	}
+
+	100% {
+		transform: translate(0, 0);
+	}
+}
+
+.slide-effect1 {
+	animation: pxl_effect1 12s ease-out infinite;
+	-webkit-animation: pxl_effect1 12s ease-out infinite;
+}
+
+@keyframes pxl_effect2 {
+	0% {
+		transform: translate(0, 0);
+	}
+
+	20% {
+		transform: translate(-30px, 40px);
+	}
+
+	40% {
+		transform: translate(60px, 60px);
+	}
+
+	60% {
+		transform: translate(70px, 40px);
+	}
+
+	80% {
+		transform: translate(40px, -70px);
+	}
+
+	100% {
+		transform: translate(0, 0);
+	}
+}
+
+.slide-effect2 {
+	animation: pxl_effect2 12s ease-out infinite;
+	-webkit-animation: pxl_effect2 12s ease-out infinite;
+}
+
+@keyframes pxl_effect3 {
+	0% {
+		transform: translate(0, 0);
+	}
+
+	30% {
+		transform: translate(40px, 60px);
+	}
+
+	45% {
+		transform: translate(80px, 90px);
+	}
+
+	65% {
+		transform: translate(40px, 110px);
+	}
+
+	75% {
+		transform: translate(20px, 800px);
+	}
+
+	100% {
+		transform: translate(0, 0);
+	}
+}
+
+.slide-effect3 {
+	animation: pxl_effect3 12s ease-out infinite;
+	-webkit-animation: pxl_effect3 12s ease-out infinite;
+}
+
+@keyframes pxl_top_bottom {
+	0% {
+		transform: translateX(0);
+	}
+
+	25% {
+		transform: translateY(-40px);
+	}
+
+	50% {
+		transform: translateY(0);
+	}
+
+	75% {
+		transform: translateY(40px);
+	}
+
+	100% {
+		transform: translateY(0);
+	}
+}
+
+.slide-top-to-bottom {
+	animation: pxl_top_bottom 12s ease-out infinite;
+	-webkit-animation: pxl_top_bottom 12s ease-out infinite;
+}
+// Animation area end here ***
+
+//Joss animation area start here ***
+//Joss animation area end here ***
+
+// Animation rotate area start here ***
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+.animation__rotate {
+	animation: rotate 40s linear infinite;
+}
+@keyframes rotateY {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(-360deg);
+	}
+}
+.animation__rotateY {
+	animation: rotateY 40s linear infinite;
+}
+
+@keyframes rotateAndScale {
+	0% {
+		transform: rotate(0deg) scale(1);
+	}
+	50% {
+		transform: rotate(180deg) scale(0.5);
+	}
+	100% {
+		transform: rotate(360deg) scale(1);
+	}
+}
+
+.animation__rotateAndScale {
+	animation: rotateAndScale 10s linear infinite;
+}
+
+@keyframes rotateAndScaleY {
+	0% {
+		transform: rotate(0deg) scale(1);
+	}
+	50% {
+		transform: rotate(-180deg) scale(0.5);
+	}
+	100% {
+		transform: rotate(-360deg) scale(1);
+	}
+}
+
+.animation__rotateAndScaleY {
+	animation: rotateAndScaleY 10s linear infinite;
+}
+// Animation rotate area end here ***
+
+//  Bobble animation start here ***
+@keyframes bobble {
+	0% {
+		transform: translateY(0) scale(0.9);
+	}
+	100% {
+		transform: translateY(-20px) scale(1);
+	}
+}
+.bobble__animation {
+	animation: bobble 3s ease-in-out infinite alternate;
+}
+//  Bobble animation end here ***
+
+//  Animation of the video button area start here ***
+@-webkit-keyframes video-animation {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.5);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(2);
+	}
+}
+
+@keyframes video-animation {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.5);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(2);
+	}
+}
+
+//Joss animation area start here ***
+@keyframes goAll {
+	0% {
+		transform: translate(400px, 200px);
+		opacity: 30%;
+	}
+	17% {
+		transform: translate(600px, 400px);
+		opacity: 40%;
+	}
+	33% {
+		transform: translate(600px, 600px);
+		opacity: 70%;
+	}
+	50% {
+		transform: translate(400px, 800px);
+		opacity: 20%;
+	}
+	66% {
+		transform: translate(200px, 600px);
+		opacity: 60%;
+	}
+	83% {
+		transform: translate(200px, 400px);
+		opacity: 30%;
+	}
+	100% {
+		transform: translate(400px, 200px);
+		opacity: 30%;
+	}
+}
+
+@keyframes goAll2 {
+	0% {
+		top: 800px;
+		left: 845px;
+		opacity: 30%;
+	}
+	25% {
+		top: 400px;
+		left: 845px;
+		opacity: 40%;
+	}
+	50% {
+		top: 800px;
+		left: 845px;
+		opacity: 100%;
+	}
+	75% {
+		top: 1200px;
+		left: 845px;
+		opacity: 20%;
+	}
+	100% {
+		top: 800px;
+		left: 845px;
+		opacity: 30%;
+	}
+}
+
+@keyframes left {
+	0% {
+		transform: translateX(0px);
+	}
+	50% {
+		transform: translateX(30px);
+	}
+	100% {
+		transform: translateX(0px);
+	}
+}
+.animation__goLeft {
+	animation: left infinite 6s;
+}
+
+@keyframes top-bottom {
+	0%,
+	100%,
+	20%,
+	50%,
+	80% {
+		-webkit-transform: translateY(0);
+		-ms-transform: translateY(0);
+		transform: translateY(0);
+	}
+
+	40% {
+		-webkit-transform: translateY(-8px);
+		-ms-transform: translateY(-8px);
+		transform: translateY(-8px);
+	}
+	60% {
+		-webkit-transform: translateY(-4px);
+		-ms-transform: translateY(-4px);
+		transform: translateY(-4px);
+	}
+}
+.animation__topBottom {
+	animation: top-bottom 2s infinite;
+}
+
+@keyframes goAll3 {
+	0% {
+		transform: translate(0px, 0px);
+		opacity: 100%;
+	}
+	33% {
+		transform: translate(100px, 100px);
+		opacity: 30%;
+	}
+	66% {
+		transform: translate(0px, 200px);
+		opacity: 70%;
+	}
+	100% {
+		transform: translate(0px, 0px);
+		opacity: 100%;
+	}
+}
+.animation__goAll {
+	animation: goAll 30s infinite linear;
+}
+.animation__goAll2 {
+	animation: goAll2 50s infinite linear;
+}
+.animation__goAll3 {
+	animation: goAll3 30s infinite linear;
+}
+//Joss animation area end here ***
+//  Animation of the video button end here ***

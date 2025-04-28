@@ -1,0 +1,12 @@
+﻿body {
+}
+
+.ansewe-info:hover {
+    cursor: pointer;
+    border-radius: 3px;
+    background: #ddd;
+}
+.answer-selected {
+    background: #ddd;
+    border-radius: 3px;
+}

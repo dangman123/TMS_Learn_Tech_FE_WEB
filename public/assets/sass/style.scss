@@ -1,0 +1,25 @@
+
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+// Abstracts styles ***
+@import "_abstracts/_mixins";
+@import "_abstracts/_variables";
+
+// Typography styles***
+@import "_base/_typography";
+
+// Component styles ***
+@import "_components/_buttons";
+@import "_components/_progress";
+
+// Layout styles ***
+@import "_layout/_header";
+@import "_layout/_banner";
+@import "_layout/_section";
+@import "_layout/_footer";
+
+// Animation styles***
+@import "_base/_animation";
+
+// Responsive styles ***
+@import "_base/_responsive";

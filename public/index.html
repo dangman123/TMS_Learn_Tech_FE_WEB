@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trang Chủ - Hỗ trợ học tập</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Favicon img -->
+  <link rel="shortcut icon" href="/favicon.png" />
+
+  <style>
+    .fa8097ff55eabaa5782b {
+      display: block;
+      width: 350px !important;
+      height: calc(100% - 200px) !important;
+      right: 115px !important;
+    }
+
+    .ab1ac9d9bab12da47298 {
+      bottom: 18px !important;
+      right: 20px !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="root">
+    <script
+      src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.5/libs/oversea/index.js"></script>
+    <script>
+      const API_BASE_URL = "https://api.coze.com/v1";
+      // const CONVERSATION_ID = "7479462509712408594";
+      const BOT_ID = "7480578588807610384";
+      const BEARER_TOKEN =
+        "pat_aQGTUl6LNqQdarkVcjVvIuvpijuDkVuy31kyUa1b0lxqcGvICtGHBCysSI9L6EJv"; // Thay bằng token thật
+
+      function generateUUID() {
+        const arr = new Uint8Array(16);
+        crypto.getRandomValues(arr);
+        arr[6] = (arr[6] & 0x0f) | 0x40;
+        arr[8] = (arr[8] & 0x3f) | 0x80;
+        return [...arr].map((b) => b.toString(16).padStart(2, "0")).join("");
+      }
+
+
+      async function fetchConversationData() {
+        const url = `https://api.coze.com/v1/conversations?bot_id=${BOT_ID}&connector_id=999&page_num=1&page_size=1`;
+        const bearerToken = 'pat_aQGTUl6LNqQdarkVcjVvIuvpijuDkVuy31kyUa1b0lxqcGvICtGHBCysSI9L6EJv'; // Replace with your actual Bearer token
+
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${bearerToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (data.data && data.data.conversations && data.data.conversations.length > 0) {
+            const lastSectionId = data.data.conversations[0].last_section_id;
+            console.log('Response Data ID Conversation last:', lastSectionId);
+            return lastSectionId;
+          } else {
+            console.log('No conversations found.');
+            return null;
+          }
+
+          return data; // Return the data if you need to use it elsewhere
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+
+      // Call the function
+      // fetchConversationData();
+
+
+
+
+      // Hàm gọi API với Bearer Token
+      async function callAPI(url, method = "GET", body = null) {
+        const options = {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${BEARER_TOKEN}`,
+          },
+        };
+
+        if (body) {
+          options.body = JSON.stringify(body);
+        }
+
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          console.log(`✅ API: ${url}`, data);
+          return data;
+        } catch (error) {
+          console.error(`❌ Lỗi gọi API: ${url}`, error);
+        }
+      }
+
+      // 🔹 1️⃣ Lấy danh sách tin nhắn từ cuộc trò chuyện
+      async function getMessageList(conversation_id) {
+        const url = `${API_BASE_URL}/conversation/message/list?conversation_id=${conversation_id}`;
+        const response = await callAPI(url, "GET");
+
+        if (response?.data?.length > 0) {
+          return response.data.map((msg) => msg.id); // Trả về danh sách message_id
+        } else {
+          console.warn("⚠ Không có tin nhắn nào trong cuộc trò chuyện.");
+          return [];
+        }
+      }
+
+      // 🔹 2️⃣ Xóa từng tin nhắn trong danh sách
+      async function deleteMessages(messageIds, conversation_id) {
+        for (const messageId of messageIds) {
+          const url = `${API_BASE_URL}/conversation/message/delete?conversation_id=${conversation_id}&message_id=${messageId}`;
+          await callAPI(url, "POST");
+        }
+      }
+
+      // 🔹 3️⃣ Chạy toàn bộ quy trình: Lấy danh sách tin nhắn -> Xóa từng tin nhắn
+      async function deleteAllMessages() {
+
+
+        const conversation_id = await fetchConversationData();
+
+        const messageIds = await getMessageList(conversation_id);
+
+        if (messageIds.length > 0) {
+          // console.log("🗑 Đang xóa tin nhắn...");
+          await deleteMessages(messageIds, conversation_id);
+          // console.log("✅ Hoàn tất xóa tất cả tin nhắn.");
+        } else {
+          console.log("⚠ Không có tin nhắn nào để xóa.");
+        }
+      }
+
+      // 🏁 Chạy script xóa tin nhắn
+
+      let userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        userId = generateUUID();
+        deleteAllMessages();
+      } else {
+        userId = sessionStorage.getItem("userId");
+      }
+
+
+      // Danh sách tên ngẫu nhiên
+      const randomNicknames = [
+        "User123",
+        "Anonymous",
+        "Guest456",
+        "JohnDoe",
+        "Alice",
+        "Bob",
+        "CyberWarrior",
+        "AI_Lover",
+      ];
+      const nickname =
+        randomNicknames[Math.floor(Math.random() * randomNicknames.length)];
+
+      // Danh sách ảnh avatar ngẫu nhiên
+      const randomAvatars = [
+        "https://i.pravatar.cc/100?img=1",
+        "https://i.pravatar.cc/100?img=2",
+        "https://i.pravatar.cc/100?img=3",
+        "https://i.pravatar.cc/100?img=4",
+        "https://i.pravatar.cc/100?img=5",
+      ];
+      const avatarUrl =
+        randomAvatars[Math.floor(Math.random() * randomAvatars.length)];
+      new CozeWebSDK.WebChatClient({
+        config: {
+          bot_id: "7480578588807610384",
+          save_history: false,
+        },
+        componentProps: {
+          title: "TMS Chat",
+        },
+        auth: {
+          type: "token",
+          token:
+            "pat_aQGTUl6LNqQdarkVcjVvIuvpijuDkVuy31kyUa1b0lxqcGvICtGHBCysSI9L6EJv",
+          onRefreshToken: function () {
+            return "pat_aQGTUl6LNqQdarkVcjVvIuvpijuDkVuy31kyUa1b0lxqcGvICtGHBCysSI9L6EJv";
+          },
+        },
+        userInfo: {
+          id: "4573985739573",
+          url: avatarUrl,
+          nickname: nickname,
+        },
+
+        ui: {
+          base: {
+            icon: "https://firebasestorage.googleapis.com/v0/b/learn-with-tms-4cc08.appspot.com/o/image%2FBlue%20White%20Illustrated%20Question%20Chatbot%20Logo.png?alt=media&token=d259b25c-c427-42ce-954e-fea5425db2c3",
+            layout: "pc",
+            zIndex: 1000,
+          },
+        },
+        header: {
+          isShow: false,
+          isNeedClose: false,
+        },
+        asstBtn: {
+          isNeed: true,
+        },
+        session: {
+          conversation_id: generateUUID(),
+        },
+      });
+    </script>
+  </div>
+</body>
+
+<script></script>
+
+</html>

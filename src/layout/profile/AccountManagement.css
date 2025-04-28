@@ -1,0 +1,16 @@
+.custom-nav-profile {
+    position: relative;
+    border-top: 1px solid #ccc;
+}
+
+.row {
+    display: flex;
+}
+
+/* .sidebar {
+    flex: 1;
+} */
+
+/* .main-content {
+    flex: 1;
+} */

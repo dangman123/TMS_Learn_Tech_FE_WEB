@@ -1,0 +1,199 @@
+/* Container */
+.ranking-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Header */
+.ranking-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.ranking-badge img {
+  width: 100px;
+  height: 100px;
+}
+
+.ranking-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.ranking-subtitle {
+  font-size: 14px;
+  color: #555;
+}
+
+.ranking-timer {
+  font-size: 14px;
+  color: #f59e0b; /* Màu vàng */
+  font-weight: bold;
+}
+
+/* Ranking List */
+.ranking-list {
+  border-top: 1px solid #ddd;
+  margin-top: 20px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.ranking-rank {
+  width: 30px;
+  text-align: center;
+  font-weight: bold;
+  margin-right: 20px;
+}
+.ranking-rank span {
+  margin-left: 5px;
+  display: inline-block;
+  width: 30px;
+  height: 50px;
+  font-size: 20px; /* Tăng kích thước chữ */
+  font-weight: bold;
+  color: #22c55e; /* Màu chữ */
+  text-align: center;
+  align-items: center;
+  line-height: 55px; /* Căn giữa chữ theo chiều dọc */
+}
+.rank-badge {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: center;
+}
+
+.rank-icon {
+  width: 50px; /* Kích thước hình ảnh */
+  height: 50px;
+  display: inline-block;
+  vertical-align: middle;
+}
+/* Avatar */
+.ranking-avatar {
+  position: relative;
+  width: 40px; /* Tăng kích thước avatar */
+  height: 48px;
+  margin-right: 20px;
+}
+.ranking-avatar .avatar {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #000;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 50px;
+  text-align: center;
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #f59e0b; /* Màu vàng */
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 50%;
+}
+
+/* Name */
+.ranking-name {
+  flex: 1;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Points */
+.ranking-points {
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+}
+/* Promotion Group */
+.promotion-group {
+  margin-top: 20px;
+  padding-top: 10px;
+}
+
+.promotion-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #22c55e; /* Màu xanh lá */
+  margin-bottom: 10px;
+}
+
+.promotion-list .ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.promotion-list .ranking-rank span {
+  margin-left: 5px;
+  display: inline-block;
+  width: 30px;
+  height: 50px;
+  font-size: 20px; /* Tăng kích thước chữ */
+  font-weight: bold;
+  color: #22c55e; /* Màu chữ */
+  text-align: center;
+  align-items: center;
+  line-height: 50px; /* Căn giữa chữ theo chiều dọc */
+}
+
+.promotion-list .ranking-avatar .avatar {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #000;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 50px;
+  text-align: center;
+}
+
+.promotion-list .ranking-name {
+  flex: 1;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.promotion-list .ranking-points {
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+}
+/* Arrow Up Icon */
+.arrow-up-icon {
+  margin: 0 10px; /* Khoảng cách giữa mũi tên và chữ */
+  vertical-align: middle; /* Căn giữa với chữ */
+}
+/* Current User */
+.current-user {
+  background: #e5e7eb;
+
+  padding: 10px; /* Khoảng cách bên trong */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Thêm bóng để nổi bật */
+}

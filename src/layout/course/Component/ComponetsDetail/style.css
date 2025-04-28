@@ -1,0 +1,16 @@
+.review-start-user {
+    display: flex;
+    align-items: center;
+  }
+  
+  .review-start-user .fa-star {
+    color: #FFD700; /* Màu vàng cho sao đầy */
+  }
+  
+  .review-start-user .fa-star-o {
+    color: #ccc; /* Màu xám nhạt cho sao trống */
+  }
+  .img-detail-course{
+    width: 492px !important;
+    height: 400px !important;
+  }

@@ -1,0 +1,954 @@
+// Banner area start here ***
+.banner {
+	&-area {
+		overflow: hidden;
+		position: relative;
+		z-index: 1;
+		@include breakpoint(max-md) {
+			padding: 100px 0;
+		}
+	}
+	&__shape1 {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		z-index: -1;
+	}
+	&__shape2 {
+		position: absolute;
+		top: 40%;
+		left: 65px;
+		z-index: -1;
+		@include breakpoint(max-sm) {
+			display: none;
+		}
+	}
+	&__shape3 {
+		position: absolute;
+		top: 70px;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: -1;
+		@include breakpoint(max-sm) {
+			display: none;
+		}
+	}
+	&__shape4 {
+		position: absolute;
+		top: 65px;
+		right: 110px;
+		z-index: -1;
+	}
+	&__shape5 {
+		position: absolute;
+		bottom: 65px;
+		right: 0px;
+		z-index: -1;
+		@include breakpoint(max-md) {
+			display: none;
+		}
+	}
+	&__video-btn {
+		.video-pulse {
+			&::after,
+			&::before {
+				border: 1px solid var(--primary-color);
+			}
+		}
+		.video-popup {
+			@include radius(44px, 44px, 44px);
+			background-color: var(--primary-color);
+			color: var(--white);
+			font-size: 16px;
+		}
+	}
+	&__content {
+		max-width: 490px;
+
+		h1 {
+			letter-spacing: 2px;
+		}
+		p {
+			font-size: 18px;
+			color: var(--heading-color);
+			@include breakpoint(max-sm) {
+				font-size: 16px;
+			}
+		}
+	}
+	&__hero {
+		position: absolute;
+		right: 20%;
+		bottom: 0;
+		@include breakpoint(max-xxxl) {
+			right: 10%;
+		}
+		@include breakpoint(max-xl) {
+			display: none;
+		}
+		.hero-shape1 {
+			position: absolute;
+			top: 225px;
+			left: 20px;
+			z-index: -1;
+		}
+		.hero-shape2 {
+			position: absolute;
+			left: 80px;
+			bottom: 5px;
+			z-index: -1;
+		}
+		.hero-shape3 {
+			position: absolute;
+			right: -20px;
+			top: 220px;
+			z-index: -1;
+		}
+		.hero-shape4 {
+			position: absolute;
+			right: -20px;
+			bottom: 65px;
+			z-index: -1;
+		}
+	}
+	&__info {
+		max-width: 210px;
+		border-radius: 8px;
+		padding: 20px;
+		background-color: var(--white);
+		@include flex;
+		gap: 15px;
+		box-shadow: var(--shadow);
+		left: -63px;
+		bottom: 30%;
+		position: absolute;
+		&.info2 {
+			top: 193px;
+			left: unset;
+			right: -100px;
+			bottom: unset;
+		}
+		&.info3 {
+			left: -185px;
+			top: 70px;
+			bottom: unset;
+		}
+	}
+	&-two {
+		&-area {
+			@extend .banner-area;
+			padding-top: 165px;
+			padding-bottom: 265px;
+
+			@include breakpoint(max-md) {
+				padding-top: 120px;
+				padding-bottom: 200px;
+			}
+		}
+		&__shape1 {
+			@extend .banner__shape1;
+		}
+		&__shape2 {
+			@extend .banner__shape2;
+			top: 60px;
+			left: 50px;
+			@include breakpoint(max-lg) {
+				display: none;
+			}
+		}
+		&__shape3 {
+			position: absolute;
+			top: 0;
+			right: 0;
+			z-index: -1;
+		}
+		&__shape4 {
+			position: absolute;
+			bottom: 0;
+			right: 0;
+			z-index: -1;
+			@include breakpoint(max-lg) {
+				display: none;
+			}
+		}
+		&__content {
+			@extend .banner__content;
+			max-width: 530px;
+			h1 {
+				@include breakpoint(max-sm) {
+					font-size: 38px;
+				}
+				span {
+					position: relative;
+					z-index: 1;
+					img {
+						position: absolute;
+						bottom: -5px;
+						left: 50%;
+						transform: translateX(-50%);
+						z-index: -1;
+					}
+				}
+			}
+		}
+		&__image {
+			position: absolute;
+			right: 15%;
+			top: 16%;
+
+			@include breakpoint(max-xxxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 0%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+			.image1 {
+				max-width: 287px;
+				position: absolute;
+				bottom: 0;
+				left: -260px;
+			}
+			.image2 {
+				max-width: 450px;
+			}
+			.shape-line {
+				position: absolute;
+				top: 0px;
+				left: -120px;
+				z-index: -1;
+			}
+			.shape-dots {
+				position: absolute;
+				top: 120px;
+				left: -75px;
+				z-index: -1;
+			}
+			.shape {
+				position: absolute;
+				top: -30px;
+				right: -30px;
+				z-index: -1;
+			}
+		}
+	}
+	&-three {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding: 215px 0;
+			@include breakpoint(max-md) {
+				padding: 120px 0;
+			}
+		}
+		&__shape1 {
+			position: absolute;
+			top: 30px;
+			left: 40px;
+			z-index: -1;
+		}
+		&__shape2 {
+			position: absolute;
+			bottom: 60px;
+			left: 40px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shape3 {
+			position: absolute;
+			top: 116px;
+			right: 74px;
+			z-index: -1;
+			animation: rotate 5s linear infinite;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shape4 {
+			position: absolute;
+			bottom: 78px;
+			right: 68px;
+			z-index: -1;
+		}
+		&__image {
+			position: absolute;
+			right: 17%;
+			top: 50%;
+			transform: translateY(-50%);
+			@include breakpoint(max-xxxl) {
+				right: 12%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+			.image2 {
+				position: absolute;
+				left: -95px;
+				bottom: 20px;
+			}
+			.shape1 {
+				position: absolute;
+				top: 25px;
+				left: 0px;
+				z-index: -1;
+			}
+			.shape2 {
+				position: absolute;
+				bottom: 20px;
+				left: -55px;
+			}
+			.dots {
+				position: absolute;
+				top: 105px;
+				left: 20px;
+				z-index: -1;
+			}
+			.line {
+				position: absolute;
+				top: 120px;
+				right: -55px;
+				z-index: -1;
+			}
+		}
+	}
+	&-four {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding: 220px 0;
+			@include breakpoint(max-lg) {
+				padding: 120px 0;
+			}
+		}
+		&__image {
+			position: absolute;
+			right: 19%;
+			top: 50%;
+			transform: translateY(-50%);
+			@include breakpoint(max-xxxl) {
+				right: 10%;
+			}
+			@include breakpoint(max-xl) {
+				right: 5%;
+			}
+			@include breakpoint(max-lg) {
+				display: none;
+			}
+			.line {
+				position: absolute;
+				top: 25px;
+				left: 16%;
+				z-index: -1;
+			}
+			.image-bg {
+				position: absolute;
+				top: 45%;
+				left: 65%;
+				transform: translate(-50%, -50%);
+				z-index: -1;
+			}
+		}
+	}
+	&-five {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding-top: 220px;
+			padding-bottom: 250px;
+			@include breakpoint(max-md) {
+				padding-top: 120px;
+				padding-bottom: 150px;
+			}
+			@include breakpoint(max-sm) {
+				padding-top: 80px;
+				padding-bottom: 100px;
+			}
+		}
+		&__cloud-shape {
+			position: absolute;
+			bottom: 0;
+			left: -10px;
+		}
+		&__shape1 {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+		}
+		&__shape2 {
+			position: absolute;
+			top: 150px;
+			left: 20px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shadow1 {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			z-index: -1;
+		}
+		&__shape3 {
+			position: absolute;
+			bottom: 70px;
+			left: -50px;
+			z-index: -1;
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+		}
+		&__shape4 {
+			position: absolute;
+			top: 90px;
+			left: 48%;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shadow2 {
+			position: absolute;
+			top: 0;
+			right: 0;
+			z-index: -1;
+		}
+		&__shape5 {
+			position: absolute;
+			top: 70px;
+			right: 0px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shape6 {
+			position: absolute;
+			bottom: 200px;
+			right: 128px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__dots {
+			position: absolute;
+			bottom: 60px;
+			right: 48%;
+			z-index: -1;
+			@include breakpoint(max-lg) {
+				display: none;
+			}
+		}
+		&__image {
+			max-width: 611px;
+			bottom: 0;
+			right: 19%;
+			position: absolute;
+			@include breakpoint(max-xxxl) {
+				right: 15%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+			.image-bg {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				z-index: -1;
+			}
+			.star-shape {
+				position: absolute;
+				right: 90px;
+				top: 65px;
+				z-index: -1;
+			}
+			.dots {
+				position: absolute;
+				right: 2px;
+				top: 122px;
+				z-index: -1;
+			}
+		}
+		&__content {
+			@extend .banner-two__content;
+			h5 {
+				svg {
+					margin-top: -5px;
+					margin-left: 8px;
+				}
+			}
+		}
+	}
+	&-six {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding-top: 360px;
+			padding-bottom: 175px;
+		}
+		&__shape1 {
+			position: absolute;
+			top: 170px;
+			left: 60px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shape2 {
+			position: absolute;
+			bottom: 30px;
+			left: 30px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shape3 {
+			position: absolute;
+			top: 220px;
+			right: 30px;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__image {
+			max-width: 707px;
+			position: absolute;
+			bottom: 0;
+			right: 13%;
+			@include breakpoint(max-xxxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 2%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+			.shape1 {
+				position: absolute;
+				top: -100px;
+				left: -15px;
+				z-index: -1;
+			}
+			.shape2 {
+				position: absolute;
+				top: -20px;
+				right: 100px;
+				z-index: -1;
+			}
+			.shape3 {
+				position: absolute;
+				bottom: 30px;
+				right: -20px;
+				z-index: -1;
+			}
+		}
+	}
+	&-seven {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding: 210px 0;
+		}
+		&__image {
+			position: absolute;
+			bottom: 0;
+			right: 16%;
+			max-width: 546px;
+			@include breakpoint(max-xxxl) {
+				right: 10%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+			.al-quran {
+				position: absolute;
+				top: 90px;
+				left: -60px;
+			}
+		}
+	}
+	&-eight {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding-top: 315px;
+			padding-bottom: 235px;
+		}
+		&__shape1 {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__shape2 {
+			position: absolute;
+			top: 225px;
+			right: 0;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__circle {
+			position: absolute;
+			top: -65px;
+			left: -180px;
+			z-index: -1;
+		}
+		&__circle2 {
+			position: absolute;
+			bottom: -120px;
+			right: -150px;
+			z-index: -1;
+		}
+		&__equpment {
+			position: absolute;
+			top: 40%;
+			left: 55%;
+			z-index: -1;
+			@include breakpoint(max-sm) {
+				display: none;
+			}
+		}
+		&__content {
+			@extend .banner-two__content;
+			h1 {
+				color: var(--white);
+				span {
+					color: #ee4a62;
+				}
+			}
+			p {
+				color: rgba(255, 255, 255, 0.9);
+			}
+		}
+	}
+	&-nine {
+		&-area {
+			overflow: hidden;
+			padding-top: 210px;
+			padding-bottom: 210px;
+			position: relative;
+			z-index: 1;
+		}
+		&__bg {
+			position: absolute;
+			top: 0;
+			right: 0;
+			z-index: -1;
+			@include breakpoint(max-lg) {
+				display: none;
+			}
+		}
+		&__shape1 {
+			position: absolute;
+			top: 20px;
+			left: -150px;
+			z-index: -1;
+		}
+		&__shape2 {
+			position: absolute;
+			bottom: -150px;
+			left: 0;
+			z-index: -1;
+		}
+		&__shape3 {
+			position: absolute;
+			top: 25px;
+			left: 47%;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape4 {
+			position: absolute;
+			top: 25px;
+			right: 0;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape5 {
+			position: absolute;
+			bottom: 20px;
+			right: -150px;
+			z-index: -1;
+		}
+		&__car {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			z-index: -1;
+		}
+		&__image {
+			position: absolute;
+			max-width: 639px;
+			top: 50%;
+			right: 13%;
+			transform: translateY(-50%);
+			@include breakpoint(max-xxxl) {
+				right: 10%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+		}
+	}
+	&-ten {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			padding-top: 160px;
+			padding-bottom: 230px;
+			z-index: 1;
+		}
+		&__line {
+			position: absolute;
+			bottom: 120px;
+			right: 105px;
+			z-index: -1;
+		}
+		&__input {
+			box-shadow: 0px 4px 25px 0px #0000000f;
+			display: flex;
+			border-radius: 10px;
+			.select-option {
+				position: relative;
+				width: 75%;
+				svg {
+					position: absolute;
+					top: 22px;
+					left: 18px;
+					z-index: 1;
+				}
+				.nice-select {
+					padding-left: 40px;
+					border-radius: 0;
+					border: none;
+					border-right: 1px solid var(--border);
+					border-top-left-radius: 10px;
+					border-bottom-left-radius: 10px;
+					height: 59px;
+					line-height: 59px;
+					.current {
+						font-weight: 500;
+						color: var(--heading-color);
+					}
+					.list {
+						.option.selected {
+							font-weight: 400;
+						}
+					}
+				}
+			}
+			.input-feild {
+				position: relative;
+				width: 100%;
+				input {
+					width: 100%;
+					padding: 16px 40px;
+					border-top-right-radius: 10px;
+					border-bottom-right-radius: 10px;
+				}
+				button {
+					font-weight: 700;
+					font-family: var(--spartan);
+					line-height: 16px;
+					border-radius: 6px;
+					padding: 16px;
+					background-color: var(--primary-color);
+					color: var(--white);
+					position: absolute;
+					right: 6px;
+					top: 6px;
+				}
+				svg {
+					top: 22px;
+					left: 18px;
+					position: absolute;
+				}
+			}
+		}
+		&__content {
+			@extend .banner-two__content;
+			max-width: 538px;
+			.user {
+				strong {
+					font-weight: 500;
+					font-family: var(--spartan);
+					color: var(--heading-color);
+					font-size: 14px;
+					span {
+						color: var(--primary-color);
+					}
+				}
+			}
+		}
+		&__image {
+			max-width: 620px;
+			position: absolute;
+			bottom: 130px;
+			right: 15%;
+			@include breakpoint(max-xxxl) {
+				right: 10%;
+			}
+			@include breakpoint(max-xxl) {
+				right: 5%;
+			}
+			@include breakpoint(max-xl) {
+				display: none;
+			}
+			.circle {
+				position: absolute;
+				top: 50px;
+				left: -40px;
+				z-index: -1;
+			}
+		}
+	}
+	&-inner {
+		&-area {
+			overflow: hidden;
+			position: relative;
+			z-index: 1;
+			padding: 150px 0;
+			@include breakpoint(max-md) {
+				padding: 80px 0;
+			}
+		}
+		&__shape1 {
+			position: absolute;
+			top: 60px;
+			left: 145px;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape2 {
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape3 {
+			position: absolute;
+			bottom: 60px;
+			left: 80px;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape4 {
+			position: absolute;
+			top: 60px;
+			right: 15%;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__shape5 {
+			position: absolute;
+			top: 50%;
+			right: 0;
+			transform: translateY(-50%);
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__circle {
+			position: absolute;
+			top: 90px;
+			left: 30%;
+			z-index: -1;
+		}
+		&__circle2 {
+			position: absolute;
+			bottom: 60px;
+			right: 40%;
+			z-index: -1;
+		}
+		&__dots {
+			position: absolute;
+			bottom: 40px;
+			right: 145px;
+			z-index: -1;
+			@include breakpoint(max-md) {
+				display: none;
+			}
+		}
+		&__content {
+			text-align: center;
+			h1 {
+				font-size: 50px;
+				@include breakpoint(max-md) {
+					font-size: 36px;
+					line-height: 40px;
+				}
+			}
+			ul {
+				@include flex;
+				justify-content: center;
+				gap: 10px;
+				li {
+					font-weight: 500;
+					@include breakpoint(max-md) {
+						font-size: 14px;
+					}
+					a {
+						color: #181818cc;
+						&:hover {
+							color: var(--primary-color);
+						}
+					}
+					i {
+						color: var(--heading-color);
+					}
+					&:last-child {
+						color: var(--primary-color);
+					}
+				}
+			}
+		}
+	}
+}
+// Banner area end here *** ***

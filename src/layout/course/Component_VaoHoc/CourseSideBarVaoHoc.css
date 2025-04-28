@@ -1,0 +1,195 @@
+
+.course-sidebar {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  overflow-y: auto; /* Enable vertical scrolling */
+  transition: all 0.3s ease;
+  width: 400px;
+}
+
+.course-sidebar__content {
+  padding: 1.5rem;
+  overflow-y: auto; /* Ensure content is scrollable */
+  max-height: calc(100vh - 3rem); /* Adjust height to fit within the sidebar */
+}
+.chapter-container {
+  margin-bottom: 1.5rem;
+}
+
+.chapter-header {
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.chapter-header:hover {
+  background: #f1f3f5;
+}
+
+.chapter-header.active {
+  background: #e9ecef;
+}
+
+.chapter-header__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chapter-number {
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.chapter-title {
+  color: #212529;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.lesson-container {
+  margin: 1rem 0;
+  padding-left: 1rem;
+}
+
+.lesson-header {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.lesson-header:hover {
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.lesson-header.active {
+  background: #e9ecef;
+  border-radius: 6px;
+}
+
+.lesson-header__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lesson-number {
+  background: #e9ecef;
+  border-radius: 50%;
+  color: #495057;
+  font-size: 0.875rem;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  width: 24px;
+}
+
+.lesson-title {
+  color: #495057;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.content-item {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  gap: 1rem;
+  margin: 0.75rem 0;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.content-item:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+.content-item.completed {
+  border-color: #40c057;
+}
+
+.content-item.locked {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.content-item__icon {
+  color: #228be6;
+  font-size: 1.25rem;
+}
+
+.content-item__info {
+  flex: 1;
+}
+
+.content-title {
+  color: #212529;
+  display: block;
+  font-weight: 500;
+}
+
+.content-duration {
+  color: #868e96;
+  font-size: 0.875rem;
+}
+
+.content-item__status {
+  color: #40c057;
+  font-size: 1.25rem;
+}
+
+.content-item.locked .content-item__status {
+  color: #adb5bd;
+}
+
+.chapter-test-item {
+  background: #f8f9fa;
+  margin-top: 1.5rem;
+}
+
+.test-name {
+  color: #868e96;
+  font-size: 0.875rem;
+}
+
+/* Scrollbar styling */
+.course-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.course-sidebar::-webkit-scrollbar-track {
+  background: #f1f3f5;
+}
+
+.course-sidebar::-webkit-scrollbar-thumb {
+  background: #ced4da;
+  border-radius: 3px;
+}
+
+.course-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #adb5bd;
+}
+.content-item.locked {
+  opacity: 0.5; /* Make it more apparent that it's locked */
+  cursor: not-allowed;
+ 
+}
+
+.content-item.locked .content-item__status {
+  color: #adb5bd; /* Grey out the status icon */
+}

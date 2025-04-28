@@ -1,0 +1,237 @@
+.comment-section {
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+
+.comment-login {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-button {
+  background-color: #6a0dad;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.comments-list {
+  margin-top: 20px;
+}
+
+.comment-item {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.comment-user {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.username {
+  font-weight: bold;
+  color: #6a0dad;
+  margin-right: 10px;
+}
+
+.comment-date {
+  color: #888;
+  font-size: 0.9em;
+}
+
+.comment-content {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.like-button,
+.dislike-button,
+.reply-button,
+.report-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6a0dad;
+  font-size: 1em;
+}
+
+.like-button:hover,
+.dislike-button:hover,
+.reply-button:hover,
+.report-button:hover {
+  color: #4a0072;
+}
+.comment-user {
+  position: relative;
+}
+.comment-user-image {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+.comment-user-content {
+  width: 100%;
+  margin-left: 54px;
+  background-color: #eff1f3;
+  padding: 7px;
+  border-radius: 10px;
+}
+.comment-actions {
+  margin: 4px 0px 15px 54px;
+}
+.child-comments {
+  margin: 0px 0px 0px 57px;
+}
+.child-comment-item.children {
+  margin-bottom: 10px;
+}
+
+.pagination.comment-video {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.pagination.comment-video button {
+  background-color: transparent;
+  border: none;
+  color: #888;
+  font-weight: 700;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.pagination.comment-video button:hover {
+  color: #ff5722;
+}
+
+.pagination.comment-video button.active {
+  background-color: #ff5722;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.pagination.comment-video button:disabled {
+  color: #ddd;
+  cursor: default;
+}
+
+.pagination.comment-video .dots {
+  padding: 8px 12px;
+  color: #888;
+}
+.reply-button-user {
+  border-color: #f5f6f7;
+  border-radius: 50px;
+  background-color: #eff1f3;
+  padding: 0px 15px 0px 15px;
+  margin-left: 7px;
+}
+.add-child-comment {
+  margin-top: 10px;
+  margin-left: 53px;
+}
+
+.add-child-comment textarea {
+  width: 100%;
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.add-child-comment button {
+  margin-top: -2px;
+  padding: 5px 35px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.add-child-comment button:hover {
+  background-color: #0056b3;
+}
+
+.reply-button-user {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.reply-button-user:hover {
+  background-color: #e0e0e0;
+}
+/* Container của bình luận gốc */
+.add-comment-root {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Ô nhập văn bản (textarea) */
+  .add-comment-root textarea {
+    width: 100%;
+    height: 80px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+  }
+  
+  .add-comment-root textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Nút gửi bình luận */
+  .add-comment-root button {
+    padding: 4px 28px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    display: grid;
+    transition: background-color 0.3s ease;
+}
+  
+  .add-comment-root button:hover {
+    background-color: #0056b3;
+  }
+  
+  .add-comment-root button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  

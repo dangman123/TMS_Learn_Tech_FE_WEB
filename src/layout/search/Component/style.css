@@ -1,0 +1,62 @@
+@media (min-width: 976px) {
+  @media (min-width: 768px) {
+    .layout-grid-4.list-search-main {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+}
+@media (max-width: 576px) {
+  .layout-grid-4.list-search-main {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+.row_search_button {
+  width: 100%;
+  display: flex;
+ 
+}
+.col-sm-10 {
+  padding-left: 64px;
+}
+button.btn.btn-secondary {
+  /* margin-right: 119px; */
+}
+@media (max-width: 576px) {
+}
+
+
+.tab-container {
+  display: flex;
+  justify-content: flex-start; /* Aligns the tabs to the left */
+  background-color: #f8f9fa; /* Light background for the tab container */
+  border-bottom: 2px solid #dee2e6; /* Adds a subtle border under the tabs */
+  padding: 0.5rem; /* Adds padding around the tabs */
+}
+
+.tab {
+  background-color: #e9ecef; /* Light gray background for inactive tabs */
+  color: #495057; /* Dark gray text color */
+  border: 1px solid #dee2e6; /* Border around the tab */
+  padding: 0.5rem 1rem; /* Padding inside the tabs */
+  margin-right: 0.5rem; /* Space between tabs */
+  cursor: pointer;
+  border-radius: 0.25rem 0.25rem 0 0; /* Round the top corners */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.tab.active {
+  background-color: #ffffff; /* White background for the active tab */
+  color: #007bff; /* Blue text color for active tab */
+  border-bottom: 2px solid #ffffff; /* Removes the bottom border of the active tab */
+}
+
+.tab:hover {
+  background-color: #dee2e6; /* Darker gray on hover */
+  color: #007bff; /* Blue text color on hover */
+}
+
+

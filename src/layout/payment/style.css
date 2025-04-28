@@ -1,0 +1,76 @@
+.payment-failure-area {
+    background-color: #f8f9fa;
+    padding: 50px 0;
+  }
+  
+  .failure-icon {
+    color: #dc3545;
+  }
+  
+  .payment-failure-content {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .actions .btn {
+    width: 200px;
+  }
+  .btn.btn-primary.btn-lg.mx-2 a,
+  .btn.btn-secondary.btn-lg.mx-2 a{
+    color: white;
+  }
+  .contact-support p {
+    font-size: 14px;
+  }
+  
+  .back-to-home a {
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .back-to-home a:hover {
+    text-decoration: underline;
+  }
+  .payment-success-area {
+    background-color: #f8f9fa;
+    padding: 50px 0;
+  }
+  
+  .success-icon {
+    color: #28a745;
+  }
+  
+  .payment-success-content {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .transaction-details p {
+    font-size: 16px;
+  }
+  
+  .actions .btn {
+    width: 200px;
+  }
+  
+  .contact-support p {
+    font-size: 14px;
+  }
+  
+  .contact-support a {
+    color: #007bff;
+  }
+  
+  .contact-support a:hover {
+    text-decoration: underline;
+  }
+  

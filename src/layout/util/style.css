@@ -1,0 +1,72 @@
+.breadcrumb-item + .breadcrumb-item::before {
+  float: left;
+  padding-right: var(--bs-breadcrumb-item-padding-x);
+  color: var(--bs-breadcrumb-divider-color);
+  content: var(--bs-breadcrumb-divider, ">") !important;
+}
+li.breadcrumb-item {
+  font-size: 15px;
+}
+li.breadcrumb-item a {
+  color: #05a;
+}
+
+
+.courses__image img {
+  width: 100%; /* Đặt chiều rộng ảnh bằng 100% của phần tử chứa nó */
+  height: auto; /* Đảm bảo tỷ lệ khung hình của ảnh không bị thay đổi */
+  max-height: 270px; /* Đặt chiều cao tối đa cho ảnh */
+  object-fit: cover; /* Đảm bảo ảnh được cắt cúp đúng cách để phù hợp với kích thước */
+}.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.price-cost {
+  text-decoration: line-through; /* Gạch ngang */
+  color: #888; /* Màu xám cho giá gốc */
+  font-size: 14px; /* Kích thước chữ nhỏ hơn nếu cần */
+}
+
+.price-current {
+  color: #d9534f; /* Màu đỏ cho giá hiện tại (hoặc màu nổi bật khác) */
+  font-size: 18px; /* Kích thước chữ lớn hơn để làm nổi bật */
+  font-weight: bold; /* Đậm hơn nếu muốn */
+}
+.error403-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.error-code {
+  font-size: 96px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.error-message {
+  font-size: 18px;
+  margin-bottom: 24px;
+  color: #555;
+}
+
+.back-home-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.back-home-btn:hover {
+  background-color: #c0392b;
+}

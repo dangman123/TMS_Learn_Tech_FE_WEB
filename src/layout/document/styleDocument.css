@@ -1,0 +1,36 @@
+.pegi button.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: 1px solid transparent;
+}
+.pegi button {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    border-radius: 50%;
+    transition: var(--transition);
+    background-color: var(--primary-10);
+    color: var(--heading-color);
+    border: 1px solid var(--border);
+}
+.nav-document-detail {
+    border: 1px solid #ccc;
+    padding: 15px 0px;
+    margin: 0px !important;
+}
+.sort-option {
+    border-right: 1px solid black;
+    padding: 0px 5px;
+    color: black;
+    font-size: 14px;
+  }
+  
+  .sort-option:last-child {
+    border-right: none; /* Xóa đường viền bên phải của phần tử cuối cùng */
+  }
+  
+  .active {
+    color: #007bff; /* Màu chữ cho tiêu chí được chọn */
+    font-weight: bold; /* Làm đậm chữ cho tiêu chí được chọn */
+  }
