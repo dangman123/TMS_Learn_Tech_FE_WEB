@@ -3,6 +3,7 @@ import { FaBell } from "react-icons/fa";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./NotificationDropdown.css";
+
 interface Notification {
   notification: {
     id: number;
@@ -27,56 +28,16 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   unreadCount,
 }) => {
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
-
-  const dropdownMenuStyles: React.CSSProperties = {
-    width: "400px",
-    maxHeight: "400px",
-    overflowY: "auto",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    animation: "fadeIn 0.3s",
-  };
-
-  const notificationItemStyles: React.CSSProperties = {
-    padding: "10px 20px",
-    borderBottom: "1px solid #eee",
-    transition: "background-color 0.2s",
-  };
-
-  const unreadNotificationStyles: React.CSSProperties = {
-    backgroundColor: "#e6f7ff",
-    fontWeight: "bold",
-  };
-
-  const notificationDividerStyles: React.CSSProperties = {
-    height: "1px",
-    backgroundColor: "#ddd",
-    marginTop: "10px",
-    marginBottom: "10px",
-  };
-
-  const fadeInKeyframes = `
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  `;
+  const navigate = useNavigate();
 
   const handleFilterChange = (filterType: "all" | "unread") => {
-    // setFilter(filterType);
     window.location.href = "/notification-all";
   };
 
   const handleDetailClick = (notification: Notification) => {
     window.location.href = `/notification-details/${notification.notification.id}`;
   };
+
   const filteredNotifications =
     filter === "all"
       ? notifications
@@ -84,98 +45,77 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
   return (
     <div className="notification-dropdown">
-      <style>{fadeInKeyframes}</style>
       <DropdownButton
         id="notification-dropdown"
-        style={{backgroundColor:"white"}}
+        className="custom-dropdown-button"
+        align="end"
+        variant="light"
         title={
-          <div
-            className="notification-icon"
-            style={{ position: "relative", cursor: "pointer",backgroundColor:"white" }}
-          >
-            <FaBell size={24}   style={{backgroundColor:"white"}}/>
+          <div className="notification-icon">
+            <FaBell size={24} />
             {unreadCount > 0 && (
-              <span
-                className="notification-count"
-                style={{
-                  position: "absolute",
-                  top: "-10px",
-                  right: "-10px",
-                  backgroundColor: "red",
-                  color: "white",
-                  borderRadius: "50%",
-                  padding: "2px 6px",
-                  fontSize: "12px",
-                }}
-              >
-                {unreadCount}
-              </span>
+              <span className="notification-badge">{unreadCount}</span>
             )}
           </div>
         }
-        align="end"
-        variant="light"
       >
-        <div style={dropdownMenuStyles}>
-          <Dropdown.Header>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "10px",
-              }}
-            >
+        <div className="notification-dropdown-content">
+          <div className="notification-header-a">
+            <div className="notification-filter-buttons">
               <button
                 onClick={() => handleFilterChange("all")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: filter === "all" ? "#007bff" : "#000",
-                  cursor: "pointer",
-                }}
+                className={`filter-button ${filter === "all" ? "active" : ""}`}
               >
                 Tất cả
               </button>
               <button
                 onClick={() => handleFilterChange("unread")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: filter === "unread" ? "#007bff" : "#000",
-                  cursor: "pointer",
-                }}
+                className={`filter-button ${
+                  filter === "unread" ? "active" : ""
+                }`}
               >
                 Đánh dấu đã đọc
               </button>
             </div>
-          </Dropdown.Header>
+          </div>
+
           {filteredNotifications.length === 0 ? (
-            <Dropdown.ItemText>Không có thông báo nào</Dropdown.ItemText>
+            <div className="empty-notification">
+              <div className="empty-icon">
+                <FaBell size={24} color="#ccc" />
+              </div>
+              <p>Không có thông báo nào</p>
+            </div>
           ) : (
-            filteredNotifications.map((notification) => (
-              <Dropdown.Item
-                key={notification.notification.id}
-                onClick={() => handleDetailClick(notification)}
-                style={{
-                  ...notificationItemStyles,
-                  ...(notification.readStatus ? {} : unreadNotificationStyles),
-                }}
-                className="dropdown-notification-item"
-              >
-                <div>{notification.notification.title}</div>
+            <div className="notification-list-a">
+              {filteredNotifications.slice(0, 3).map((notification) => (
                 <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#555",
-                    marginTop: "5px",
-                  }}
-                  className="dropdown-notification-item-content"
+                  key={notification.notification.id}
+                  onClick={() => handleDetailClick(notification)}
+                  className={`notification-item ${
+                    !notification.readStatus ? "unread" : ""
+                  }`}
                 >
-                  {notification.notification.message}
+                  <div className="notification-title">
+                    {notification.notification.title}
+                  </div>
+                  <div className="notification-message">
+                    {notification.notification.message}
+                  </div>
+                  <div className="notification-time">
+                    {new Date(
+                      notification.notification.createdAt
+                    ).toLocaleString()}
+                  </div>
                 </div>
-                <div style={notificationDividerStyles}></div>
-              </Dropdown.Item>
-            ))
+              ))}
+              <div
+                className="view-more-notifications"
+                onClick={() => navigate("/notification-all")}
+              >
+                Xem thông báo trước
+              </div>
+            </div>
           )}
         </div>
       </DropdownButton>

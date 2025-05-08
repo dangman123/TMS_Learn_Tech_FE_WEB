@@ -1,0 +1,302 @@
+.overview-section {
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.overview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Top Row - Ví và Card thống kê */
+.top-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  justify-content: space-between;
+  padding-bottom: 8px; /* Không gian cho thanh cuộn */
+}
+
+/* Wallet Card */
+.wallet-card {
+  background: linear-gradient(135deg, #0a84ff, #0072e5);
+  border-radius: 12px;
+  padding: 18px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.2);
+  width: 40%; /* Tăng kích thước */
+  min-width: 20px; /* Đảm bảo kích thước tối thiểu */
+  flex-shrink: 0; /* Ngăn không cho thu nhỏ */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+.wallet-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(10, 132, 255, 0.3);
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.wallet-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.balance-label {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 4px;
+}
+
+.balance-value {
+  font-size: 24px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.add-funds-btn,
+.view-details-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: 20px;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.add-funds-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  flex: 1;
+}
+
+.add-funds-btn span,
+.view-details-btn span {
+  color: white;
+}
+
+.add-funds-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.view-details-btn {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  flex: 1;
+}
+
+.view-details-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Stats Row */
+.stats-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: nowrap; /* Ngăn không cho xuống dòng */
+  flex-shrink: 0;
+  height: auto;
+  align-items: stretch;
+}
+
+.stat-cardd {
+  height: 100%;
+  flex: 0 0 auto; /* Không cho phép co giãn */
+  width: 150px; /* Tăng kích thước */
+  min-width: 150px; /* Đảm bảo kích thước tối thiểu */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 15px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  border-left: 3px solid transparent;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px; /* Tăng kích thước */
+  height: 50px; /* Tăng kích thước */
+  border-radius: 50%;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px; /* Tăng kích thước */
+  font-weight: 700;
+  color: #222;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 14px; /* Tăng kích thước */
+  color: #666;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+/* Stats Card Colors */
+.streak-card {
+  border-left-color: #ff9900;
+}
+
+.streak-card .stat-icon {
+  color: #ff9900;
+  background-color: rgba(255, 153, 0, 0.1);
+}
+
+.points-card {
+  border-left-color: #ff453a;
+}
+
+.points-card .stat-icon {
+  color: #ff453a;
+  background-color: rgba(255, 69, 58, 0.1);
+}
+
+.courses-card {
+  border-left-color: #0a84ff;
+}
+
+.courses-card .stat-icon {
+  color: #0a84ff;
+  background-color: rgba(10, 132, 255, 0.1);
+}
+
+.documents-card {
+  border-left-color: #bf5af2;
+}
+
+.documents-card .stat-icon {
+  color: #bf5af2;
+  background-color: rgba(191, 90, 242, 0.1);
+}
+
+/* Bottom Row - Ranking và Streak */
+/* Giới hạn chiều cao cho Streak và Ranking */
+/* Bottom Row - Ranking và Streak nằm trên cùng một dòng */
+.bottom-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.bottom-column {
+  flex: 1;
+  min-width: 300px; /* Kích thước tối thiểu */
+  max-width: 48%; /* Giới hạn chiều rộng tối đa */
+  height: 50%; /* Chiều cao cố định */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: auto; /* Cho phép cuộn nếu nội dung dài */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Điều chỉnh nội dung bên trong Streak */
+.streak-column .wrapper,
+.streak-column .container-steack {
+  width: 100%;
+  max-width: 100%;
+}
+
+.streak-column .calendar-grid {
+  grid-template-columns: repeat(7, minmax(30px, 1fr));
+  gap: 5px;
+}
+
+/* Điều chỉnh nội dung bên trong Ranking */
+.ranking-column .container {
+  min-height: auto;
+  max-height: 350px;
+  padding: 0;
+}
+
+.ranking-column .topUsersPodium {
+  height: auto;
+  max-height: 150px;
+}
+
+.ranking-column .list {
+  max-height: 120px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .bottom-row {
+    flex-direction: column;
+  }
+
+  .bottom-column {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .top-row,
+  .bottom-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Cho iOS */
+    scrollbar-width: thin; /* Firefox */
+  }
+
+  .top-row::-webkit-scrollbar,
+  .bottom-row::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .top-row::-webkit-scrollbar-thumb,
+  .bottom-row::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+}

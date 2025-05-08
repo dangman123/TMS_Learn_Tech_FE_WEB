@@ -1,23 +1,115 @@
 import React, { useEffect, useState } from "react";
-import "./style.css";
+import "./PaymentStyles.css"; // We'll create a new CSS file
 import { push, ref, set } from "firebase/database";
 import { database } from "../util/fucntion/firebaseConfig";
+
 interface PaymentData {
   id: number;
   payment_date: string;
   total_payment: number;
   paymentMethod: string;
   account_id: number;
+  courses: CourseItem[];
 }
+
+interface CourseItem {
+  id: number;
+  title: string;
+  price: number;
+  image: string;
+  instructor: string;
+}
+
 function PaymentSuccess() {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Animation effect on mount
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+
+    // Get actual payment data or use mock data for demo
+    const paymentDataString = localStorage.getItem("totalPayment");
+
+    if (paymentDataString) {
+      try {
+        const paymentDataParsed = JSON.parse(paymentDataString);
+        setPaymentData(paymentDataParsed);
+        const userId = paymentDataParsed.account_id.toString();
+        const idTacGiaArrayString = localStorage.getItem("idTacGiaArray");
+
+        if (idTacGiaArrayString) {
+          const idTacGiaArray = JSON.parse(idTacGiaArrayString);
+          const processedUserIds = new Set();
+
+          const conversationPromises = idTacGiaArray
+            .filter((otherUserId: any) => {
+              if (!processedUserIds.has(otherUserId)) {
+                processedUserIds.add(otherUserId);
+                return true;
+              }
+              return false;
+            })
+            .map((otherUserId: any) => startConversation(userId, otherUserId));
+
+          Promise.all(conversationPromises)
+            .then(() => {
+              console.log("Tất cả cuộc trò chuyện đã được bắt đầu.");
+            })
+            .catch((error) => {
+              console.error("Lỗi khi bắt đầu cuộc trò chuyện:", error);
+            })
+            .finally(() => {
+              setIsLoading(false);
+            });
+
+          localStorage.removeItem("idTacGiaArray");
+        } else {
+          console.log("Không tìm thấy mảng idTacGia trong localStorage.");
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Lỗi khi xử lý dữ liệu thanh toán:", error);
+        setIsLoading(false);
+      }
+    } else {
+      // Use mock data for demo/preview
+      setPaymentData({
+        id: 10243859,
+        payment_date: new Date().toISOString(),
+        total_payment: 2490000,
+        paymentMethod: "VNPAY",
+        account_id: 12345,
+        courses: [
+          {
+            id: 1,
+            title: "Lập trình React.js Nâng cao",
+            price: 1490000,
+            image: "../../assets/images/courses/react-advanced.jpg",
+            instructor: "Nguyễn Thành Long",
+          },
+          {
+            id: 2,
+            title: "Master JavaScript từ cơ bản đến chuyên sâu",
+            price: 1000000,
+            image: "../../assets/images/courses/javascript-master.jpg",
+            instructor: "Trần Minh Hiếu",
+          },
+        ],
+      });
+      setIsLoading(false);
+    }
+  }, []);
 
   const createConversation = async (
     userId: string,
     otherUserId: string,
     message: string
   ) => {
-    // Tạo đối tượng hội thoại
+    // Create conversation object
     const newConversation = {
       lastMessage: message,
       participants: [otherUserId.toString(), userId.toString()],
@@ -25,19 +117,19 @@ function PaymentSuccess() {
     };
 
     try {
-      // Tạo ID ngẫu nhiên cho cuộc hội thoại mới
+      // Create random ID for new conversation
       const conversationsRef = ref(database, "conversations");
-      const newConversationRef = push(conversationsRef); // Tạo ID ngẫu nhiên cho cuộc hội thoại
-      await set(newConversationRef, newConversation); // Lưu cuộc hội thoại mới vào Firebase
+      const newConversationRef = push(conversationsRef);
+      await set(newConversationRef, newConversation);
 
-      // Tạo tin nhắn đầu tiên cho cuộc hội thoại
+      // Create first message for conversation
       const newMessage = {
         senderId: userId.toString(),
         content: message,
         timestamp: new Date().toISOString(),
       };
 
-      // Lưu tin nhắn vào mục messages trong Firebase
+      // Save message to Firebase
       const messagesRef = ref(database, `messages/${newConversationRef.key}`);
       const newMessageRef = push(messagesRef);
       await set(newMessageRef, newMessage);
@@ -50,79 +142,25 @@ function PaymentSuccess() {
 
   const startConversation = (userId: string, otherUserId: string) => {
     const initialMessage = "Xin chào! Chào mừng bạn đến với khoá học của tôi!";
-    createConversation(userId, otherUserId, initialMessage);
+    return createConversation(userId, otherUserId, initialMessage);
   };
 
-  // useEffect(() => {
-  //   const paymentDataString = localStorage.getItem("totalPayment");
-
-  //   if (paymentDataString) {
-  //     const paymentDataParsed = JSON.parse(paymentDataString);
-  //     setPaymentData(paymentDataParsed);
-  //     const userId = paymentDataParsed.account_id.toString();
-  //     const idTacGiaArrayString = localStorage.getItem("idTacGiaArray");
-
-  //     if (idTacGiaArrayString) {
-  //       const idTacGiaArray = JSON.parse(idTacGiaArrayString);
-
-  //       const conversationPromises = idTacGiaArray.map((otherUserId: any) =>
-
-  //         startConversation(
-  //           userId,
-  //           otherUserId
-  //         )
-  //       );
-  //       localStorage.removeItem("idTacGiaArray");
-  //     } else {
-  //       console.error("Không tìm thấy mảng idTacGia trong localStorage.");
-  //     }
-  //   }
-  // }, []);
-
-
-  useEffect(() => {
-    const paymentDataString = localStorage.getItem("totalPayment");
-
-    if (paymentDataString) {
-      const paymentDataParsed = JSON.parse(paymentDataString);
-      setPaymentData(paymentDataParsed);
-      const userId = paymentDataParsed.account_id.toString();
-      const idTacGiaArrayString = localStorage.getItem("idTacGiaArray");
-
-      if (idTacGiaArrayString) {
-        const idTacGiaArray = JSON.parse(idTacGiaArrayString);
-        const processedUserIds = new Set(); // Tập hợp để kiểm tra trùng lặp
-
-        const conversationPromises = idTacGiaArray
-          .filter((otherUserId: any) => {
-            if (!processedUserIds.has(otherUserId)) {
-              processedUserIds.add(otherUserId);
-              return true;
-            }
-            return false;
-          })
-          .map((otherUserId: any) =>
-            startConversation(userId, otherUserId)
-          );
-
-        Promise.all(conversationPromises)
-          .then(() => {
-            console.log("Tất cả cuộc trò chuyện đã được bắt đầu.");
-          })
-          .catch((error) => {
-            console.error("Lỗi khi bắt đầu cuộc trò chuyện:", error);
-          });
-
-        localStorage.removeItem("idTacGiaArray");
-      } else {
-        console.error("Không tìm thấy mảng idTacGia trong localStorage.");
-      }
-    }
-  }, []);
-
+  if (isLoading) {
+    return (
+      <div className="compact-payment-loading">
+        <div className="spinner"></div>
+        <p>Đang xử lý thanh toán...</p>
+      </div>
+    );
+  }
 
   if (!paymentData) {
-    return <div>Loading...</div>;
+    return (
+      <div className="compact-payment-error">
+        <i className="fa fa-exclamation-triangle"></i>
+        <p>Không thể tải dữ liệu thanh toán. Vui lòng thử lại sau.</p>
+      </div>
+    );
   }
 
   const formattedTotalPayment = new Intl.NumberFormat("vi-VN", {
@@ -130,55 +168,88 @@ function PaymentSuccess() {
     currency: "VND",
   }).format(paymentData.total_payment);
 
+  const formattedDate = new Date(paymentData.payment_date).toLocaleDateString(
+    "vi-VN",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
+
   return (
-    <section className="payment-success-area pt-120 pb-120 text-center">
+    <section className="compact-payment-result-section payment-success">
       <div className="container">
-        <div className="payment-success-content">
-          {/* Icon thành công */}
-          <div className="success-icon">
-            <i
-              className="fa fa-check-circle text-success"
-              style={{ fontSize: "72px" }}
-            ></i>
-          </div>
-
-          {/* Tiêu đề */}
-          <h2 className="mt-4">Thanh toán thành công!</h2>
-          <p className="text-muted">
-            Cảm ơn bạn đã hoàn tất giao dịch. Hãy kiểm tra email của bạn! Chi
-            tiết giao dịch của bạn như sau:
-          </p>
-
-          {/* Chi tiết giao dịch */}
-          <div className="transaction-details text-left mt-4">
-            <p>
-              <strong>Mã đơn hàng:</strong>{" "}
-              <span id="orderId">{paymentData.id}</span>
-            </p>
-            <p>
-              <strong>Số tiền thanh toán:</strong>{" "}
-              <span id="totalAmount">{formattedTotalPayment}</span>
-            </p>
-            <p>
-              <strong>Phương thức thanh toán:</strong>{" "}
-              {paymentData.paymentMethod}
-            </p>
-            <p>
-              <strong>Ngày giao dịch:</strong>{" "}
-              {paymentData.payment_date
-                ? new Date(paymentData.payment_date).toLocaleDateString("vi-VN")
-                : "Không có ngày"}
+        <div className="compact-payment-result-content">
+          <div className="compact-result-header">
+            <div className="compact-result-icon success-icon">
+              <i className="fa fa-check-circle"></i>
+            </div>
+            <h2>Thanh toán thành công!</h2>
+            <p className="subtitle">
+              Cảm ơn bạn đã hoàn tất giao dịch. Khóa học đã sẵn sàng!
             </p>
           </div>
 
-          {/* Lựa chọn hành động tiếp theo */}
-          <div className="actions mt-5">
-            <button className="btn btn-primary btn-lg mx-2">
-              <a href={`/tai-khoan`}>Về tài khoản</a>
-            </button>
-            <button className="btn btn-secondary btn-lg mx-2">
-              <a href={`/`}>Quay về trang chính</a>
-            </button>
+          <div className="compact-order-details">
+            <div className="compact-detail-item">
+              <span className="label">Mã đơn hàng:</span>
+              <span className="value">{paymentData.id}</span>
+            </div>
+
+            <div className="compact-detail-item">
+              <span className="label">Phương thức:</span>
+              <span className="value payment-method">
+                {paymentData.paymentMethod === "VNPAY" && (
+                  <img
+                    src="../../assets/images/logo/VNPAY_Logo.jpg"
+                    alt="VNPAY"
+                    className="payment-icon"
+                  />
+                )}
+                {paymentData.paymentMethod === "MOMO" && (
+                  <img
+                    src="../../assets/images/logo/logo-momo.jpg"
+                    alt="MoMo"
+                    className="payment-icon"
+                  />
+                )}
+                {paymentData.paymentMethod}
+              </span>
+            </div>
+
+            <div className="compact-detail-item">
+              <span className="label">Ngày:</span>
+              <span className="value">{formattedDate}</span>
+            </div>
+
+            <div className="compact-detail-item total">
+              <span className="label">Tổng:</span>
+              <span className="value total-amount">
+                {formattedTotalPayment}
+              </span>
+            </div>
+          </div>
+
+          <div className="compact-next-actions">
+            <a href="/khoa-hoc-cua-toi" className="compact-btn btn-primary">
+              <i className="fa fa-play-circle"></i> Bắt đầu học
+            </a>
+            <a href="/" className="compact-btn btn-outline">
+              <i className="fa fa-home"></i> Trang chủ
+            </a>
+          </div>
+
+          <div className="compact-additional-info">
+            <p>
+              <i className="fa fa-envelope"></i> Chi tiết đã được gửi qua email
+            </p>
+            <p>
+              <i className="fa fa-question-circle"></i> Cần hỗ trợ?{" "}
+              <a href="/lien-he">Liên hệ</a>
+            </p>
           </div>
         </div>
       </div>

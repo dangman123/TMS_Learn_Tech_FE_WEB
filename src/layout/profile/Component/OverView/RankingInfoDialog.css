@@ -1,0 +1,262 @@
+.ranking-info-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ranking-info-dialog {
+  background-color: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ranking-info-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ranking-info-header {
+  position: relative;
+}
+
+.gradient-header {
+  background: linear-gradient(135deg, #4a6ee0 0%, #60b0f4 100%);
+  padding: 20px;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+}
+
+.star-icon {
+  background-color: rgba(255, 255, 255, 0.2);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.header-text {
+  color: white;
+}
+
+.header-text h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.header-text p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.ranking-info-body {
+  padding: 20px;
+  overflow-y: auto; /* Giữ nguyên overflow-y: auto ở đây */
+  max-height: calc(90vh - 150px);
+}
+
+.ranking-info-body h3 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  color: #333;
+}
+
+.point-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  animation: fadeInUp 0.4s ease-in-out both;
+}
+svg.bi.bi-play-circle,
+svg.bi.bi-file-earmark-text {
+  margin: 0;
+}
+@keyframes fadeInUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.point-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.video-iconn {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.quiz-icon {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.chapter-icon {
+  background-color: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+}
+
+.perfect-icon {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.streak-icon {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.course-icon {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.point-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.point-title {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+  padding-right: 10px;
+}
+
+.point-badge {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background-color: rgba(33, 150, 243, 0.15);
+  color: #2196f3;
+  white-space: nowrap;
+}
+
+.point-badge.yellow {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.point-badge.purple {
+  background-color: rgba(156, 39, 176, 0.15);
+  color: #9c27b0;
+}
+
+.point-badge.green {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+}
+
+.point-badge.red {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: #f44336;
+}
+
+.point-badge.yellow-large {
+  background-color: rgba(255, 152, 0, 0.15);
+  color: #ff9800;
+  font-size: 16px;
+}
+
+.point-tip {
+  display: flex;
+  background-color: #fff8e1;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 25px 0;
+  border: 1px solid #ffecb3;
+}
+
+.tip-icon {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+.tip-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+}
+
+.understood-btn {
+  background-color: #5c7cfa;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+  width: 100%;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.understood-btn:hover {
+  background-color: #4263eb;
+}

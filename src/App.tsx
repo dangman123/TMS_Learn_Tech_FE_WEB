@@ -66,7 +66,7 @@ import ChooseRegisterMethod from "./layout/login/ChooseRegisterMethod";
 import VerifyOTPSMS from "./layout/login/VerifyOTPSMS";
 
 import ContentExampleDetail from "./layout/example/ComponentDetail/ContentExampleDetail";
-import Ranking from "./layout/profile/Component/Ranking";
+import OverView from "./layout/profile/Component/OverView/OverView";
 const ProtectedAccountManagement = withAuth(AccountManagement);
 const ProtectedChechOut = withAuth(Checkout);
 
@@ -346,19 +346,11 @@ function App() {
 
               <Route
                 path="/tai-khoan"
-                element={
-                  <MainLayout>
-                    <ProtectedAccountManagement />
-                  </MainLayout>
-                }
+                element={<ProtectedAccountManagement />}
               />
               <Route
                 path="/tai-khoan/:menu"
-                element={
-                  <MainLayout>
-                    <ProtectedAccountManagement />
-                  </MainLayout>
-                }
+                element={<ProtectedAccountManagement />}
               />
 
               <Route

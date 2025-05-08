@@ -1,0 +1,597 @@
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 5px;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.backButton,
+.infoButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.backIcon,
+.infoIcon {
+  font-size: 18px;
+  color: #333;
+}
+
+.infoIcon {
+  font-weight: bold;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4a6ee0;
+  margin: 0;
+  background: linear-gradient(90deg, #4a6ee0, #60b0f4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+/* User Score Card */
+.scoreCard {
+  margin: 15px;
+  background: linear-gradient(135deg, #4a6ee0 0%, #60b0f4 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(74, 110, 224, 0.3);
+  position: relative;
+}
+
+.trophyIcon {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-right: 15px;
+}
+
+.scoreInfo {
+  flex: 1;
+}
+
+.scoreLabel {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.scoreValue {
+  font-size: 36px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.scoreUnit {
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+.scoreChange {
+  background-color: white;
+  color: #4caf50;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.changeIcon {
+  margin-right: 4px;
+}
+
+/* Rewards Banner */
+.rewardsBanner {
+  margin: 15px;
+  background-color: #ff7043;
+  border-radius: 16px;
+  padding: 18px;
+  color: white;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(255, 112, 67, 0.3);
+  cursor: pointer;
+}
+
+.giftIcon {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.rewardsInfo {
+  flex: 1;
+}
+
+.rewardsTitle {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.rewardsSubtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.chevronRight {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Period Tabs */
+.periodTabs {
+  display: flex;
+  margin: 20px 15px;
+  background-color: white;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.tabButton {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 15px 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #757575;
+}
+
+.tabActive {
+  background-color: #4a6ee0;
+  color: white;
+  font-weight: bold;
+  border-radius: 30px;
+  box-shadow: 0 4px 8px rgba(74, 110, 224, 0.25);
+}
+
+/* Top Users Podium */
+.topUsersPodium {
+  display: flex;
+  justify-content: center;
+  margin: 30px 15px;
+  position: relative;
+  height: 240px;
+}
+
+.podiumUser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  width: 100px;
+}
+
+.podiumSecond {
+  left: 50%;
+  transform: translateX(-150%);
+  bottom: 20px;
+  z-index: 1;
+}
+
+.podiumFirst {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  z-index: 3;
+}
+
+.podiumThird {
+  left: 50%;
+  transform: translateX(50%);
+  bottom: 40px;
+  z-index: 1;
+}
+
+.podiumNameCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+  width: 120px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.podiumName {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.podiumPoints {
+  font-size: 14px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.podiumCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: -18px;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.podiumRank {
+  font-weight: bold;
+  color: #333;
+}
+
+.podiumBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0 10px;
+  width: 100px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.firstBlock {
+  height: 120px;
+  background-color: #ffd54f;
+}
+
+.secondBlock {
+  height: 90px;
+  background-color: #e0e0e0;
+}
+
+.thirdBlock {
+  height: 70px;
+  background-color: #d7ccc8;
+}
+
+.trophySmall {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.podiumLevel {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.podiumBadge {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+}
+
+/* Ranking List Section */
+.listHeader {
+  margin: 20px 15px 10px;
+  font-size: 20px;
+  color: #4a6ee0;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Ranking List Styles - Updated */
+/* Thêm chiều cao tối đa và thanh cuộn cho danh sách xếp hạng */
+.list {
+  margin: 0 15px 20px;
+  background-color: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  max-height: 400px; /* Chiều cao tối đa */
+  overflow-y: auto; /* Tự động thêm thanh cuộn dọc khi cần */
+  scrollbar-width: thin; /* Cho Firefox */
+  scrollbar-color: #4a6ee0 #f1f1f1; /* Màu thanh cuộn cho Firefox */
+}
+
+/* Tùy chỉnh thanh cuộn cho Chrome, Edge và Safari */
+.list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: #4a6ee0;
+  border-radius: 8px;
+}
+
+.list::-webkit-scrollbar-thumb:hover {
+  background: #3a5bc0;
+}
+.item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+}
+
+.item:hover {
+  background-color: #f9fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.currentUser {
+  background-color: rgba(74, 110, 224, 0.08);
+  border-left: 4px solid #4a6ee0;
+}
+
+.currentUser:hover {
+  background-color: rgba(74, 110, 224, 0.12);
+}
+
+.rankNumber {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4a6ee0, #60b0f4);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 15px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(74, 110, 224, 0.25);
+}
+
+.userAvatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  margin-right: 15px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.userAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.defaultAvatar {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9e9e9e;
+  font-size: 20px;
+}
+
+.defaultAvatar::after {
+  content: "👤";
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.userTag {
+  font-size: 12px;
+  background-color: #4a6ee0;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  box-shadow: 0 2px 4px rgba(74, 110, 224, 0.2);
+}
+
+.courseInfo {
+  font-size: 13px;
+  color: #757575;
+  display: flex;
+  align-items: center;
+}
+
+.courseIcon {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+.userLevel {
+  width: 100px;
+  text-align: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.levelBadge {
+  font-size: 13px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: inline-block;
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.15);
+}
+
+.userPoints {
+  width: 80px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #4a6ee0;
+  text-align: right;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pointsLabel {
+  font-size: 11px;
+  color: #9e9e9e;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.loading {
+  padding: 30px;
+  text-align: center;
+  color: #757575;
+}
+
+/* Animation for content loading */
+.loading::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  animation: loading 1.5s infinite;
+  overflow: hidden;
+}
+
+@keyframes loading {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+  100% {
+    content: "";
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+  .userLevel {
+    width: 80px;
+  }
+
+  .userPoints {
+    width: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .item {
+    padding: 10px;
+  }
+
+  .userLevel {
+    display: none;
+  }
+
+  .userPoints {
+    width: 60px;
+    font-size: 16px;
+  }
+
+  .rankNumber {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+
+  .userAvatar {
+    width: 38px;
+    height: 38px;
+    margin-right: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .podiumUser {
+    width: 80px;
+  }
+
+  .podiumNameCard {
+    width: 100px;
+  }
+
+  .podiumBlock {
+    width: 80px;
+  }
+
+  .userPoints {
+    width: 60px;
+    font-size: 16px;
+  }
+}

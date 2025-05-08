@@ -1,15 +1,20 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaUser,
-  FaComment,
-  FaBook,
-  FaHistory,
-  FaFileAlt,
-  FaMoneyBillWave,
-  FaSignOutAlt,
-} from "react-icons/fa";
-import { FaBars, FaTimes } from "react-icons/fa";
+  List,
+  Person,
+  ClockHistory,
+  Book,
+  CreditCard,
+  FileText,
+  ChatDots,
+  Award,
+  LightningCharge,
+  Trophy,
+  GraphUp,
+  Star,
+  BoxArrowRight,
+} from "react-bootstrap-icons";
 import "../style.css";
 
 const MenuBarProfile = ({
@@ -23,71 +28,57 @@ const MenuBarProfile = ({
     <div className="sidebar-sticky">
       <div className="menu-toggle-container"></div>
       <ul className="nav flex-column">
-        <li className={`nav-item ${activeMenu === "profile" ? "active" : ""}`}>
-          <Link className="nav-link" to="/tai-khoan/profile">
-            <FaUser className="nav-icon" />
-            <span className="nav-text">Thông tin cá nhân</span>
+        <li className={`nav-item ${activeMenu === "overview" ? "active" : ""}`}>
+          <Link className="nav-link" to="/tai-khoan/overview">
+            <GraphUp className="nav-icon" />
+            <span className="nav-text">Tổng quan</span>
           </Link>
         </li>
-
         <li
           className={`nav-item ${activeMenu === "my-course" ? "active" : ""}`}
         >
           <Link className="nav-link" to="/tai-khoan/my-course">
-            <FaBook className="nav-icon" />
-            <span className="nav-text">Khóa học của tôi</span>
+            <Book className="nav-icon" />
+            <span className="nav-text">Học Tập</span>
           </Link>
         </li>
         <li className={`nav-item ${activeMenu === "ket-qua" ? "active" : ""}`}>
           <Link className="nav-link" to="/tai-khoan/ket-qua">
-            <FaBook className="nav-icon" />
-            <span className="nav-text">Kết quả học tập</span>
+            <Award className="nav-icon" />
+            <span className="nav-text">Kết Quả Học Tập</span>
           </Link>
         </li>
-        <li className={`nav-item ${activeMenu === "history" ? "active" : ""}`}>
-          <Link className="nav-link" to="/tai-khoan/history">
-            <FaHistory className="nav-icon" />
-            <span className="nav-text">Lịch sử làm bài</span>
-          </Link>
-        </li>
-        <li
-          className={`nav-item ${
-            activeMenu === "history-document" ? "active" : ""
-          }`}
-        >
-          <Link className="nav-link" to="/tai-khoan/history-document">
-            <FaFileAlt className="nav-icon" />
-            <span className="nav-text">Lịch sử tài liệu</span>
-          </Link>
-        </li>
+
         <li
           className={`nav-item ${activeMenu === "history-pay" ? "active" : ""}`}
         >
           <Link className="nav-link" to="/tai-khoan/history-pay">
-            <FaMoneyBillWave className="nav-icon" />
-            <span className="nav-text">Lịch sử thanh toán</span>
+            <CreditCard className="nav-icon" />
+            <span className="nav-text">Lịch Sử Thanh Toán</span>
+          </Link>
+        </li>
+        <li className={`nav-item ${activeMenu === "history" ? "active" : ""}`}>
+          <Link className="nav-link" to="/tai-khoan/history">
+            <ClockHistory className="nav-icon" />
+            <span className="nav-text">Lịch Sử Hoạt Động</span>
+          </Link>
+        </li>
+        <li className={`nav-item ${activeMenu === "upgrade" ? "active" : ""}`}>
+          <Link className="nav-link" to="/tai-khoan/upgrade">
+            <Star className="nav-icon" />
+            <span className="nav-text">Nâng cấp gói</span>
           </Link>
         </li>
         <li className={`nav-item ${activeMenu === "chat" ? "active" : ""}`}>
           <Link className="nav-link" to="/tai-khoan/chat">
-            <FaComment className="nav-icon" />
+            <ChatDots className="nav-icon" />
             <span className="nav-text">Chat</span>
           </Link>
         </li>
-        <li
-          className={`nav-item ${
-            activeMenu === "enable-course" ? "active" : ""
-          }`}
-        >
-          <Link className="nav-link" to="/tai-khoan/enable-course">
-            <FaComment className="nav-icon" />
-            <span className="nav-text">Kích hoạt khóa học</span>
-          </Link>
-        </li>
-        <li className={`nav-item ${activeMenu === "ranking" ? "active" : ""}`}>
-          <Link className="nav-link" to="/tai-khoan/ranking">
-            <FaComment className="nav-icon" />
-            <span className="nav-text">Bảng xếp hạng</span>
+        <li className={`nav-item ${activeMenu === "profile" ? "active" : ""}`}>
+          <Link className="nav-link" to="/tai-khoan/profile">
+            <Person className="nav-icon" />
+            <span className="nav-text">Cài Đặt</span>
           </Link>
         </li>
         <li className={`nav-item ${activeMenu === "logout" ? "active" : ""}`}>
@@ -96,7 +87,7 @@ const MenuBarProfile = ({
             onClick={() => onMenuClick("logout")}
             style={{ cursor: "pointer" }}
           >
-            <FaSignOutAlt className="nav-icon" />
+            <BoxArrowRight className="nav-icon" />
             <span className="nav-text">Đăng xuất</span>
           </a>
         </li>

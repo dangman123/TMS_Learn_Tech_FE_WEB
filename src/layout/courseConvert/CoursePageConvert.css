@@ -402,11 +402,11 @@ ul > li.rbt-course-main-content a {
 .accordion-body.card-body.vaohoc {
   padding-bottom: 5px !important;
 }
-svg.bi.bi-play-circle,
+/* svg.bi.bi-play-circle,
 svg.bi.bi-file-earmark-text {
   margin-left: -10px;
   margin-right: 5px;
-}
+} */
 
 .rbt-lesson-rightsidebar .rbt-checkbox-wrapper label,
 .rbt-lesson-rightsidebar .rbt-form-check label {

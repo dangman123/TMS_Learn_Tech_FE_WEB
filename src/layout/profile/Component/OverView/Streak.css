@@ -1,17 +1,18 @@
 .container-steack {
   background-color: #ffffff; /* Màu nền trắng cho nội dung */
-  width: 800px;
-  height: 700px;
+  width: 90%;
+  height: auto;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  align-self: center;
+  margin: 0 auto;
 }
 
 .highlighted-section {
   background-color: #fff8e1; /* Màu vàng nhạt */
   padding: 20px;
   margin: -20px -20px;
-
   margin-bottom: 20px;
 }
 

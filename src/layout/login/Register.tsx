@@ -5,11 +5,12 @@ import "../../assets/assetsLogin/css/iofrm-style.css";
 import "../../assets/assetsLogin/css/iofrm-theme19.css";
 import { useNavigate } from "react-router-dom";
 import { POST_ACCOUNT_REGISTER } from "../../api/api";
-import { ToastContainer, toast } from "react-toastify"; // Import Toastify và toast
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { database } from "../util/fucntion/firebaseConfig";
 import { ref, set } from "firebase/database";
 import { Phone } from "react-bootstrap-icons";
+import "./register.css";
 interface account {
   id: number;
   email: string;
@@ -43,6 +44,14 @@ const Register: React.FC = () => {
     birthday: "",
   });
 
+  const [touched, setTouched] = useState({
+    fullname: false,
+    email: false,
+    phone: false,
+    password: false,
+    birthday: false,
+  });
+
   const pushUserToFirebase = async (account: account) => {
     try {
       const userData = {
@@ -65,147 +74,165 @@ const Register: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Kiểm tra lỗi khi người dùng nhập
+    if (touched[name as keyof typeof touched]) {
+      validateField(name, value);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setTouched({
+      ...touched,
+      [name]: true,
+    });
+    validateField(name, value);
+  };
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    switch (name) {
+      case "fullname":
+        if (!value.trim()) {
+          error = "Họ và tên không được để trống!";
+        }
+        break;
+
+      case "email":
+        if (!value) {
+          error = "Email không được để trống!";
+        } else {
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailPattern.test(value)) {
+            error = "Email không đúng định dạng!";
+          }
+        }
+        break;
+
+      case "birthday":
+        if (!value) {
+          error = "Ngày sinh không được để trống!";
+        } else {
+          const today = new Date();
+          const birthDate = new Date(value);
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDifference = today.getMonth() - birthDate.getMonth();
+          if (
+            monthDifference < 0 ||
+            (monthDifference === 0 && today.getDate() < birthDate.getDate())
+          ) {
+            age--;
+          }
+          const MINIMUM_AGE = 10;
+          if (age < MINIMUM_AGE) {
+            error = `Người dùng phải ít nhất ${MINIMUM_AGE} tuổi để đăng ký!`;
+          }
+          const MAXIMUM_AGE = 80;
+          if (age > MAXIMUM_AGE) {
+            error = `Tuổi không được lớn hơn ${MAXIMUM_AGE}!`;
+          }
+          if (birthDate >= today) {
+            error = "Ngày sinh không hợp lệ!";
+          }
+        }
+        break;
+
+      case "phone":
+        if (!value) {
+          error = "Số điện thoại không được để trống!";
+        } else {
+          const phonePattern =
+            /^(032|033|034|035|036|037|038|039|081|082|083|084|085|070|076|077|078|079|056|058|059|087)\d{7}$/;
+          if (!phonePattern.test(value)) {
+            error =
+              "Số điện thoại không hợp lệ! Vui lòng nhập đúng định dạng 10 số với đầu số hợp lệ.";
+          }
+        }
+        break;
+
+      case "password":
+        if (!value) {
+          error = "Mật khẩu không được để trống!";
+        } else {
+          const passwordPattern =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
+          if (!passwordPattern.test(value)) {
+            error =
+              "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!";
+          }
+        }
+        break;
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
+
+    return error;
   };
 
   const validate = () => {
-    if (!formData.fullname.trim()) {
-      toast.error("Họ và tên không được để trống!");
-      return false;
-    }
+    let isValid = true;
+    const newErrors = {
+      fullname: validateField("fullname", formData.fullname),
+      email: validateField("email", formData.email),
+      birthday: validateField("birthday", formData.birthday),
+      phone: validateField("phone", formData.phone),
+      password: validateField("password", formData.password),
+    };
 
-    if (!formData.email) {
-      toast.error("Email không được để trống!");
-      return false;
-    } else {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(formData.email)) {
-        toast.error("Email không đúng định dạng!");
-        return false;
-      }
-    }
+    setErrors(newErrors);
 
-    if (!formData.birthday) {
-      toast.error("Ngày sinh không được để trống!");
-      return false;
-    } else {
-      const today = new Date();
-      const birthDate = new Date(formData.birthday);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDifference = today.getMonth() - birthDate.getMonth();
-      if (
-        monthDifference < 0 ||
-        (monthDifference === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
+    // Kiểm tra xem có lỗi nào không
+    Object.values(newErrors).forEach((error) => {
+      if (error) {
+        isValid = false;
+        toast.error(error);
       }
-      const MINIMUM_AGE = 10;
-      if (age < MINIMUM_AGE) {
-        toast.error(`Người dùng phải ít nhất ${MINIMUM_AGE} tuổi để đăng ký!`);
-        return false;
-      }
-      const MAXIMUM_AGE = 80;
-      if (age > MAXIMUM_AGE) {
-        toast.error(`Tuổi không được lớn hơn ${MAXIMUM_AGE}!`);
-        return false;
-      }
-      if (birthDate >= today) {
-        toast.error("Ngày sinh không hợp lệ!");
-        return false;
-      }
-    }
+    });
 
-    if (!formData.phone) {
-      toast.error("Số điện thoại không được để trống!");
-      return false;
-    } else {
-      const phonePattern =
-        /^(032|033|034|035|036|037|038|039|081|082|083|084|085|070|076|077|078|079|056|058|059|087)\d{7}$/;
-      if (!phonePattern.test(formData.phone)) {
-        toast.error(
-          "Số điện thoại không hợp lệ! Vui lòng nhập đúng định dạng 10 số với đầu số hợp lệ."
-        );
-        return false;
-      }
-    }
-
-    if (!formData.password) {
-      toast.error("Mật khẩu không được để trống!");
-      return false;
-    } else {
-      const passwordPattern =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
-
-      if (!passwordPattern.test(formData.password)) {
-        toast.error(
-          "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"
-        );
-        return false;
-      }
-    }
-    return true;
+    return isValid;
   };
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (validate()) {
-  //     setLoading(true);
-  //     try {
-  //       // const response = await fetch(POST_ACCOUNT_REGISTER, {
-  //       const response = await fetch(
-  //         `${process.env.REACT_APP_SERVER_HOST}/account/register-generate`,
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({
-  //             ...formData,
-  //             birthday: new Date(formData.birthday).toISOString(), // Chuyển ngày sinh thành chuỗi ISO
-  //           }),
-  //         }
-  //       );
-
-  //       if (response.ok) {
-  //         const data = await response.text();
-
-  //         // await pushUserToFirebase({
-  //         //   id: data.accountID,
-  //         //   fullname: data.fullname,
-  //         //   birthday: data.birthday,
-  //         //   email: data.email,
-  //         //   image: "",
-  //         //   phone: Number(data.phone),
-  //         //   role: "USER",
-  //         // });
-
-  //         toast.success(
-  //           "Đăng ký thành công! Vui lòng nhập mã OTP gửi đến mail của bạn! "
-  //         );
-  //         setTimeout(() => {
-  //           navigate("/verify-otp-email", { state: { email: formData.email } });
-  //         }, 2500);
-  //       } else {
-  //         toast.error("Có lỗi xảy ra trong quá trình đăng ký !");
-  //       }
-  //     } catch (error: any) {
-  //       toast.error("Có lỗi xảy ra:", error);
-  //     } finally {
-  //       setLoading(false); // Tắt trạng thái chờ
-  //     }
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Đánh dấu tất cả các trường đã được chạm vào
+    setTouched({
+      fullname: true,
+      email: true,
+      phone: true,
+      password: true,
+      birthday: true,
+    });
+
     if (validate()) {
       navigate("/dang-ky-method", { state: { data: formData } });
     }
   };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  // Styles
+  const errorMessageStyle = {
+    color: "red",
+    fontSize: "12px",
+    marginTop: "5px",
+    marginBottom: "10px",
+    display: "block",
+  };
+
+  const inputStyle = (hasError: boolean) => ({
+    borderColor: hasError ? "red" : "",
+  });
+
   return (
     <div className="form-body without-side">
       <div className="row">
@@ -223,88 +250,117 @@ const Register: React.FC = () => {
               </h3>
 
               <form onSubmit={handleSubmit}>
-                <input
-                  className="form-control"
-                  type="text"
-                  name="fullname"
-                  placeholder="Họ và tên"
-                  value={formData.fullname}
-                  onChange={handleChange}
-                />
-                {errors.fullname && (
-                  <small className="error-message">{errors.fullname}</small>
-                )}
-
-                <input
-                  className="form-control"
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  autoComplete="new-email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-                {errors.email && (
-                  <small className="error-message">{errors.email}</small>
-                )}
-
-                <input
-                  className="form-control"
-                  type="date"
-                  name="birthday"
-                  placeholder="Ngày sinh"
-                  value={formData.birthday}
-                  onChange={handleChange}
-                />
-                {errors.birthday && (
-                  <small className="error-message">{errors.birthday}</small>
-                )}
-
-                <input
-                  className="form-control"
-                  type="tel"
-                  name="phone"
-                  placeholder="Số điện thoại"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-                {errors.phone && (
-                  <small className="error-message">{errors.phone}</small>
-                )}
-                <div
-                  className="password-wrapper"
-                  style={{ position: "relative" }}
-                >
-                  <input
-                    className="form-control"
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="Mật khẩu"
-                    value={formData.password}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                  />
-                  <span
-                    className="toggle-password"
-                    onClick={togglePasswordVisibility}
-                    style={{
-                      cursor: "pointer",
-                      position: "absolute",
-                      right: "10px",
-                      top: "40%",
-                      transform: "translateY(-50%)",
-                    }}
-                  >
-                    {showPassword ? (
-                      <i className="fa-solid fa-eye-slash"></i>
-                    ) : (
-                      <i className="fa-solid fa-eye"></i>
-                    )}
-                  </span>
+                <div className="form-group">
+                  <div className="input-with-star">
+                    <input
+                      className="form-control"
+                      type="text"
+                      name="fullname"
+                      placeholder="Họ và tên *"
+                      value={formData.fullname}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle(!!errors.fullname && touched.fullname)}
+                    />
+                  </div>
+                  {errors.fullname && touched.fullname && (
+                    <small style={errorMessageStyle}>{errors.fullname}</small>
+                  )}
                 </div>
-                {errors.password && (
-                  <small className="error-message">{errors.password}</small>
-                )}
+
+                <div className="form-group">
+                  <div className="input-with-star">
+                    <input
+                      className="form-control"
+                      type="email"
+                      name="email"
+                      placeholder="Email *"
+                      autoComplete="new-email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle(!!errors.email && touched.email)}
+                    />
+                  </div>
+                  {errors.email && touched.email && (
+                    <small style={errorMessageStyle}>{errors.email}</small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <div className="input-with-star">
+                    <input
+                      className="form-control"
+                      type="date"
+                      name="birthday"
+                      placeholder="Ngày sinh *"
+                      value={formData.birthday}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle(!!errors.birthday && touched.birthday)}
+                    />
+                  </div>
+                  {errors.birthday && touched.birthday && (
+                    <small style={errorMessageStyle}>{errors.birthday}</small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <div className="input-with-star">
+                    <input
+                      className="form-control"
+                      type="tel"
+                      name="phone"
+                      placeholder="Số điện thoại *"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      style={inputStyle(!!errors.phone && touched.phone)}
+                    />
+                  </div>
+                  {errors.phone && touched.phone && (
+                    <small style={errorMessageStyle}>{errors.phone}</small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <div
+                    className="password-wrapper"
+                    style={{ position: "relative" }}
+                  >
+                    <input
+                      className="form-control"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="Mật khẩu *"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      autoComplete="new-password"
+                      style={inputStyle(!!errors.password && touched.password)}
+                    />
+                    <span
+                      className="toggle-password"
+                      onClick={togglePasswordVisibility}
+                      style={{
+                        cursor: "pointer",
+                        position: "absolute",
+                        right: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                      }}
+                    >
+                      {showPassword ? (
+                        <i className="fa-solid fa-eye-slash"></i>
+                      ) : (
+                        <i className="fa-solid fa-eye"></i>
+                      )}
+                    </span>
+                  </div>
+                  {errors.password && touched.password && (
+                    <small style={errorMessageStyle}>{errors.password}</small>
+                  )}
+                </div>
 
                 <div className="form-button">
                   <button
@@ -324,16 +380,8 @@ const Register: React.FC = () => {
                   </button>
                 </div>
               </form>
-              <div className="other-links">
-                <div className="text">Hoặc đăng ký</div>
-                {/* <a href="#">
-                  <i className="fab fa-facebook-f"></i>Facebook
-                </a> */}
-                <a href="#">
-                  <i className="fab fa-google"></i>Google
-                </a>
-              </div>
-              <div className="page-links">
+
+              <div className="page-links" style={{ marginTop: "20px" }}>
                 <a href="/dang-nhap">Bạn đã có tài khoản ?</a>
               </div>
             </div>

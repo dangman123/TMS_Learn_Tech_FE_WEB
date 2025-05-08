@@ -1,87 +1,373 @@
-/* Tabs Navigation */
-.profile-container .upgrade-button {
-  background-color: #28a745; /* Màu xanh lá cây */
-  color: #fff;
-  border: 1px solid #28a745;
-  border-radius: 5px;
-  padding: 10px 15px;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-.profile-container .nav-link.upgrade-button:hover {
-  background-color: #218838; /* Màu xanh lá cây đậm hơn khi hover */
-  color: #fff;
-}
-.profile-container .nav-tabs {
-  margin-top: 20px;
+.profile-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 60px);
 }
 
-/* Popup Overlay */
-.profile-container .popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Settings Menu Styles */
+.settings-menu {
+  flex: 0 0 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-height: 400px;
+}
+
+.settings-title {
+  padding: 1rem;
+  background: #ced4da;
+  color: black;
+
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.settings-title i {
+  font-size: 18px;
+}
+.settings-title span {
+  color: black;
+  font-size: 18px;
+}
+.settings-list {
+  padding: 1rem 0;
+}
+
+.settings-link {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  color: #555;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  gap: 0.75rem;
+  font-size: 16px;
+}
+
+.settings-link:hover {
+  background-color: #f5f5f5;
+  color: #2196f3;
+}
+
+.settings-item-a.active {
+  background-color: #e3f2fd;
+  color: #2196f3;
+  border-left: 4px solid #2196f3;
+}
+
+/* Main Content Styles */
+.settings-content {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  max-height: 600px;
+}
+.settings-content-update {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  width: 500px;
+  max-height: 600px;
+}
+.settings-content-nor {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  max-height: 800px;
+  width: 800px;
+}
+
+.form-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-title {
+  margin-bottom: 2rem;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: #2196f3;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.required {
+  color: #dc3545;
+}
+
+/* Avatar Styles */
+.avatar-placeholder {
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Màu nền mờ đậm hơn */
+  border-radius: 50%;
+  background-color: #f0f0f0;
   display: flex;
-  justify-content: center;
-  align-items: center; /* Căn giữa popup theo chiều dọc */
-  z-index: 1000;
-  overflow-y: auto; /* Cho phép cuộn nếu nội dung quá dài */
-  padding: 20px; /* Khoảng cách từ các cạnh màn hình */
-}
-
-/* Popup Content */
-.profile-container .popup-content {
-  background-color: #ffffff;
-  border-radius: 10px;
-  padding: 30px; /* Tăng khoảng cách bên trong */
-  width: 100%;
-  height: 800px;
-  max-width: 1000px;
-  position: relative;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Tăng độ bóng */
-  animation: fadeIn 0.3s ease;
-}
-
-/* Close Button */
-/* Close Button */
-.profile-container .close-button {
-  position: absolute;
-  top: 10px; /* Giảm khoảng cách từ trên */
-  right: 10px; /* Giảm khoảng cách từ bên phải */
-  background-color: #ff4d4f; /* Màu đỏ nổi bật */
-  border: none;
-  color: #fff; /* Màu chữ trắng */
-  font-size: 20px; /* Tăng kích thước chữ */
-  width: 40px; /* Kích thước nút */
-  height: 40px; /* Kích thước nút */
-  border-radius: 50%; /* Bo tròn nút */
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.avatar-placeholder i {
+  font-size: 64px;
+}
+
+.avatar-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: visible;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-upload {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #2196f3;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  z-index: 1000;
+  transition: transform 0.2s ease;
 }
 
-.profile-container .close-button:hover {
-  background-color: #d9363e; /* Màu đỏ đậm hơn khi hover */
-  transform: scale(1.1); /* Phóng to nhẹ khi hover */
+.avatar-upload:hover {
+  transform: scale(1.1);
 }
 
-.profile-container .close-button:active {
-  transform: scale(0.95); /* Thu nhỏ nhẹ khi nhấn */
+/* Button Styles */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-/* Fade-in Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
+
+.btn-primary {
+  background: #2196f3;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #1976d2;
+}
+
+/* Form Row for Grid Layout */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Password Form Specific Styles */
+.password-form {
+  max-width: 500px;
+}
+/* Notification Settings Styles */
+.settings-section {
+  padding: 16px 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e8eaed;
+}
+
+.settings-section-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 16px;
+}
+
+.settings-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.settings-option:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.settings-option-info {
+  flex: 1;
+}
+
+.settings-option-title {
+  font-weight: 500;
+  font-size: 16px;
+  color: #202124;
+  margin-bottom: 4px;
+}
+
+.settings-option-description {
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.4;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  margin-left: 10px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #2196f3;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: start;
+
+  gap: 16px;
+}
+
+.reset-defaults-button-2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.75rem 1rem; /* giảm padding ngang */
+  width: auto; /* đảm bảo nút chỉ dài vừa đủ với nội dung */
+  color: #5f6368;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  white-space: nowrap; /* tránh nút bị xuống dòng */
+}
+
+.reset-defaults-button-2:hover {
+  background-color: #e8eaed;
+  color: #202124;
+}
+
+.reset-defaults-button-2:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.reset-defaults-button-2 svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .settings-section {
+    padding: 12px 16px;
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+
+  .settings-actions {
+    flex-direction: column;
+  }
+
+  .settings-option {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toggle-switch {
+    margin-left: 0;
+    margin-top: 10px;
   }
 }

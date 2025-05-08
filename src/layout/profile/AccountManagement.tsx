@@ -12,15 +12,21 @@ import DocumentHistory from "./Component/DocumentHistory";
 import Chat from "./Component/Chat/Chat";
 import ResultPage from "./Component/ComponentResultLearning/ResultPage";
 import EnableCourse from "./Component/ComponentEnableCourse/EnableCourse";
-import Ranking from "./Component/Ranking";
+
+import Overview from "./Component/OverView/OverView";
+import HeaderProfile from "../header-footer/HeaderProfile";
+import Upgrade from "./Component/UpgradeAccount/Upgrade";
+import CourseResultsPage from "./Component/ComponentResultLearning/CourseResultsPage ";
+
 const AccountManagement: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeMenu, setActiveMenu] = useState("profile");
+  const [activeMenu, setActiveMenu] = useState("overview");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     const path = location.pathname.split("/")[2];
-    setActiveMenu(path || "profile");
+    setActiveMenu(path || "overview");
   }, [location]);
 
   const handleMenuClick = (menu: string) => {
@@ -30,14 +36,33 @@ const AccountManagement: React.FC = () => {
       window.location.href = "/dang-nhap";
     } else {
       navigate(`/tai-khoan/${menu}`);
+      setShowMobileMenu(false); // Hide mobile menu after navigation
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setShowMobileMenu(!showMobileMenu);
   };
 
   return (
     <div className="container-fluid">
-      <div className="row mb-100">
-        <div className="col-md-3 col-lg-3 d-md-block sidebar custom-nav-profile">
-          <nav style={{ position: "relative" }}>
+      {/* Mobile menu toggle button */}
+      <div className="mobile-menu-toggle d-md-none">
+        <button onClick={toggleMobileMenu} className="btn btn-primary">
+          <Icon.List size={20} />
+        </button>
+      </div>
+
+      <div className="row custom-main">
+        <div
+          className={`col-md-3 col-lg-3 d-md-block sidebar custom-nav-profile ${
+            showMobileMenu ? "show" : ""
+          }`}
+        >
+          <a href="/" className="logoA">
+            <img src="../../assets/images/logo/logoTMS.png" alt="logo" />
+          </a>
+          <nav>
             <MenuBarProfile
               activeMenu={activeMenu}
               onMenuClick={handleMenuClick}
@@ -45,21 +70,33 @@ const AccountManagement: React.FC = () => {
           </nav>
         </div>
 
-        <main
-          role="main"
-          className="col-md-9 ml-sm-9 col-lg-9 px-md-4"
-          style={{ flex: "1" }}
-        >
-          <div className="content">
+        <main role="main" className="custom-content">
+          <div className="header-profile">
+            <HeaderProfile />
+          </div>
+          <div className="custom-content-2">
             {activeMenu === "profile" && <Profile />}
             {activeMenu === "history" && <TestHistory />}
             {activeMenu === "my-course" && <MyCourse />}
-            {activeMenu === "ket-qua" && <ResultPage />}
+            {activeMenu === "ket-qua" && <CourseResultsPage />}
+            {/* {activeMenu === "ket-qua" && <ResultPage />} */}
             {activeMenu === "history-pay" && <PayHistory />}
             {activeMenu === "history-document" && <DocumentHistory />}
+            {activeMenu === "overview" && (
+              <Overview
+                userId={8}
+                dayStreaks={15}
+                points={250}
+                courses={4}
+                documents={12}
+                balance={500000}
+                onAddFunds={() => console.log("Add funds clicked")}
+                onViewDetails={() => console.log("View details clicked")}
+              />
+            )}
             {activeMenu === "chat" && <Chat />}
             {activeMenu === "enable-course" && <EnableCourse />}
-            {activeMenu === "ranking" && <Ranking />}
+            {activeMenu === "upgrade" && <Upgrade />}
           </div>
         </main>
       </div>

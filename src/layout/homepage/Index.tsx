@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import "./index.css";
+import TeamMembers from "../contact/TeamMember";
 function Index() {
   useEffect(() => {
     new WOW.WOW({
@@ -279,7 +280,10 @@ function Index() {
           />
         </div>
         <div className="container">
-          <div style={{display:"block !important"}} className="section-header mb-60 text-center home-page">
+          <div
+            style={{ display: "block !important" }}
+            className="section-header mb-60 text-center home-page"
+          >
             <h5
               className="wow fadeInUp"
               data-wow-delay="00ms"
@@ -339,6 +343,9 @@ function Index() {
           </div>
         </div>
       </section>
+      <div className="container">
+        <TeamMembers />
+      </div>
       <ToastContainer />
     </main>
   );

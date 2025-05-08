@@ -1,0 +1,76 @@
+.team-members {
+  margin-bottom: 80px;
+  position: relative;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.scroll-container {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.3s ease;
+  padding: 10px 0;
+}
+
+.team-member {
+  min-width: calc(33.333% - 14px);
+  text-align: center;
+}
+
+.member-img {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.member-img img {
+  width: 100%;
+  height: auto;
+}
+
+.team-member h4 {
+  margin-bottom: 8px;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.team-slider-container {
+  position: relative;
+  overflow: hidden;
+  margin: 0 40px;
+}
+
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.nav-button:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.nav-button.prev {
+  left: 0;
+}
+
+.nav-button.next {
+  right: 0;
+}

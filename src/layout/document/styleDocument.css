@@ -1,36 +1,91 @@
 .pegi button.active {
-    background-color: var(--primary-color);
-    color: var(--white);
-    border: 1px solid transparent;
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: 1px solid transparent;
 }
 .pegi button {
-    width: 50px;
-    height: 50px;
-    line-height: 50px;
-    text-align: center;
-    border-radius: 50%;
-    transition: var(--transition);
-    background-color: var(--primary-10);
-    color: var(--heading-color);
-    border: 1px solid var(--border);
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  border-radius: 50%;
+  transition: var(--transition);
+  background-color: var(--primary-10);
+  color: var(--heading-color);
+  border: 1px solid var(--border);
 }
 .nav-document-detail {
-    border: 1px solid #ccc;
-    padding: 15px 0px;
-    margin: 0px !important;
+  border: 1px solid #ccc;
+  padding: 15px 0px;
+  margin: 0px !important;
 }
 .sort-option {
-    border-right: 1px solid black;
-    padding: 0px 5px;
-    color: black;
-    font-size: 14px;
+  border-right: 1px solid black;
+  padding: 0px 5px;
+  color: black;
+  font-size: 14px;
+}
+
+.sort-option:last-child {
+  border-right: none; /* Xóa đường viền bên phải của phần tử cuối cùng */
+}
+
+.active {
+  color: #007bff; /* Màu chữ cho tiêu chí được chọn */
+  font-weight: bold; /* Làm đậm chữ cho tiêu chí được chọn */
+}
+/* Styles cho trạng thái loading */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #4a6ee0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .sort-option:last-child {
-    border-right: none; /* Xóa đường viền bên phải của phần tử cuối cùng */
-  }
-  
-  .active {
-    color: #007bff; /* Màu chữ cho tiêu chí được chọn */
-    font-weight: bold; /* Làm đậm chữ cho tiêu chí được chọn */
-  }
+}
+
+/* Styles cho trường hợp không có tài liệu */
+.no-documents {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 300px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 40px 20px;
+}
+
+.no-data-icon {
+  font-size: 60px;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.no-documents h3 {
+  font-size: 22px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.no-documents p {
+  font-size: 16px;
+  color: #666;
+  max-width: 400px;
+}

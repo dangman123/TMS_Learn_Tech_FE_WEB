@@ -25,6 +25,16 @@ interface DepositHistory {
   status: string;
 }
 
+// Thêm interface cho lịch sử mua bài thi
+interface ExamPurchaseHistory {
+  purchaseId: number;
+  purchaseDate: string;
+  examTitle: string;
+  examType: string;
+  price: number;
+  status: string;
+}
+
 function PayHistory() {
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [paymentDetailHistory, setPaymentDetailHistory] = useState<
@@ -50,12 +60,20 @@ function PayHistory() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Thêm state mới
-  const [activeTab, setActiveTab] = useState("payment"); // "payment" hoặc "deposit"
+  const [activeTab, setActiveTab] = useState("payment"); // "payment", "deposit" hoặc "exam"
   const [walletBalance, setWalletBalance] = useState(0);
   const [depositHistory, setDepositHistory] = useState<DepositHistory[]>([]);
   const [depositPage, setDepositPage] = useState(0);
   const [totalDeposits, setTotalDeposits] = useState(0);
   const [totalDepositAmount, setTotalDepositAmount] = useState(0);
+
+  // Thêm state cho lịch sử mua bài thi
+  const [examPurchaseHistory, setExamPurchaseHistory] = useState<
+    ExamPurchaseHistory[]
+  >([]);
+  const [examPage, setExamPage] = useState(0);
+  const [totalExams, setTotalExams] = useState(0);
+  const [totalExamAmount, setTotalExamAmount] = useState(0);
 
   const fetchPaymentHistory = async () => {
     setLoading(true);
@@ -181,24 +199,78 @@ function PayHistory() {
     }
   };
 
+  // Thêm function lấy lịch sử mua bài thi
+  const fetchExamPurchaseHistory = async () => {
+    setLoading(true);
+    let token = localStorage.getItem("authToken");
+
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        window.location.href = "/dang-nhap";
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/exams/purchases?accountId=${user.id}&page=${examPage}&size=${size}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setExamPurchaseHistory(data.content || []);
+        setTotalExams(data.totalElements || 0);
+        setTotalExamAmount(
+          data.content.reduce(
+            (sum: number, item: ExamPurchaseHistory) => sum + item.price,
+            0
+          )
+        );
+      } else {
+        console.error(
+          "Failed to fetch exam purchase history:",
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching exam purchase history:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchWalletBalance();
 
     if (activeTab === "payment") {
       fetchPaymentHistory();
-    } else {
+    } else if (activeTab === "deposit") {
       fetchDepositHistory();
+    } else if (activeTab === "exam") {
+      fetchExamPurchaseHistory();
     }
-  }, [page, depositPage, size, activeTab]);
+  }, [page, depositPage, examPage, size, activeTab]);
 
   const handlePageChange = (newPage: number) => {
     if (activeTab === "payment") {
       if (newPage >= 0) {
         setPage(newPage);
       }
-    } else {
+    } else if (activeTab === "deposit") {
       if (newPage >= 0) {
         setDepositPage(newPage);
+      }
+    } else if (activeTab === "exam") {
+      if (newPage >= 0) {
+        setExamPage(newPage);
       }
     }
   };
@@ -255,12 +327,10 @@ function PayHistory() {
         {/* Thêm card hiển thị số dư ví */}
         <div className="col-md-4">
           <div className="card text-white bg-info mb-3">
-            <div className="card-header">Số dư ví</div>
+            <div className="card-header">Tổng số bài thi</div>
             <div className="card-body">
-              <h5 className="card-title">
-                {walletBalance.toLocaleString()} VND
-              </h5>
-              <p className="card-text">Số tiền hiện có trong ví</p>
+              <h5 className="card-title">{totalExams.toLocaleString()}</h5>
+              <p className="card-text">Tổng số bài thi đã mua</p>
             </div>
           </div>
         </div>
@@ -315,6 +385,21 @@ function PayHistory() {
                     }}
                   >
                     Lịch sử nạp tiền
+                  </a>
+                </li>
+                {/* Thêm tab lịch sử mua bài thi */}
+                <li className="nav-item">
+                  <a
+                    className={`nav-link ${
+                      activeTab === "exam" ? "active" : ""
+                    }`}
+                    href="#exam-tab"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleTabChange("exam");
+                    }}
+                  >
+                    Lịch sử mua bài thi
                   </a>
                 </li>
               </ul>
@@ -382,7 +467,7 @@ function PayHistory() {
                     </button>
                   </div>
                 </>
-              ) : (
+              ) : activeTab === "deposit" ? (
                 // Tab lịch sử nạp tiền
                 <>
                   <table className="table table-striped table-hover">
@@ -449,6 +534,80 @@ function PayHistory() {
                       className="btn btn-primary"
                       onClick={() => handlePageChange(depositPage + 1)}
                       disabled={depositHistory.length < size}
+                    >
+                      Trang sau
+                    </button>
+                  </div>
+                </>
+              ) : (
+                // Tab lịch sử mua bài thi
+                <>
+                  <table className="table table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>STT</th>
+                        <th>Ngày mua</th>
+                        <th>Tên bài thi</th>
+                        <th>Loại bài thi</th>
+                        <th>Giá tiền</th>
+                        <th>Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <tr>
+                          <td colSpan={6} className="text-center">
+                            Đang tải dữ liệu...
+                          </td>
+                        </tr>
+                      ) : examPurchaseHistory.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center">
+                            Không có dữ liệu.
+                          </td>
+                        </tr>
+                      ) : (
+                        examPurchaseHistory.map((exam, index) => (
+                          <tr key={exam.purchaseId}>
+                            <th scope="row">{index + 1 + examPage * size}</th>
+                            <td>
+                              {new Date(exam.purchaseDate).toLocaleString()}
+                            </td>
+                            <td>{exam.examTitle}</td>
+                            <td>{exam.examType}</td>
+                            <td>{exam.price.toLocaleString()} VND</td>
+                            <td>
+                              <span
+                                className={`badge ${
+                                  exam.status === "Đã hoàn thành"
+                                    ? "bg-success"
+                                    : exam.status === "Đang làm bài"
+                                    ? "bg-warning"
+                                    : exam.status === "Chưa làm"
+                                    ? "bg-info"
+                                    : "bg-danger"
+                                }`}
+                              >
+                                {exam.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                  <div className="d-flex justify-content-between mt-3">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handlePageChange(examPage - 1)}
+                      disabled={examPage === 0}
+                    >
+                      Trang trước
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handlePageChange(examPage + 1)}
+                      disabled={examPurchaseHistory.length < size}
                     >
                       Trang sau
                     </button>

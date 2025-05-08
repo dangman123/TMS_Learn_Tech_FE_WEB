@@ -1,16 +1,118 @@
+.custom-nav-profile .logoA img {
+  justify-items: center;
+  width: 170px;
+}
+.custom-nav-profile .logoA {
+  display: flex; /* Sử dụng Flexbox */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  height: 98px; /* Đặt chiều cao phù hợp cho vùng chứa logo */
+}
+.container-fluid {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+.custom-main {
+  display: flex;
+  height: 100vh;
+  background-color: #f8f9fa;
+
+  margin-right: 0 !important;
+  padding: 0 !important;
+}
+
 .custom-nav-profile {
-    position: relative;
-    border-top: 1px solid #ccc;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 20% !important;
+  height: 100vh;
+  background-color: #fff;
+  padding: 0 !important;
+  border-right: solid 1px #e0e0e0; /* Đường viền bên phải */
+  z-index: 100;
 }
 
-.row {
-    display: flex;
+.custom-content {
+  flex: 1;
+  width: 100%;
+  margin-left: 20%; /* Để tránh đè lên sidebar */
+  background-color: #fff; /* Màu nền ngoài */
+  display: flex;
+  flex-direction: column; /* Hiển thị các phần tử theo chiều dọc */
+  padding: 0 !important;
 }
 
-/* .sidebar {
-    flex: 1;
-} */
+/* Phần header-profile */
+.header-profile {
+  width: 100%;
 
-/* .main-content {
-    flex: 1;
-} */
+  align-self: center; /* Tự căn giữa theo chiều ngang */
+}
+
+.custom-content-2 {
+  width: 100%;
+  align-self: center; /* Tự căn giữa theo chiều ngang */
+  background-color: #fff; /* Nền trắng cho nội dung */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Thêm đổ bóng nhẹ */
+  padding: 20px; /* Thêm padding bên trong */
+  flex: 1; /* Cho phép mở rộng để lấp đầy không gian còn lại */
+  margin: 0 !important;
+  border-top: solid 1px #e0e0e0; /* Đường viền trên cùng */
+}
+
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1060;
+  display: none;
+}
+
+.mobile-menu-toggle .btn {
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .custom-nav-profile {
+    width: 100% !important;
+    position: fixed;
+    left: -100%;
+    transition: left 0.3s;
+    z-index: 1050;
+  }
+
+  .custom-nav-profile.show {
+    left: 0;
+  }
+
+  .custom-content {
+    width: 100%;
+    margin-left: 0;
+    padding: 10px; /* Giảm padding trên mobile */
+  }
+
+  .custom-content-2 {
+    width: 100%; /* Chiếm toàn bộ chiều rộng trên mobile */
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  /* Thêm padding top cho content để tránh bị che bởi nút toggle */
+  .custom-content {
+    padding-top: 60px;
+  }
+}

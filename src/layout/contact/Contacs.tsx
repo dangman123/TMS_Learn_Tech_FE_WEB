@@ -1,9 +1,12 @@
 import React from "react";
 
+import TeamMembers from "./TeamMember";
 function Contacts() {
   return (
     <section className="contact-area pt-120 pb-120">
       <div className="container">
+        {/* Team Members Section */}
+
         <div className="contact__info pb-120">
           <div className="row g-4">
             <div className="col-lg-4">

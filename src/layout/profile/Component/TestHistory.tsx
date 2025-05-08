@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
-import "../style.css";
+
+import "./TestHistory.css";
 import { TestHistoryNav } from "./ComponentTest/TestHistoryNav";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../../util/fucntion/auth";
@@ -7,6 +8,9 @@ import saveAs from "file-saver";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
+
+import DocumentHistory from "../Component/DocumentHistory"; // Import component Lịch sử tải tài liệu
+
 export interface TestResult {
   id: number;
   testId: number;
@@ -29,7 +33,14 @@ interface TestResultDownload {
   correctAnswer: string;
   userAnswer: string;
 }
+
+type TabType = "test" | "login" | "document";
+
 const TestHistory = () => {
+  // State cho chức năng chuyển tab
+  const [activeTab, setActiveTab] = useState<TabType>("test");
+
+  // State cho TestHistory
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [testResultsDownload, setTestResultsDownload] = useState<
@@ -51,6 +62,11 @@ const TestHistory = () => {
   };
 
   const user = getUserData();
+
+  // Xử lý chuyển tab
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+  };
 
   // Fetch Test Results
   const fetchTestResults = async () => {
@@ -87,39 +103,9 @@ const TestHistory = () => {
     }
   };
 
-  // const fetchTestResultsDownload = async (testResultId: number) => {
-  //   let token = localStorage.getItem("authToken");
-
-  //   if (isTokenExpired(token)) {
-  //     token = await refresh();
-  //     if (!token) {
-  //       window.location.href = "/dang-nhap";
-  //       return;
-  //     }
-  //     localStorage.setItem("authToken", token);
-  //   }
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.REACT_APP_SERVER_HOST}/api/test-results/download-test?accountId=${user.id}&testResultId=${testResultId}`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`, // Đính kèm token
-  //         },
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-  //     const data: TestResultDownload[] = await response.json();
-  //     setTestResultsDownload(data);
-  //   } catch (error: any) {
-  //     console.error("Error fetching test results:", error);
-  //   }
-  // };
-
-  const fetchTestResultsDownload = async (testResultId: number): Promise<TestResultDownload[]> => {
+  const fetchTestResultsDownload = async (
+    testResultId: number
+  ): Promise<TestResultDownload[]> => {
     let token = localStorage.getItem("authToken");
 
     if (isTokenExpired(token)) {
@@ -154,8 +140,10 @@ const TestHistory = () => {
   };
 
   useEffect(() => {
-    fetchTestResults();
-  }, [page, size]);
+    if (activeTab === "test") {
+      fetchTestResults();
+    }
+  }, [page, size, activeTab]);
 
   // Kết hợp cả `filterByTime` và `searchKeyword`
   const filteredResults = useMemo(() => {
@@ -219,7 +207,10 @@ const TestHistory = () => {
     }
   };
 
-  const generateDocument = async (testResultId: number, testResult: TestResult) => {
+  const generateDocument = async (
+    testResultId: number,
+    testResult: TestResult
+  ) => {
     await fetchTestResultsDownload(testResultId);
     const data = await fetchTestResultsDownload(testResultId);
     const doc = new Document({
@@ -293,40 +284,44 @@ const TestHistory = () => {
             ...data
               .map(
                 (
-                  q: { question: string; options: string[]; correctAnswer: string },
+                  q: {
+                    question: string;
+                    options: string[];
+                    correctAnswer: string;
+                  },
                   index: number
                 ) => [
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: `Câu ${index + 1}. ${q.question}`,
-                          bold: true,
-                          size: 24,
-                        }),
-                      ],
-                    }),
-                    ...q.options.map(
-                      (option: string, idx: number) =>
-                        new Paragraph({
-                          children: [
-                            new TextRun({
-                              text: `${String.fromCharCode(65 + idx)}. ${option}`, // A, B, C, D
-                              size: 22,
-                            }),
-                          ],
-                        })
-                    ),
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: `Đáp án đúng: ${q.correctAnswer}`,
-                          italics: true,
-                          color: "008000",
-                        }),
-                      ],
-                    }),
-                    new Paragraph({}), // Thêm khoảng cách giữa các câu hỏi
-                  ]
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `Câu ${index + 1}. ${q.question}`,
+                        bold: true,
+                        size: 24,
+                      }),
+                    ],
+                  }),
+                  ...q.options.map(
+                    (option: string, idx: number) =>
+                      new Paragraph({
+                        children: [
+                          new TextRun({
+                            text: `${String.fromCharCode(65 + idx)}. ${option}`, // A, B, C, D
+                            size: 22,
+                          }),
+                        ],
+                      })
+                  ),
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `Đáp án đúng: ${q.correctAnswer}`,
+                        italics: true,
+                        color: "008000",
+                      }),
+                    ],
+                  }),
+                  new Paragraph({}), // Thêm khoảng cách giữa các câu hỏi
+                ]
               )
               .flat(),
           ],
@@ -338,104 +333,157 @@ const TestHistory = () => {
     const blob = await Packer.toBlob(doc);
     saveAs(blob, "BaiKiemTra.docx");
   };
+
   return (
     <div id="historyTest" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-      {/* <TestHistoryNavTop onFilterByTime={setFilterByTime} /> */}
-      <hr />
-      <TestHistoryNav
-        onSearch={setSearchKeyword}
-        size={size}
-        setSize={handleSizeChange}
-        onFilterByTime={setFilterByTime}
-      />
-      <hr />
-
-      <div className="table-responsive test-history-user">
-        <table className="table table-striped table-sm">
-          <thead>
-            <tr>
-              <th scope="col" className="col-stt">
-                STT
-              </th>
-              <th scope="col" className="col-ten-bai-kiem-tra">
-                Tên bài kiểm tra
-              </th>
-              <th scope="col" className="col-diem">
-                Điểm
-              </th>
-              <th scope="col" className="col-diem">
-                Số câu đúng
-              </th>
-              <th scope="col" className="col-diem">
-                Thời gian
-              </th>
-              <th scope="col" className="col-xoa">
-                Tải xuống
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="text-center">
-                  Đang tải dữ liệu...
-                </td>
-              </tr>
-            ) : filteredResults.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="text-center">
-                  Không có dữ liệu.
-                </td>
-              </tr>
-            ) : (
-              filteredResults.map((result, index) => (
-                <tr key={result.id}>
-                  <th scope="row">{index + 1 + page * size}</th>
-                  <td>{result.testTitle}</td>
-                  <td>{result.score.toFixed(1)}</td>
-                  <td>
-                    {result.correctAnswers}/{result.totalQuestions}
-                  </td>
-                  <td>{new Date(result.completedAt).toLocaleString()}</td>
-                  <td>
-                    <button
-                      className="btn btn-link text-danger"
-                      onClick={() => generateDocument(result.id, result)}
-                    >
-                      <i className="fas fa-download"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-      <div className="pegi justify-content-center mt-60">
-        <a
-          href="#0"
-          onClick={() => handlePageChange(page - 1)}
-          className={`border-none ${page === 0 ? "disabled" : ""}`}
-        >
-          <i className="fa-regular fa-arrow-left primary-color transition"></i>
-        </a>
-        {[...Array(totalPages)].map((_, index) => (
-          <a
-            key={index}
-            href="#0"
-            onClick={() => handlePageChange(index)}
-            className={index === page ? "active" : ""}
+      {/* Tab Navigation */}
+      <div className="history-tabs-header">
+        <div className="history-tabs">
+          <button
+            className={`history-tab ${activeTab === "test" ? "active" : ""}`}
+            onClick={() => handleTabChange("test")}
           >
-            {index + 1}
-          </a>
-        ))}
-        <a
-          href="#0"
-          onClick={() => handlePageChange(page + 1)}
-          className={`border-none ${page === totalPages - 1 ? "disabled" : ""}`}
-        >
-          <i className="fa-regular fa-arrow-right primary-color transition"></i>
-        </a>
+            <i className="fas fa-clipboard-check tab-icon"></i>
+            <span className="tab-text">Lịch sử làm bài</span>
+          </button>
+
+          <button
+            className={`history-tab ${
+              activeTab === "document" ? "active" : ""
+            }`}
+            onClick={() => handleTabChange("document")}
+          >
+            <i className="fas fa-file-download tab-icon"></i>
+            <span className="tab-text">Lịch sử tải tài liệu</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="history-tabs-content">
+        {/* Tab Lịch sử làm bài */}
+        {activeTab === "test" && (
+          <>
+            <hr />
+            <TestHistoryNav
+              onSearch={setSearchKeyword}
+              size={size}
+              setSize={handleSizeChange}
+              onFilterByTime={setFilterByTime}
+            />
+            <hr />
+
+            {/* Cập nhật phần body của bảng trong TestHistory.tsx */}
+            <div className="table-responsive test-history-user">
+              <table className="table table-sm">
+                <thead>
+                  <tr>
+                    <th scope="col" className="col-stt">
+                      STT
+                    </th>
+                    <th scope="col" className="col-ten-bai-kiem-tra">
+                      Tên bài kiểm tra
+                    </th>
+                    <th scope="col" className="col-diem">
+                      Điểm
+                    </th>
+                    <th scope="col" className="col-diem">
+                      Số câu đúng
+                    </th>
+                    <th scope="col" className="col-thoi-gian">
+                      Thời gian
+                    </th>
+                    <th scope="col" className="col-xoa">
+                      Tải xuống
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6}>
+                        <div className="loading-container">
+                          <div className="loading-spinner"></div>
+                          <span className="loading-text">
+                            Đang tải dữ liệu...
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filteredResults.length === 0 ? (
+                    <tr>
+                      <td colSpan={6}>
+                        <div className="no-data-message">
+                          <i className="fas fa-inbox"></i>
+                          <p>Không có dữ liệu</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredResults.map((result, index) => (
+                      <tr key={result.id}>
+                        <th scope="row" className="col-stt">
+                          {index + 1 + page * size}
+                        </th>
+                        <td>{result.testTitle}</td>
+                        <td className="col-diem">{result.score.toFixed(1)}</td>
+                        <td className="col-diem">
+                          {result.correctAnswers}/{result.totalQuestions}
+                        </td>
+                        <td className="col-thoi-gian">
+                          {new Date(result.completedAt).toLocaleString()}
+                        </td>
+                        <td className="col-tai-xuong">
+                          <button
+                            className="btn-link text-danger"
+                            onClick={() => generateDocument(result.id, result)}
+                            title="Tải xuống bài kiểm tra"
+                          >
+                            <i className="fas fa-download"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Cập nhật phân trang */}
+
+            <div className="pegi justify-content-center mt-60">
+              <a
+                href="#0"
+                onClick={() => handlePageChange(page - 1)}
+                className={`border-none ${page === 0 ? "disabled" : ""}`}
+              >
+                <i className="fa-regular fa-arrow-left primary-color transition"></i>
+              </a>
+              {[...Array(totalPages)].map((_, index) => (
+                <a
+                  key={index}
+                  href="#0"
+                  onClick={() => handlePageChange(index)}
+                  className={index === page ? "active" : ""}
+                >
+                  {index + 1}
+                </a>
+              ))}
+              <a
+                href="#0"
+                onClick={() => handlePageChange(page + 1)}
+                className={`border-none ${
+                  page === totalPages - 1 ? "disabled" : ""
+                }`}
+              >
+                <i className="fa-regular fa-arrow-right primary-color transition"></i>
+              </a>
+            </div>
+          </>
+        )}
+
+        {/* Tab Lịch sử tải tài liệu */}
+        {activeTab === "document" && <DocumentHistory />}
       </div>
     </div>
   );

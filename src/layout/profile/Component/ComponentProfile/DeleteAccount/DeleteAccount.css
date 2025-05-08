@@ -1,0 +1,284 @@
+/* Thêm CSS cho phần mới trong modal */
+.warning-note {
+  background-color: #f9f9f9;
+  border-left: 3px solid #d9534f;
+  padding: 10px 15px;
+  margin-top: 15px;
+  border-radius: 4px;
+}
+
+.password-input-wrapper {
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #d9534f;
+  box-shadow: 0 0 0 0.25rem rgba(217, 83, 79, 0.25);
+}
+
+.delete-confirm-btn {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  padding: 8px 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.delete-confirm-btn:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+  box-shadow: 0 4px 8px rgba(217, 83, 79, 0.3);
+  transform: translateY(-2px);
+}
+
+.delete-confirm-btn:active {
+  transform: translateY(0);
+}
+
+.btn-outline-secondary {
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
+}
+
+/* Hiệu ứng rung khi mở modal */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.account-deletion-modal .modal-content {
+  animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation-delay: 0.2s;
+}
+.delete-account-section {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.danger-zone {
+  background-color: #fff8f8;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 3px 10px rgba(217, 83, 79, 0.1);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.danger-zone:hover {
+  box-shadow: 0 5px 15px rgba(217, 83, 79, 0.15);
+  transform: translateY(-2px);
+}
+
+.danger-zone::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #d9534f;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.danger-zone h4 {
+  color: #d9534f;
+  margin-bottom: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.danger-zone h4::before {
+  content: "⚠️";
+  margin-right: 10px;
+}
+
+.delete-account-btn {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  margin-top: 15px;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.delete-account-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.6s ease;
+  z-index: -1;
+}
+
+.delete-account-btn:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+  box-shadow: 0 4px 8px rgba(217, 83, 79, 0.3);
+  transform: translateY(-2px);
+}
+
+.delete-account-btn:hover::before {
+  left: 100%;
+}
+
+.delete-account-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(217, 83, 79, 0.3);
+}
+
+.account-deletion-modal .modal-content {
+  border-top: 4px solid #d9534f;
+  border-radius: 8px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #fff 0%, #f9f9f9 100%);
+}
+
+.account-deletion-modal .modal-header {
+  border-bottom-color: #ffcccc;
+  background-color: #fff8f8;
+  padding: 1.2rem 1.5rem;
+}
+
+.account-deletion-modal .modal-title {
+  color: #d9534f;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.account-deletion-modal .modal-title::before {
+  content: "⚠️";
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.account-deletion-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.account-deletion-modal .modal-footer {
+  border-top-color: #ffcccc;
+  background-color: #fff8f8;
+  padding: 1rem 1.5rem;
+  justify-content: space-between;
+}
+
+.account-deletion-modal .alert-danger {
+  display: flex;
+  align-items: center;
+  background-color: rgba(217, 83, 79, 0.15);
+  border: 1px solid rgba(217, 83, 79, 0.3);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(217, 83, 79, 0.1);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(217, 83, 79, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 83, 79, 0);
+  }
+}
+
+.account-deletion-modal .alert-danger i {
+  margin-right: 12px;
+  font-size: 1.3rem;
+  color: #d9534f;
+}
+
+/* Tạo overlay cho modal */
+.account-deletion-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.account-deletion-modal .modal-dialog {
+  max-width: 500px;
+  margin: 10% auto;
+  transform: translateY(0);
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+.account-deletion-modal .modal-content {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  border-top: 4px solid #d9534f;
+  border-radius: 8px;
+  overflow: hidden;
+
+  background: linear-gradient(to bottom, #fff 0%, #f9f9f9 100%);
+}
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,283 @@
+.rewards-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.rewards-popup-container {
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.rewards-popup-header {
+  padding: 20px 24px;
+  position: relative;
+  border-bottom: 1px solid #dcdcdc;
+  background: linear-gradient(135deg, #3a56d4, #5686e1);
+  color: white;
+}
+
+.rewards-popup-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: white;
+}
+
+.rewards-popup-header p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: white;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.rewards-list {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 60vh;
+}
+
+.reward-item {
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 2px solid #eaeaea;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+.reward-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #d0d0d0;
+}
+
+.reward-item.locked {
+  opacity: 0.8;
+  background-color: #f8f8f8;
+  border-color: #e0e0e0;
+}
+
+.reward-content {
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+}
+
+.reward-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #3a56d4;
+}
+
+.reward-info {
+  flex: 1;
+}
+
+.reward-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #333333;
+}
+
+.reward-info p {
+  font-size: 14px;
+  color: #555555;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.reward-level {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 14px;
+  color: #ffffff;
+  border-radius: 20px;
+  background-color: #3a56d4;
+  white-space: nowrap;
+  margin-left: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lock-info {
+  display: flex;
+  align-items: center;
+  color: #9e9e9e;
+  font-size: 13px;
+  margin-top: 8px;
+  background-color: #f5f5f5;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.lock-info svg {
+  margin-right: 6px;
+  color: #757575;
+}
+
+.voucher-container {
+  margin-top: 12px;
+}
+
+.voucher-code {
+  display: flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border: 1px dashed #c0c0c0;
+}
+.reward-level span {
+  color: white !important;
+}
+
+.voucher-code span {
+  flex: 1;
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  letter-spacing: 1px;
+}
+
+.copy-button {
+  background: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  color: #555555;
+  cursor: pointer;
+  padding: 6px;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background: #d0d0d0;
+  color: #333333;
+}
+
+.use-button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.use-button:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.expiry-date {
+  font-size: 12px;
+  color: #757575;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.rewards-note {
+  background-color: #fff3cd;
+  padding: 14px 18px;
+  margin: 0 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  border-left: 4px solid #ffc107;
+}
+
+.rewards-note svg {
+  color: #ff9800;
+  flex-shrink: 0;
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.rewards-note p {
+  font-size: 13px;
+  margin: 0;
+  color: #664d03;
+  line-height: 1.5;
+}
+
+.no-rewards {
+  padding: 30px;
+  text-align: center;
+  color: #757575;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+@media (max-width: 480px) {
+  .rewards-popup-container {
+    width: 95%;
+  }
+
+  .reward-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .reward-info h3 {
+    font-size: 15px;
+  }
+
+  .reward-info p {
+    font-size: 13px;
+  }
+}

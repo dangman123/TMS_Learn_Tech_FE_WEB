@@ -1,0 +1,245 @@
+.wallet-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.wallet-popup-container {
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  background-color: #f5f7fa;
+  border-radius: 16px;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.wallet-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  background-color: white;
+}
+
+.wallet-popup-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.wallet-popup-back {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.wallet-popup-placeholder {
+  width: 32px;
+}
+
+.wallet-card-details {
+  background: linear-gradient(135deg, #0a84ff, #0072e5);
+  margin: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.2);
+}
+
+.balance-label-details {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.balance-value-details {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.wallet-info {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.card-expiry {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+.wallet-card-logo {
+  align-self: flex-start;
+}
+
+.wallet-actions-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 8px 16px 8px;
+  margin: 0 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 22%;
+}
+
+.action-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 20px;
+  color: white;
+}
+
+.add-icon {
+  background-color: #4cd964;
+  font-size: 24px;
+}
+
+.transfer-icon {
+  background-color: #007aff;
+  font-size: 22px;
+}
+
+.qr-icon {
+  background-color: #5856d6;
+}
+
+.history-icon {
+  background-color: #ff9500;
+}
+
+.action-label {
+  font-size: 12px;
+  color: #444;
+  text-align: center;
+}
+
+.payment-methods-section {
+  padding: 20px 16px;
+  background-color: white;
+  margin: 16px;
+  border-radius: 12px;
+}
+
+.payment-methods-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.payment-methods-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.add-method-button {
+  border: none;
+  background: none;
+  color: #007aff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.payment-methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-method-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.payment-method-item:last-child {
+  border-bottom: none;
+}
+
+.payment-method-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.payment-method-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.connected-badge {
+  display: flex;
+  align-items: center;
+  color: #34c759;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.check-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background-color: #34c759;
+  color: white;
+  border-radius: 50%;
+  margin-right: 4px;
+  font-size: 10px;
+}
+
+.connect-button {
+  border: none;
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  cursor: pointer;
+}

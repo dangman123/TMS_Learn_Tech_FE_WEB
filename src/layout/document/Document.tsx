@@ -8,25 +8,22 @@ import {
   GET_USER_DOCUMENT_PAGE,
 } from "../../api/api";
 import { DocumentModel } from "../../model/DocumentModel";
-import "./styleDocument.css"; // Đảm bảo bạn có các lớp CSS cần thiết ở đây
+import "./styleDocument.css";
 import { useParams } from "react-router-dom";
 
 function Document() {
   let id = localStorage.getItem("iddanhmuctailieu");
-  // const { id } = useParams();
   const [documents, setDocuments] = useState<DocumentModel[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   const [sortCriterion, setSortCriterion] = useState<
     "featured" | "most-viewed" | "newest"
   >("newest");
-
-  const url = id
-    ? GET_USER_DOCUMENT_BY_CATEGORY_ID(Number(id), currentPage, 12)
-    : GET_USER_DOCUMENT_PAGE(currentPage, 12);
-
   useEffect(() => {
     const fetchDocuments = async () => {
+      setLoading(true);
       try {
         const url = id
           ? GET_USER_DOCUMENT_BY_CATEGORY_ID(Number(id), currentPage, 12)
@@ -67,6 +64,10 @@ function Document() {
         setTotalPages(response.data.totalPages);
       } catch (error) {
         console.error("Error fetching documents:", error);
+        setDocuments([]);
+        setTotalPages(0);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -83,7 +84,7 @@ function Document() {
     criterion: "featured" | "most-viewed" | "newest"
   ) => {
     setSortCriterion(criterion);
-    setCurrentPage(0); // Đặt lại trang hiện tại khi thay đổi tiêu chí phân loại
+    setCurrentPage(0);
   };
 
   return (
@@ -125,37 +126,56 @@ function Document() {
                   <span className="sort-option">Mới đăng</span>
                 </a>
               </div>
-              <ListDocument documents={documents} />
-              <div className="pegi justify-content-center mt-60 pb-30">
-                <button
-                  className="border-none"
-                  disabled={currentPage === 0}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                >
-                  <i className="fa-regular fa-arrow-left primary-color transition"></i>
-                </button>
-                {[...Array(totalPages)].map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handlePageChange(index)}
-                    className={currentPage === index ? "active" : ""}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-                <button
-                  className="border-none"
-                  disabled={currentPage >= totalPages - 1}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                >
-                  <i className="fa-regular fa-arrow-right primary-color transition"></i>
-                </button>
-              </div>
+
+              {loading ? (
+                <div className="loading-indicator">
+                  <div className="spinner"></div>
+                  <p>Đang tải dữ liệu...</p>
+                </div>
+              ) : documents.length > 0 ? (
+                <>
+                  <ListDocument documents={documents} />
+                  {totalPages > 0 && (
+                    <div className="pegi justify-content-center mt-60 pb-30">
+                      <button
+                        className="border-none"
+                        disabled={currentPage === 0}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                      >
+                        <i className="fa-regular fa-arrow-left primary-color transition"></i>
+                      </button>
+                      {[...Array(totalPages)].map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handlePageChange(index)}
+                          className={currentPage === index ? "active" : ""}
+                        >
+                          {index + 1}
+                        </button>
+                      ))}
+                      <button
+                        className="border-none"
+                        disabled={currentPage >= totalPages - 1}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                      >
+                        <i className="fa-regular fa-arrow-right primary-color transition"></i>
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-documents">
+                  <div className="no-data-icon">
+                    <i className="fa fa-file-text-o" aria-hidden="true"></i>
+                  </div>
+                  <h3>Không có tài liệu</h3>
+                  <p>Hiện chưa có tài liệu nào trong danh mục này.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
-      
     </main>
   );
 }

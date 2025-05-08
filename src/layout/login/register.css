@@ -1,0 +1,26 @@
+.form-group {
+  margin-bottom: 15px;
+}
+
+.input-with-star {
+  position: relative;
+}
+
+.form-control::placeholder {
+  color: #666;
+}
+
+/* Thêm CSS để hiện dấu * màu đỏ */
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="date"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="password"]::placeholder {
+  color: #666;
+}
+
+/* Style cho input khi focus */
+.form-control:focus {
+  border-color: #4a6ee0;
+  box-shadow: 0 0 0 0.2rem rgba(74, 110, 224, 0.25);
+}

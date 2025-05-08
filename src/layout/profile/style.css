@@ -1,6 +1,7 @@
 .nav-item.active {
   background-color: #ccc; /* Màu nền cho thẻ được kích hoạt */
 }
+
 nav.col-md-3.col-lg-3.mt-60.d-md-block.sidebar {
   position: unset;
 }
@@ -168,9 +169,6 @@ div#historyDocument {
   cursor: pointer; /* Con trỏ chuột dạng tay khi di chuột qua */
 }
 /* Container chính cho menu */
-.sidebar-sticky {
-  position: relative; /* Để điều chỉnh vị trí của icon */
-}
 
 /* Container cho nút điều khiển menu */
 .menu-toggle-container {
@@ -192,10 +190,30 @@ div#historyDocument {
 .sidebar-sticky {
   display: flex;
   flex-direction: column;
-  background: #f8f9fa; /* Màu nền menu, có thể thay đổi */
-  border-right: 1px solid #ddd; /* Đường viền bên phải */
+  background: #fff; /* Màu nền menu, có thể thay đổi */
+  max-height: 80vh; /* hoặc giá trị bạn muốn, ví dụ 100% hoặc 90vh */
+  overflow-y: auto;
+}
+/* Scrollbar nhỏ và bo tròn cho Chrome, Edge, Safari */
+.sidebar-sticky::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
 }
 
+.sidebar-sticky::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.sidebar-sticky::-webkit-scrollbar-thumb:hover {
+  background: #b0b8c1;
+}
+
+/* Scrollbar cho Firefox */
+.sidebar-sticky {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
 /* Định dạng các mục menu */
 .nav-item {
   margin-bottom: 10px; /* Khoảng cách giữa các mục menu */
@@ -209,11 +227,22 @@ div#historyDocument {
   color: #333;
   text-decoration: none;
 }
-
-.nav-link:hover {
-  background-color: #e9ecef; /* Hiệu ứng khi di chuột qua */
+.nav.flex-column .nav-item {
+  padding-top: 14px;
+  padding-bottom: 14px;
 }
-
+.nav-link:hover {
+  color: #007bff !important;
+}
+.nav-item .nav-text {
+  transition: color 0.3s ease;
+}
+.nav-item svg {
+  margin-bottom: 5px;
+}
+.nav-item:hover .nav-text {
+  color: #007bff !important;
+}
 .nav-icon {
   font-size: 20px; /* Kích thước icon */
   margin-right: 10px; /* Khoảng cách giữa icon và chữ */
