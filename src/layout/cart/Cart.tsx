@@ -6,11 +6,15 @@ interface CartItem {
   id: number;
   title: string;
   price: number;
+  originalPrice: number;
   image: string;
-  category: string;
   instructor: string;
-  quantity: number; // Thêm thuộc tính quantity
+  quantity: number;
+  totalHours?: string;
+  totalLessons?: string;
+  level?: string;
 }
+
 function Cart() {
   const [cart, setCart] = useState<CartItem[]>(mockCartItems);
   const [totalPrice, setTotalPrice] = useState(
@@ -22,43 +26,27 @@ function Cart() {
   const handleRemoveItem = (id: number) => {
     const updatedCart = cart.filter((item) => item.id !== id);
     setCart(updatedCart);
-    const total = updatedCart.reduce((acc, item) => acc + item.price, 0);
-    setTotalPrice(total);
-  };
-
-  const handleQuantityChange = (id: number, change: number) => {
-    const currentItem = cart.find((item) => item.id === id);
-    if (!currentItem) return;
-
-    if (currentItem && change === -1 && currentItem.quantity === 1) return;
-
-    const updatedCart = cart.map((item) =>
-      item.id === id
-        ? { ...item, quantity: (item.quantity || 1) + change }
-        : item
-    );
-
-    setCart(updatedCart);
     calculateTotal(updatedCart);
   };
 
   const calculateTotal = (cartItems: CartItem[]) => {
-    const subtotal = cartItems.reduce(
-      (acc, item) => acc + item.price * (item.quantity || 1),
-      0
-    );
-    const discountAmount = (subtotal * discount) / 100;
-    setTotalPrice(subtotal - discountAmount);
+    const subtotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+    setTotalPrice(subtotal);
   };
 
   const applyPromoCode = () => {
     // Giả lập mã giảm giá - trong thực tế sẽ gọi API
     if (promoCode === "SUMMER2025") {
       setDiscount(10);
-      calculateTotal(cart);
+      const discountedTotal = totalPrice * (1 - discount / 100);
+      setTotalPrice(discountedTotal);
     } else {
       alert("Mã giảm giá không hợp lệ!");
     }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString() + " ₫";
   };
 
   return (
@@ -120,41 +108,47 @@ function Cart() {
             </div>
           ) : (
             cart.map((item) => (
-              <div className="cart-item-section" key={item.id}>
-                <div className="item-checkbox">
-                  <input type="checkbox" checked readOnly />
-                </div>
+              <div className="cart-item" key={item.id}>
                 <div className="item-image">
                   <img src={item.image} alt={item.title} />
                 </div>
-                <div className="item-details">
-                  <div className="item-main-info">
-                    <h3>{item.title}</h3>
-                    <div className="price-info">
-                      <span className="original-price">
-                        ₫{item.price.toLocaleString()}
-                      </span>
-                      <span className="current-price">
-                        ₫{(item.price * 0.9).toLocaleString()}
-                      </span>
+                <div className="item-content">
+                  <div className="item-info">
+                    <h3 className="item-title">{item.title}</h3>
+                    <p className="item-instructor">Bởi {item.instructor}</p>
+                    {item.totalHours && (
+                      <div className="item-meta">
+                        <span>Tổng số {item.totalHours}</span>
+                        {item.totalLessons && (
+                          <>
+                            <span className="dot-separator">•</span>
+                            <span>{item.totalLessons}</span>
+                          </>
+                        )}
+                        {item.level && (
+                          <>
+                            <span className="dot-separator">•</span>
+                            <span>{item.level}</span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <div className="item-remove">
+                      <button
+                        onClick={() => handleRemoveItem(item.id)}
+                        className="remove-btn"
+                      >
+                        Xóa
+                      </button>
                     </div>
                   </div>
-                  <div className="item-actions">
-                    <div className="quantity-controls">
-                      <button onClick={() => handleQuantityChange(item.id, -1)}>
-                        -
-                      </button>
-                      <span>{item.quantity || 1}</span>
-                      <button onClick={() => handleQuantityChange(item.id, 1)}>
-                        +
-                      </button>
+                  <div className="item-price">
+                    <div className="current-price">
+                      {formatCurrency(item.price)}
                     </div>
-                    <button
-                      className="remove-button"
-                      onClick={() => handleRemoveItem(item.id)}
-                    >
-                      Xóa
-                    </button>
+                    <div className="original-price">
+                      {formatCurrency(item.originalPrice)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -163,8 +157,8 @@ function Cart() {
         </div>
 
         <div className="cart-summary">
-          <div className="promo-code-section">
-            <h3>Mã giảm giá</h3>
+          <div className="summary-header">
+            <h2>Mã giảm giá</h2>
             <div className="promo-input">
               <input
                 type="text"
@@ -179,21 +173,13 @@ function Cart() {
           <div className="summary-content">
             <div className="summary-row">
               <span>Tạm tính:</span>
-              <span>₫{totalPrice.toLocaleString()}</span>
+              <span>{formatCurrency(totalPrice)}</span>
             </div>
-            {discount > 0 && (
-              <div className="summary-row discount">
-                <span>Giảm giá:</span>
-                <span>-{discount}%</span>
-              </div>
-            )}
-            <div className="summary-total">
+            <div className="summary-row total">
               <span>Tổng cộng:</span>
-              <span>
-                ₫{(totalPrice * (1 - discount / 100)).toLocaleString()}
-              </span>
+              <span>{formatCurrency(totalPrice)}</span>
             </div>
-            <button className="checkout-button">Thanh toán</button>
+            <button className="checkout-btn">Thanh toán</button>
           </div>
         </div>
       </div>

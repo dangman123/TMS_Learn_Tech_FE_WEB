@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./style.css";
+import "./courseNav.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import {
@@ -13,39 +13,40 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import "swiper/css/autoplay";
-import { float } from "html2canvas/dist/types/css/property-descriptors/float";
 import { Category } from "../../Courses";
 import useRefreshToken from "../../../util/fucntion/useRefreshToken";
 import { useNavigate } from "react-router-dom";
 import { isTokenExpired } from "../../../util/fucntion/auth";
 
 interface CourseNavProps {
-  level1CategoriesCourse: Category[]; // Truyền danh mục từ props
-  level2CategoriesCourse: Category[]; // Truyền danh mục từ props
-  level3CategoriesCourse: Category[]; // Truyền danh mục từ props
-  categories: Category[]; // Truyền danh mục từ props
-
+  level1CategoriesCourse: Category[];
+  level2CategoriesCourse: Category[];
+  level3CategoriesCourse: Category[];
+  categories: Category[];
   onSearchChange: (query: string) => void;
 }
 
 interface Banner {
   id: number;
-  name: string;
+  title: string;
+  imageUrl: string;
   link: string;
   type: string;
-  imageUrl: string;
-  title: string;
+  position: string;
+  platform: string;
+  status: boolean;
+  priority: number;
 }
 
 const removeVietnameseTones = (str: string): string => {
   return str
-    .normalize("NFD") // Convert to Unicode Normalization Form D
-    .replace(/[\u0300-\u036f]/g, "") // Remove diacritical marks
-    .replace(/đ/g, "d") // Replace 'đ' with 'd'
-    .replace(/Đ/g, "D") // Replace 'Đ' with 'D'
-    .replace(/[^a-zA-Z0-9\s]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .toLowerCase(); // Convert to lowercase
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .replace(/[^a-zA-Z0-9\s]/g, "")
+    .replace(/\s+/g, "-")
+    .toLowerCase();
 };
 
 const CourseNav: React.FC<CourseNavProps> = ({
@@ -55,7 +56,8 @@ const CourseNav: React.FC<CourseNavProps> = ({
   categories,
   onSearchChange,
 }) => {
-  const [bannerList, setBannerList] = useState<Banner[]>([]); // Declare state for bannerList
+  const [bannerList, setBannerList] = useState<Banner[]>([]);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(event.target.value);
@@ -68,7 +70,7 @@ const CourseNav: React.FC<CourseNavProps> = ({
   const fetchBannerList = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/banner-voucher/list`,
+        "http://103.166.143.198:8080/api/banner-voucher/list",
         {
           method: "GET",
           headers: {
@@ -80,10 +82,11 @@ const CourseNav: React.FC<CourseNavProps> = ({
         throw new Error("Failed to fetch banner list");
       }
       const data = await response.json();
-      setBannerList(data.content); // Use setBannerList to update state
+      console.log("Banner data:", data);
+      setBannerList(Array.isArray(data.data) ? data.data : []);
     } catch (error) {
       console.error("Error fetching banner list:", error);
-      throw error;
+      setBannerList([]);
     }
   };
 
@@ -111,140 +114,89 @@ const CourseNav: React.FC<CourseNavProps> = ({
   };
 
   return (
-    <div>
-      <div
-        className="row"
-        style={{ height: "300px", marginBottom: "30px", marginTop: "10px" }}
-      >
-        {/* Danh mục bên trái */}
-        <div
-          className="col-md-3"
-          role="tablist"
-          aria-orientation="horizontal"
-          style={{
-            backgroundColor: "white",
-            border: "1px solid #ccc",
-            borderRadius: "12px",
-            padding: "0px",
-          }}
-        >
-          {level1CategoriesCourse.map((category) => (
-            <div
-              className="category-container"
-              key={category.id}
-              style={{ borderBottom: "1px solid #ccc" }}
-            >
-              <button
-                type="button"
-                className="category-button"
-                onClick={() => {
-                  handleReloadDataCap1(category);
-                }}
-              >
-                <span>{category.name}</span>
-                <i
-                  className="fas fa-chevron-right"
-                  style={{ float: "right", lineHeight: "28px" }}
-                ></i>
-              </button>
-
-              {/* Cấp độ 2 - Hiển thị bên phải khi hover */}
-              <div className="subcategory-level-2">
-                {level2CategoriesCourse
-                  .filter((subCategory) => subCategory.parentId === category.id)
-                  .map((subCategory) => (
-                    <div key={subCategory.id} className="category-container">
-                      <button
-                        type="button"
-                        className="category-button"
-                        onClick={() => {
-                          handleReloadDataCap2(category, subCategory);
-                        }}
-                      >
-                        <span>{subCategory.name}</span>
-                      </button>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="col-md-7" style={{ height: "100%" }}>
-          <Swiper
-            modules={[Navigation, Pagination, Scrollbar, A11y]}
-            spaceBetween={50}
-            slidesPerView={1}
-            pagination={{ clickable: true }}
-            loop={true}
-            autoplay={{
-              delay: 3000,
-              disableOnInteraction: false,
-            }}
-            breakpoints={{
-              1: { slidesPerView: 1 },
-              768: { slidesPerView: 1 },
-              1024: { slidesPerView: 1 },
-            }}
-          >
-            {bannerList.map(
-              (banner: Banner) =>
-                banner.type === "banner" && (
-                  <SwiperSlide key={banner.id} style={{ height: "100%" }}>
-                    <div className="swiper-slide" style={{ height: "100%" }}>
-                      <div className="courses__item" style={{ height: "100%" }}>
-                        <img
-                          src={banner.imageUrl}
-                          alt={banner.title}
-                          style={{ width: "100%", height: "100%" }}
-                        />
-                      </div>
-                    </div>
-                  </SwiperSlide>
-                )
-            )}
-          </Swiper>
-        </div>
-        {bannerList
-          .filter((banner: Banner) => banner.type === "voucher")
-          .slice(0, 2)
-          .map((banner: Banner) => (
-            <div
-              className="col-md-3"
-              style={{ height: "100%" }}
-              key={banner.id}
-            >
-              <div
-                className="vocher-image"
-                style={{
-                  border: "2px solid #ddd",
-                  borderRadius: "12px",
-                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                  padding: "3px",
-                }}
-              >
-                <img
-                  src={banner.imageUrl}
-                  alt={banner.title}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "10px",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-      </div>
-      <hr />
-      <div className="row">
+    <div className="course-nav-container">
+      {/* Search Bar */}
+      <div className="search-container">
         <div className="search-bar">
           <input
             type="text"
-            placeholder="Tìm khóa học ..."
+            placeholder="Tìm kiếm khóa học..."
             onChange={handleInputChange}
             className="search-input"
           />
+          <button className="search-button">
+            <i className="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <div className="course-content-container">
+        {/* Banner và Voucher */}
+        <div className="row course-main-content">
+          {/* Banner chính - Cột bên trái */}
+          <div className="col-md-8">
+            <div className="main-banner">
+              <Swiper
+                modules={[Navigation, Pagination, Scrollbar, A11y, Autoplay]}
+                spaceBetween={0}
+                slidesPerView={1}
+                pagination={{ clickable: true }}
+                navigation
+                loop={true}
+                autoplay={{
+                  delay: 4000,
+                  disableOnInteraction: false,
+                }}
+                className="main-banner-swiper"
+              >
+                {bannerList &&
+                  bannerList
+                    .filter((banner) => banner.type === "REGULAR")
+                    .map((banner) => (
+                      <SwiperSlide key={banner.id}>
+                        <a href={banner.link} className="banner-link">
+                          <div className="banner-image-container">
+                            <img
+                              src={banner.imageUrl}
+                              alt={banner.title}
+                              className="banner-image"
+                            />
+                            <div className="banner-overlay">
+                              <h3 className="banner-title">{banner.title}</h3>
+                            </div>
+                          </div>
+                        </a>
+                      </SwiperSlide>
+                    ))}
+              </Swiper>
+            </div>
+          </div>
+
+          {/* Voucher Banners - Cột bên phải */}
+          <div className="col-md-4 voucher-banners-container">
+            <div className="voucher-banners">
+              {bannerList &&
+                bannerList
+                  .filter((banner) => banner.type === "VOUCHER")
+                  .slice(0, 2)
+                  .map((banner, index) => (
+                    <div className="voucher-item" key={banner.id}>
+                      <a href={banner.link} className="voucher-link">
+                        <div className="voucher-image-container">
+                          <img
+                            src={banner.imageUrl}
+                            alt={banner.title}
+                            className="voucher-image"
+                          />
+                          <div className="voucher-overlay">
+                            <span className="voucher-tag">Ưu đãi</span>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

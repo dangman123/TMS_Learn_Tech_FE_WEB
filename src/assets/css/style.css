@@ -1747,7 +1747,7 @@ p.heading {
   color: white;
 }
 
-.heading-document>li {
+.heading-document > li {
   margin: 10px 0px;
 }
 
@@ -1833,7 +1833,7 @@ select {
   word-wrap: normal;
 }
 
-.item a>img {
+.item a > img {
   width: 140px;
   height: 100px;
 }
@@ -1884,7 +1884,7 @@ p.heading {
   color: white;
 }
 
-.heading-document>li {
+.heading-document > li {
   margin: 10px 0px;
 }
 
@@ -1901,7 +1901,7 @@ p.heading {
   margin-top: 16px;
 }
 
-.container>.section-title {
+.container > .section-title {
   background-color: #fff;
 }
 
@@ -2374,7 +2374,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .arry-prev,
   .arry-next {
     width: 40px;
@@ -2593,9 +2592,6 @@ p.heading {
   top: 0;
   animation-duration: 0.6s;
   z-index: 999;
-
-
-
 }
 
 .header__container {
@@ -2884,7 +2880,6 @@ p.heading {
 }
 
 @media (max-width: 991px) {
-
   .header-two-area,
   .header-three-area {
     top: 0;
@@ -3053,7 +3048,7 @@ p.heading {
   display: none !important;
 }
 
-.mobile-menu.mean-container .mean-nav>ul {
+.mobile-menu.mean-container .mean-nav > ul {
   width: 100%;
   display: block !important;
 }
@@ -3070,7 +3065,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .banner-area,
   .banner-two-area {
     padding: 100px 0;
@@ -3094,7 +3088,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .banner__shape2,
   .banner-two__shape2 {
     display: none;
@@ -3178,7 +3171,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .banner__content p,
   .banner-two__content p,
   .banner-ten__content p,
@@ -3312,7 +3304,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .banner-two__content h1,
   .banner-ten__content h1,
   .banner-eight__content h1,
@@ -4587,7 +4578,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .about__image .sm-image,
   .about-nine__image .sm-image {
     max-width: 200px;
@@ -4605,7 +4595,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .about__image .about-dots,
   .about-nine__image .about-dots {
     display: none;
@@ -4622,7 +4611,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .about__image .about-circle,
   .about-nine__image .about-circle {
     display: none;
@@ -4642,7 +4630,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .about__image .count-info,
   .about-nine__image .count-info {
     top: 50px;
@@ -4698,7 +4685,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .about__right-part,
   .choose-nine__right-part,
   .choose-five__right-part {
@@ -4713,7 +4699,6 @@ p.heading {
 }
 
 @media (max-width: 1199px) {
-
   .about__right-wrp,
   .choose-five__right-wrp {
     float: unset;
@@ -4763,7 +4748,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .about-two__video-btn .video-popup,
   .choose-five__video-btn .video-popup {
     width: 40px;
@@ -4805,7 +4789,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .about-two__image .dots,
   .choose-four__image .dots,
   .about-ten__image .dots,
@@ -6285,7 +6268,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .fanfact-four__wrp,
   .fanfact-nine__wrp {
     display: flex;
@@ -6664,7 +6646,6 @@ p.heading {
 }
 
 @media (max-width: 1199px) {
-
   .discout-two__image,
   .discout-ten__image,
   .discout-five__image,
@@ -7159,7 +7140,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .team-two-area.extra-padding,
   .extra-padding.team-five-area,
   .extra-padding.team-four-area {
@@ -7873,7 +7853,6 @@ p.heading {
 }
 
 @media (max-width: 575px) {
-
   .testimonial-eight__wrp,
   .testimonial-ten__wrp {
     padding-right: 10;
@@ -9192,7 +9171,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .footer__shape-left,
   .footer-two__shape-left,
   .footer-three__shape-left,
@@ -9471,7 +9449,6 @@ p.heading {
 }
 
 @media (max-width: 767px) {
-
   .footer-two__shape-right,
   .footer-four__shape-right {
     display: none;
@@ -9817,7 +9794,6 @@ p.heading {
 }
 
 @keyframes pxl_zigzag {
-
   0%,
   100%,
   20%,
@@ -10257,7 +10233,6 @@ p.heading {
 }
 
 @keyframes top-bottom {
-
   0%,
   100%,
   20%,
@@ -10345,7 +10320,7 @@ p.heading {
 
 /*# sourceMappingURL=style.css.map */
 
-.about-area.pt-120.pb-120.bg-white>.container {
+.about-area.pt-120.pb-120.bg-white > .container {
   height: 100%;
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./style.css";
+// import "./style.css";
 import CourseNav from "./Component/ComponentList/CourseNav";
 import CourseList from "./Component/ComponentList/CourseList";
 import {
@@ -27,7 +27,6 @@ export interface Category {
   type: string;
 }
 
-
 function Courses() {
   const courseCategoryId = localStorage.getItem("iddanhmuckhoahoccap1");
   const courseCategoryId2 = localStorage.getItem("iddanhmuckhoahoccap2");
@@ -40,10 +39,15 @@ function Courses() {
   const [loading, setLoading] = useState(true);
   const coursesPerPage = 6;
 
-
-  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<Category[]>([]);
-  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<Category[]>([]);
-  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<Category[]>([]);
+  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<
+    Category[]
+  >([]);
+  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<
+    Category[]
+  >([]);
+  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<
+    Category[]
+  >([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -59,8 +63,7 @@ function Courses() {
             currentPage,
             coursesPerPage
           );
-        }
-        else {
+        } else {
           // Nếu không có danh mục được chọn, gọi API không có phân loại
           url = GET_USER_COURSE(currentPage, coursesPerPage);
         }
@@ -85,16 +88,28 @@ function Courses() {
     const fetchCourseCategories = async () => {
       // startLoading();
       try {
-        const level1Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_1);
-        const level1Filtered = level1Response.data.filter(category => category.type === "course");
+        const level1Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_1
+        );
+        const level1Filtered = level1Response.data.filter(
+          (category) => category.type === "COURSE"
+        );
         setLevel1CategoriesCourse(level1Filtered);
 
-        const level2Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_2);
-        const level2Filtered = level2Response.data.filter(category => category.type === "course");
+        const level2Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_2
+        );
+        const level2Filtered = level2Response.data.filter(
+          (category) => category.type === "COURSE"
+        );
         setLevel2CategoriesCourse(level2Filtered);
 
-        const level3Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_3);
-        const level3Filtered = level3Response.data.filter(category => category.type === "course");
+        const level3Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_3
+        );
+        const level3Filtered = level3Response.data.filter(
+          (category) => category.type === "COURSE"
+        );
         setLevel3CategoriesCourse(level3Filtered);
 
         // stopLoading();
@@ -105,7 +120,6 @@ function Courses() {
     };
     fetchCourseCategories();
   }, []);
-
 
   const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -121,9 +135,11 @@ function Courses() {
     }
   };
 
-  
   return (
-    <section className="courses-area  pb-120" style={{ backgroundColor: "rgb(243 244 246)" }}>
+    <section
+      className="courses-area  pb-120"
+      style={{ backgroundColor: "rgb(243 244 246)" }}
+    >
       <div className="container" style={{ marginTop: "0px", padding: "0px" }}>
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12">
@@ -134,7 +150,6 @@ function Courses() {
                   level2CategoriesCourse={level2CategoriesCourse}
                   level3CategoriesCourse={level3CategoriesCourse}
                   categories={categories}
-                 
                   onSearchChange={handleSearchChange}
                 />
               </div>
@@ -165,8 +180,9 @@ function Courses() {
               <a
                 href="#0"
                 onClick={() => handlePageChange(currentPage + 1)}
-                className={`border-none ${currentPage === totalPages - 1 ? "disabled" : ""
-                  }`}
+                className={`border-none ${
+                  currentPage === totalPages - 1 ? "disabled" : ""
+                }`}
                 aria-disabled={currentPage === totalPages - 1}
               >
                 <i className="fa-regular fa-arrow-right primary-color transition"></i>

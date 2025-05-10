@@ -1,0 +1,212 @@
+/* Course Nav Container */
+.course-nav-container {
+  padding: 20px 0;
+  background-color: #f9f9f9;
+}
+
+/* Search Container */
+.search-container {
+  margin-bottom: 25px;
+}
+
+.search-bar {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  border-radius: 50px;
+  background-color: white;
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 60px;
+  background-color: #3f51b5;
+  border: none;
+  color: white;
+  border-radius: 0 50px 50px 0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.search-button:hover {
+  background-color: #303f9f;
+}
+
+/* Course Content Container */
+.course-content-container {
+  padding: 10px;
+}
+
+.course-main-content {
+  min-height: 280px; /* Chiều cao tối thiểu phù hợp */
+  display: flex;
+  flex-wrap: wrap; /* Đảm bảo responsive */
+}
+
+/* Main Banner - Điều chỉnh chiều rộng */
+.main-banner {
+  height: 280px; /* Chiều cao cố định */
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 0; /* Loại bỏ margin để banner sát với cạnh */
+}
+
+.main-banner-swiper {
+  height: 100%;
+}
+
+.banner-link {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.banner-image-container {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.banner-image-container:hover .banner-image {
+  transform: scale(1.05);
+}
+
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 15px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  color: white;
+}
+
+.banner-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Voucher Banners - Điều chỉnh kích thước */
+.voucher-banners-container {
+  padding-left: 15px; /* Đảm bảo có khoảng cách với banner chính */
+}
+
+.voucher-banners {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Khoảng cách giữa các voucher */
+  height: 280px; /* Đồng bộ với chiều cao banner chính */
+}
+
+.voucher-item {
+  flex: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-height: calc(
+    50% - 5px
+  ); /* Đảm bảo mỗi voucher chiếm đúng 1/2 chiều cao */
+}
+
+.voucher-link {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.voucher-image-container {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.voucher-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.voucher-image-container:hover .voucher-image {
+  transform: scale(1.05);
+}
+
+.voucher-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0;
+}
+
+.voucher-tag {
+  display: inline-block;
+  background-color: #ff5722;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .main-banner,
+  .voucher-banners {
+    height: 220px; /* Giảm chiều cao trên màn hình nhỏ */
+  }
+}
+
+@media (max-width: 768px) {
+  .main-banner {
+    height: 180px; /* Giảm thêm chiều cao trên màn hình rất nhỏ */
+    margin-bottom: 15px;
+  }
+
+  .voucher-banners {
+    flex-direction: row;
+    height: auto;
+    gap: 15px;
+  }
+
+  .voucher-item {
+    max-height: 180px;
+    width: 48%;
+  }
+
+  .col-md-8,
+  .col-md-4 {
+    padding: 0;
+  }
+
+  .voucher-banners-container {
+    padding-left: 0;
+    margin-top: 15px;
+  }
+}

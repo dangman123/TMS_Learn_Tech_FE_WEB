@@ -11,8 +11,6 @@ import {
 
   // token_default,
 } from "../../api/api";
-
-import "./styleHeader.css";
 import { DocumentModel } from "../../model/DocumentModel";
 import "./Header.css";
 import { Client } from "@stomp/stompjs";
@@ -57,7 +55,8 @@ const Header: React.FC = () => {
   useEffect(() => {
     const client = new Client({
       brokerURL: `ws://${process.env.REACT_APP_SERVER_HOST}/ws`,
-      webSocketFactory: () => new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`),
+      webSocketFactory: () =>
+        new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`),
       onConnect: () => {
         console.log("WebSocket connected");
 
@@ -94,8 +93,6 @@ const Header: React.FC = () => {
     };
   }, []);
 
-
-
   const [courseCategories, setCourseCategories] = useState<CategoryCourse[]>(
     []
   );
@@ -103,10 +100,15 @@ const Header: React.FC = () => {
   const [level2Categories, setLevel2Categories] = useState<Category[]>([]);
   const [level3Categories, setLevel3Categories] = useState<Category[]>([]);
 
-  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<Category[]>([]);
-  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<Category[]>([]);
-  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<Category[]>([]);
-
+  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<
+    Category[]
+  >([]);
+  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<
+    Category[]
+  >([]);
+  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<
+    Category[]
+  >([]);
 
   const [documentsSearch, setDocumentsSearch] = useState<DocumentModel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -118,8 +120,6 @@ const Header: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const [cartItemCount, setCartItemCount] = useState<number>(0);
-
-
 
   useEffect(() => {
     let token = localStorage.getItem("authToken");
@@ -172,16 +172,28 @@ const Header: React.FC = () => {
     const fetchCategories = async () => {
       // startLoading();
       try {
-        const level1Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_1);
-        const level1Filtered = level1Response.data.filter(category => category.type === "document");
+        const level1Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_1
+        );
+        const level1Filtered = level1Response.data.filter(
+          (category) => category.type === "DOCUMENT"
+        );
         setLevel1Categories(level1Filtered);
 
-        const level2Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_2);
-        const level2Filtered = level2Response.data.filter(category => category.type === "document");
+        const level2Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_2
+        );
+        const level2Filtered = level2Response.data.filter(
+          (category) => category.type === "DOCUMENT"
+        );
         setLevel2Categories(level2Filtered);
 
-        const level3Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_3);
-        const level3Filtered = level3Response.data.filter(category => category.type === "document");
+        const level3Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_3
+        );
+        const level3Filtered = level3Response.data.filter(
+          (category) => category.type === "DOCUMENT"
+        );
         setLevel3Categories(level3Filtered);
 
         // stopLoading();
@@ -191,21 +203,31 @@ const Header: React.FC = () => {
       }
     };
 
-
-
     const fetchCourseCategories = async () => {
       // startLoading();
       try {
-        const level1Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_1);
-        const level1Filtered = level1Response.data.filter(category => category.type === "course");
+        const level1Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_1
+        );
+        const level1Filtered = level1Response.data.filter(
+          (category) => category.type === "COURSE"
+        );
         setLevel1CategoriesCourse(level1Filtered);
 
-        const level2Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_2);
-        const level2Filtered = level2Response.data.filter(category => category.type === "course");
+        const level2Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_2
+        );
+        const level2Filtered = level2Response.data.filter(
+          (category) => category.type === "COURSE"
+        );
         setLevel2CategoriesCourse(level2Filtered);
 
-        const level3Response = await axios.get<Category[]>(GET_USER_CATEGORY_LEVEL_3);
-        const level3Filtered = level3Response.data.filter(category => category.type === "course");
+        const level3Response = await axios.get<Category[]>(
+          GET_USER_CATEGORY_LEVEL_3
+        );
+        const level3Filtered = level3Response.data.filter(
+          (category) => category.type === "COURSE"
+        );
         setLevel3CategoriesCourse(level3Filtered);
 
         // stopLoading();
@@ -214,7 +236,6 @@ const Header: React.FC = () => {
         console.error("Error fetching categories:", error);
       }
     };
-
 
     const fetchNotifications = async () => {
       // startLoading();
@@ -281,23 +302,27 @@ const Header: React.FC = () => {
   }, {} as Record<number, Category[]>);
 
   // Group categories
-  const groupedCategoriesLevel2Course = level2CategoriesCourse.reduce((acc, category) => {
-    if (category.parentId) {
-      acc[category.parentId] = acc[category.parentId] || [];
-      acc[category.parentId].push(category);
-    }
-    return acc;
-  }, {} as Record<number, Category[]>);
+  const groupedCategoriesLevel2Course = level2CategoriesCourse.reduce(
+    (acc, category) => {
+      if (category.parentId) {
+        acc[category.parentId] = acc[category.parentId] || [];
+        acc[category.parentId].push(category);
+      }
+      return acc;
+    },
+    {} as Record<number, Category[]>
+  );
 
-  const groupedCategoriesLevel3Course = level3CategoriesCourse.reduce((acc, category) => {
-    if (category.parentId) {
-      acc[category.parentId] = acc[category.parentId] || [];
-      acc[category.parentId].push(category);
-    }
-    return acc;
-  }, {} as Record<number, Category[]>);
-
-
+  const groupedCategoriesLevel3Course = level3CategoriesCourse.reduce(
+    (acc, category) => {
+      if (category.parentId) {
+        acc[category.parentId] = acc[category.parentId] || [];
+        acc[category.parentId].push(category);
+      }
+      return acc;
+    },
+    {} as Record<number, Category[]>
+  );
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -319,7 +344,6 @@ const Header: React.FC = () => {
 
   const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchTerm.trim() !== "") {
-
       navigate(`/tim-kiem?keyword=${searchTerm}`);
     }
   };
@@ -335,7 +359,7 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("authData");
-    setIsLoggedIn(false); 
+    setIsLoggedIn(false);
     window.location.href = "/dang-nhap";
   };
   const removeVietnameseTones = (str: any) => {
@@ -354,10 +378,10 @@ const Header: React.FC = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
+  const handleRouter = () => {};
+  // ... phần import và code phía trên giữ nguyên
 
-  const handleRouter = () => {
-
-  }
+  // Phần render menu trong hàm return
   return (
     <div className="header__container">
       <div className="header__main">
@@ -381,6 +405,7 @@ const Header: React.FC = () => {
                   Tài liệu <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
+                  {/* Hiển thị danh mục TÀI LIỆU cấp 1 */}
                   {level1Categories.map((level1) => (
                     <li key={level1.id} className="level1-item">
                       <a
@@ -392,16 +417,18 @@ const Header: React.FC = () => {
                           );
                           localStorage.setItem("danhmuctailieuVN", level1.name);
                           localStorage.setItem(
-                            "iddanhmuctailieu",
+                            "iddanhmuctailieucap1",
                             level1.id.toString()
                           );
+                          localStorage.removeItem("iddanhmuctailieucap2");
                         }}
                       >
                         {level1.name}
                       </a>
+                      {/* Hiển thị danh mục TÀI LIỆU cấp 2 */}
                       <ul className="sub-sub-menu">
                         {groupedCategoriesLevel2[level1.id]?.map((level2) => (
-                          <li key={level2.id}>
+                          <li key={level2.id} className="level2-item">
                             <a
                               href={`/tai-lieu/${removeVietnameseTones(
                                 level2.name
@@ -416,13 +443,57 @@ const Header: React.FC = () => {
                                   level2.name
                                 );
                                 localStorage.setItem(
-                                  "iddanhmuctailieu",
+                                  "iddanhmuctailieucap1",
+                                  level1.id.toString()
+                                );
+                                localStorage.setItem(
+                                  "iddanhmuctailieucap2",
                                   level2.id.toString()
                                 );
                               }}
                             >
                               {level2.name}
                             </a>
+                            {/* Hiển thị danh mục TÀI LIỆU cấp 3 nếu có */}
+                            {groupedCategoriesLevel3[level2.id]?.length > 0 && (
+                              <ul className="sub-sub-sub-menu">
+                                {groupedCategoriesLevel3[level2.id]?.map(
+                                  (level3) => (
+                                    <li key={level3.id} className="level3-item">
+                                      <a
+                                        href={`/tai-lieu/${removeVietnameseTones(
+                                          level3.name
+                                        )}`}
+                                        onClick={() => {
+                                          localStorage.setItem(
+                                            "danhmuctailieu",
+                                            removeVietnameseTones(level3.name)
+                                          );
+                                          localStorage.setItem(
+                                            "danhmuctailieuVN",
+                                            level3.name
+                                          );
+                                          localStorage.setItem(
+                                            "iddanhmuctailieucap1",
+                                            level1.id.toString()
+                                          );
+                                          localStorage.setItem(
+                                            "iddanhmuctailieucap2",
+                                            level2.id.toString()
+                                          );
+                                          localStorage.setItem(
+                                            "iddanhmuctailieucap3",
+                                            level3.id.toString()
+                                          );
+                                        }}
+                                      >
+                                        {level3.name}
+                                      </a>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -438,7 +509,6 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuckhoahoccap1");
                     localStorage.removeItem("iddanhmuckhoahoccap2");
                   }}
-
                 >
                   Khóa học <i className="fa-solid fa-angle-down"></i>
                 </a>
@@ -457,50 +527,93 @@ const Header: React.FC = () => {
                             "iddanhmuckhoahoccap1",
                             level1.id.toString()
                           );
-                          localStorage.removeItem(
-                            "iddanhmuckhoahoccap2"
-                          );
+                          localStorage.removeItem("iddanhmuckhoahoccap2");
                         }}
                       >
                         {level1.name}
                       </a>
                       <ul className="sub-sub-menu">
-                        {groupedCategoriesLevel2Course[level1.id]?.map((level2) => (
-                          <li key={level2.id}>
-                            <a
-                              href={`/khoa-hoc/${removeVietnameseTones(
-                                level2.name
-                              )}`}
-                              onClick={() => {
-                                localStorage.setItem(
-                                  "danhmuckhoahoc",
-                                  removeVietnameseTones(level2.name)
-                                );
-                                localStorage.setItem(
-                                  "danhmuckhoahocVN",
+                        {groupedCategoriesLevel2Course[level1.id]?.map(
+                          (level2) => (
+                            <li key={level2.id} className="level2-item">
+                              <a
+                                href={`/khoa-hoc/${removeVietnameseTones(
                                   level2.name
-                                );
-                                localStorage.setItem(
-                                  "iddanhmuckhoahoccap1",
-                                  level1.id.toString()
-                                );
-                                localStorage.setItem(
-                                  "iddanhmuckhoahoccap2",
-                                  level2.id.toString()
-                                );
-                              }}
-                            >
-                              {level2.name}
-                            </a>
-                          </li>
-                        ))}
+                                )}`}
+                                onClick={() => {
+                                  localStorage.setItem(
+                                    "danhmuckhoahoc",
+                                    removeVietnameseTones(level2.name)
+                                  );
+                                  localStorage.setItem(
+                                    "danhmuckhoahocVN",
+                                    level2.name
+                                  );
+                                  localStorage.setItem(
+                                    "iddanhmuckhoahoccap1",
+                                    level1.id.toString()
+                                  );
+                                  localStorage.setItem(
+                                    "iddanhmuckhoahoccap2",
+                                    level2.id.toString()
+                                  );
+                                }}
+                              >
+                                {level2.name}
+                              </a>
+                              {/* Thêm danh mục cấp 3 khóa học ở đây nếu có */}
+                              {groupedCategoriesLevel3Course[level2.id]
+                                ?.length > 0 && (
+                                <ul className="sub-sub-sub-menu">
+                                  {groupedCategoriesLevel3Course[
+                                    level2.id
+                                  ]?.map((level3) => (
+                                    <li key={level3.id} className="level3-item">
+                                      <a
+                                        href={`/khoa-hoc/${removeVietnameseTones(
+                                          level3.name
+                                        )}`}
+                                        onClick={() => {
+                                          localStorage.setItem(
+                                            "danhmuckhoahoc",
+                                            removeVietnameseTones(level3.name)
+                                          );
+                                          localStorage.setItem(
+                                            "danhmuckhoahocVN",
+                                            level3.name
+                                          );
+                                          localStorage.setItem(
+                                            "iddanhmuckhoahoccap1",
+                                            level1.id.toString()
+                                          );
+                                          localStorage.setItem(
+                                            "iddanhmuckhoahoccap2",
+                                            level2.id.toString()
+                                          );
+                                          localStorage.setItem(
+                                            "iddanhmuckhoahoccap3",
+                                            level3.id.toString()
+                                          );
+                                        }}
+                                      >
+                                        {level3.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </li>
                   ))}
                 </ul>
               </li>
               <li>
-                <a href="/de-thi" onClick={handleRouter}>Đề Thi</a>
+                <a href="/de-thi" onClick={handleRouter}>
+                  Đề Thi
+                </a>
               </li>
               <li>
                 <a href="/bai-viet">Bài viết</a>
@@ -559,8 +672,9 @@ const Header: React.FC = () => {
               {filteredDocuments.map((document) => (
                 <div className="search-result-item" key={document.documentId}>
                   <a
-                    href={`/tai-lieu/${removeVietnameseTones(document.name)}/${document.documentId
-                      }`}
+                    href={`/tai-lieu/${removeVietnameseTones(document.name)}/${
+                      document.documentId
+                    }`}
                     rel="noopener noreferrer"
                   >
                     <img
@@ -632,4 +746,5 @@ const Header: React.FC = () => {
     </div>
   );
 };
+
 export default Header;

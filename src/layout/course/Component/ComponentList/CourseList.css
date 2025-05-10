@@ -1,0 +1,139 @@
+/* CSS linh hoạt cho CourseList - tự điều chỉnh theo chiều dài tiêu đề */
+
+/* Đảm bảo các card có cùng chiều cao */
+.courses-two__item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Phần nội dung */
+.courses__content {
+  height: 100%;
+  position: relative;
+  padding: 20px !important;
+}
+
+/* Tiêu đề khóa học linh hoạt */
+.courses__content h3 {
+  min-height: 40px;
+  max-height: 70px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  margin-bottom: 15px;
+}
+
+/* Tiêu đề khóa học - link */
+.courses__content h3 a {
+  color: #333;
+  transition: color 0.3s;
+}
+
+.courses__content h3 a:hover {
+  color: #0056b3;
+}
+
+/* Meta info (số học viên, bài học) */
+.courses__content ul {
+  margin: 15px 0;
+}
+
+.courses__content ul li {
+  display: flex;
+  align-items: center;
+}
+
+/* Phần đánh giá và giá */
+.bor-top {
+  padding-top: 15px;
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Phần sao */
+.star {
+  min-width: 90px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.star i {
+  color: #f9ca24;
+  font-size: 14px;
+}
+
+.star i.disabled {
+  color: #ddd;
+}
+
+/* Phần giá */
+.price-container {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.price-cost {
+  font-size: 12px;
+  text-decoration: line-through;
+  color: #888;
+  white-space: nowrap;
+}
+
+.price-current {
+  font-weight: bold;
+  color: #e94560;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .courses__content h3 {
+    min-height: 40px;
+    max-height: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .star {
+    min-width: 80px;
+  }
+
+  .star i {
+    font-size: 12px;
+  }
+}
+
+/* Fix cho image */
+.courses-two__image {
+  position: relative;
+  overflow: hidden;
+}
+
+.courses-two__image img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.courses-two__image:hover img {
+  transform: scale(1.05);
+}
+
+.time {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}

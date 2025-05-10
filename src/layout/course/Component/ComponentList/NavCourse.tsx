@@ -6,20 +6,19 @@ import {
   ChevronRight,
   ChevronDown,
 } from "react-bootstrap-icons";
-import "./navDocument.css";
 
 type Category = {
   id: number;
   name: string;
   parentId: number | null;
-  type: string; // Thêm trường type vào định nghĩa Category
+  type: string; // Trường type để kiểm tra là COURSE
 };
 
-const NavDocument = () => {
+const NavCourse = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
-  // Thêm state để quản lý trạng thái đóng/mở của menu cấp cao nhất
+  // State để quản lý trạng thái đóng/mở của menu cấp cao nhất
   const [topLevelExpanded, setTopLevelExpanded] = useState<
     Record<number, boolean>
   >({});
@@ -42,18 +41,18 @@ const NavDocument = () => {
           `${process.env.REACT_APP_SERVER_HOST}/categories-all`
         );
 
-        // Lọc chỉ lấy những danh mục có type là "DOCUMENT"
-        const documentCategories = response.data.filter(
-          (category: Category) => category.type === "DOCUMENT"
+        // Lọc chỉ lấy những danh mục có type là "COURSE"
+        const courseCategories = response.data.filter(
+          (category: Category) => category.type === "COURSE"
         );
 
-        setCategories(documentCategories);
+        setCategories(courseCategories);
 
         // Tự động mở rộng danh mục hiện tại và danh mục cha của nó
         const currentCategoryId = localStorage.getItem("danhmuckhoahoc");
         if (currentCategoryId) {
           const id = parseInt(currentCategoryId, 10);
-          expandCategoryAndParents(id, documentCategories);
+          expandCategoryAndParents(id, courseCategories);
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -71,7 +70,7 @@ const NavDocument = () => {
     const expandedIds: number[] = [];
     let category = allCategories.find((cat) => cat.id === categoryId);
 
-    // Thêm categoryId hiện tại
+    // Thêm categoryId hiện tại nếu category tồn tại
     if (category) expandedIds.push(categoryId);
 
     // Thêm tất cả các danh mục cha
@@ -98,7 +97,7 @@ const NavDocument = () => {
     setSelectedCategory(id);
     localStorage.setItem("iddanhmuckhoahoc", id.toString());
     localStorage.setItem("danhmuckhoahoc", removeVietnameseTones(name));
-    window.location.href = `/tai-lieu/${removeVietnameseTones(name)}`;
+    window.location.href = `/khoa-hoc/${removeVietnameseTones(name)}`;
   };
 
   const toggleExpand = (id: number, e: React.MouseEvent, level: number) => {
@@ -249,7 +248,7 @@ const NavDocument = () => {
     <div className="col-xl-3 col-lg-4 col-md-12">
       <div className="document-card">
         <div className="document-header">
-          <h3 className="document-title">Danh mục tài liệu</h3>
+          <h3 className="document-title">Danh mục khóa học</h3>
         </div>
         <div className="document-body">{renderCategories(null)}</div>
       </div>
@@ -257,4 +256,4 @@ const NavDocument = () => {
   );
 };
 
-export default NavDocument;
+export default NavCourse;

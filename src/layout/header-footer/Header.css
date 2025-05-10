@@ -39,7 +39,7 @@
 }
 
 .dropdown-menu li a:hover,
-.dropdown-menu li button:hover {
+.dropdown-menu li:hover {
   background-color: #f1f1f1;
 }
 
@@ -119,6 +119,153 @@ a.gio-hang-icon {
 
 .offcanvas-overlay.active {
   display: block;
+}
+
+/* CSS cho menu đa cấp */
+/* Mặc định ẩn tất cả các menu con */
+.header__main nav ul li a,
+.header__main nav > ul > li > a,
+.header__main nav > ul > li > ul.sub-menu > li > a,
+.header__main nav > ul > li > ul.sub-menu > li > ul.sub-sub-menu > li > a,
+.header__main
+  nav
+  > ul
+  > li
+  > ul.sub-menu
+  > li
+  > ul.sub-sub-menu
+  > li
+  > ul.sub-sub-sub-menu
+  > li
+  > a {
+  background-color: transparent !important;
+}
+.header__main
+  nav
+  > ul
+  > li
+  > ul.sub-menu
+  > li
+  > ul.sub-sub-menu
+  > li
+  > ul.sub-sub-sub-menu {
+  border-radius: 10px;
+}
+.header__main
+  nav
+  > ul
+  > li
+  > ul.sub-menu
+  > li
+  > ul.sub-sub-menu
+  > li
+  > ul.sub-sub-sub-menu
+  > li
+  > a {
+  color: #333 !important;
+}
+.header__main
+  nav
+  > ul
+  > li
+  > ul.sub-menu
+  > li
+  > ul.sub-sub-menu
+  > li
+  > ul.sub-sub-sub-menu
+  > li:hover
+  > a {
+  color: var(--primary-color) !important;
+  padding-left: 25px !important;
+}
+/* Phần 2: Chỉ hiển thị màu xanh KHI hover vào các menu */
+.header__main nav ul li:hover > a {
+  background-color: none !important;
+}
+.header__main nav ul li .sub-menu,
+.header__main nav ul li .sub-sub-menu,
+.header__main nav ul li .sub-sub-sub-menu {
+  display: none;
+  position: absolute;
+  background: white;
+  min-width: 200px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  padding: 0;
+}
+
+/* Hiển thị menu cấp 1 khi hover vào mục menu chính */
+.header__main nav > ul > li:hover > .sub-menu {
+  display: block;
+  top: 100%;
+  left: 0;
+}
+
+/* Đảm bảo các mục menu có vị trí tương đối để có thể định vị menu con */
+.header__main nav ul li {
+  position: relative;
+}
+
+/* Hiển thị menu cấp 2 CHỈ KHI hover vào mục cấp 1 */
+.header__main nav > ul > li > .sub-menu > li:hover > .sub-sub-menu {
+  display: block;
+  top: 0;
+  left: 100%;
+}
+
+/* Hiển thị menu cấp 3 CHỈ KHI hover vào mục cấp 2 */
+.header__main
+  nav
+  > ul
+  > li
+  > .sub-menu
+  > li
+  > .sub-sub-menu
+  > li:hover
+  > .sub-sub-sub-menu {
+  display: block;
+  top: 0;
+  left: 100%;
+}
+
+/* Style cho các mục menu */
+.header__main nav ul li a {
+  display: block;
+  padding: 10px 15px;
+  color: #333;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.header__main nav ul li:hover > a {
+  background-color: #f8f8f8;
+  color: #007bff; /* Màu chữ khi hover */
+}
+
+/* Thêm mũi tên cho những mục có menu con */
+.header__main nav > ul > li > a > .fa-angle-down {
+  margin-left: 5px;
+}
+
+.header__main nav .sub-menu li.level1-item > a::after,
+.header__main nav .sub-sub-menu li.level2-item > a::after {
+  content: "▶";
+  position: absolute;
+  right: 10px;
+  font-size: 10px;
+}
+
+/* Border cho các mục menu để dễ nhìn */
+.header__main nav .sub-menu li,
+.header__main nav .sub-sub-menu li,
+.header__main nav .sub-sub-sub-menu li {
+  border-bottom: 1px solid #eee !important;
+}
+
+.header__main nav .sub-menu li:last-child,
+.header__main nav .sub-sub-menu li:last-child,
+.header__main nav .sub-sub-sub-menu li:last-child {
+  border-bottom: none;
 }
 
 /* Khi ở chế độ mobile */

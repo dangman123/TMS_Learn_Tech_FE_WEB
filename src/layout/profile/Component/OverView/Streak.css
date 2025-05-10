@@ -36,7 +36,7 @@
 .motivation-box {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
-  padding: 10px;
+  padding: 15px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -44,17 +44,23 @@
 }
 
 .motivation-icon {
-  width: 24px;
-  height: 24px;
-  background-color: #ff8c00;
+  width: 40px;
+  height: 40px;
+  background-color: #f5a623; /* Màu cam cho icon cúp */
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
 }
 
 .motivation-box p {
   margin: 0;
   font-size: 14px;
-  color: #333;
+  color: #666;
+  line-height: 1.4;
 }
 
 .motivation-link {
@@ -62,18 +68,140 @@
   cursor: pointer;
 }
 
-.calendar-title {
-  font-size: 30px;
-  font-size: bold;
+/* Nút hành động */
+.streak-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
 
-  margin-bottom: 5px;
+.btn-complete,
+.btn-skip {
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-complete {
+  background-color: #f5a623;
+  color: white;
+  flex: 1;
+  max-width: 150px;
+}
+
+.btn-skip {
+  background-color: #e6e6e6;
+  color: #777;
+  flex: 1;
+  max-width: 150px;
+}
+
+.btn-complete:hover {
+  background-color: #e69100;
+}
+
+.btn-skip:hover {
+  background-color: #d5d5d5;
+}
+
+.btn-complete.active {
+  background-color: #e69100;
+  box-shadow: 0 0 8px rgba(230, 145, 0, 0.5);
+}
+
+.btn-skip.active {
+  background-color: #b0b0b0;
+  color: white;
+}
+
+.btn-complete:disabled,
+.btn-skip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Phần thống kê */
+.streak-stats {
+  margin: 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+.streak-stats h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: white;
+}
+
+.trophy-bg {
+  background-color: #f5a623;
+}
+
+.calendar-bg {
+  background-color: #4285f4;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Lịch */
+.calendar-section {
+  margin-top: 20px;
+}
+
+.calendar-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .calendar-header h3 {
@@ -112,8 +240,10 @@
   color: #666;
   font-size: 14px;
 }
+
 /* Căn chỉnh và làm đẹp các ô ngày */
 .day {
+  position: relative;
   padding: 8px; /* Tăng kích thước padding */
   border-radius: 50%; /* Bo tròn ô ngày */
   font-size: 14px; /* Tăng kích thước font chữ */
@@ -136,16 +266,22 @@
 }
 
 .day.today {
-  background-color: #1e90ff; /* Màu xanh cho ngày hôm nay */
+  background-color: #f5a623; /* Màu cam cho ngày hôm nay */
   color: #fff;
   font-weight: bold;
-  border: 2px solid #1c7ed6; /* Thêm viền xanh đậm */
+  border: 2px solid #e69100; /* Viền cam đậm */
 }
 
-.day.marked {
-  background-color: #ffe4b5; /* Màu cam nhạt cho ngày đã đánh dấu */
+.day.completed {
+  background-color: #f8f8f8; /* Nền trắng cho ngày đã hoàn thành */
   color: #333;
-  border: 2px solid #ffcc80; /* Thêm viền cam nhạt */
+  border: 1px solid #e0e0e0;
+}
+
+.day.skipped {
+  background-color: #f8f8f8; /* Nền trắng cho ngày đã bỏ qua */
+  color: #333;
+  border: 1px solid #e0e0e0;
 }
 
 .day.future {
@@ -155,14 +291,121 @@
   border: 1px solid #e0e0e0; /* Viền nhạt */
 }
 
+.day-status {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.day-status.completed {
+  background-color: #f5a623;
+  color: white;
+}
+
+.day-status.skipped {
+  background-color: #aaa;
+  color: white;
+}
+
+.fire-icon {
+  font-size: 10px;
+}
+
+.skip-icon {
+  font-size: 8px;
+}
+
 .empty-day {
   width: 40px; /* Đặt chiều rộng cố định cho ô trống */
   height: 40px; /* Đặt chiều cao cố định cho ô trống */
   visibility: hidden; /* Ẩn các ô trống */
 }
+
 .ask-streak {
   font-size: 16px;
   color: #666;
   margin-top: 20px;
   text-align: center;
+}
+
+/* Phần mẹo học liên tục */
+.streak-tips {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.streak-tips h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.tip-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.time-icon {
+  background-color: #f5a623; /* Màu cam cho icon đồng hồ */
+}
+
+.notificationn-icon {
+  background-color: #ff7043; /* Màu cam đỏ cho icon thông báo */
+}
+
+.goal-icon {
+  background-color: #66bb6a; /* Màu xanh lá cho icon biểu đồ */
+}
+
+.tip-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container-steack {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+
+  .day {
+    width: 35px;
+    height: 35px;
+    font-size: 12px;
+  }
+
+  .stats-container {
+    flex-direction: column;
+    gap: 15px;
+  }
 }
