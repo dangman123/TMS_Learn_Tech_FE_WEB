@@ -5,17 +5,12 @@ import { useNavigate } from "react-router-dom";
 import "./NotificationDropdown.css";
 
 interface Notification {
-  notification: {
     id: number;
     title: string;
     message: string;
     topic: string;
     createdAt: string;
-    updatedAt: string;
-    deletedDate: string | null;
-    deleted: boolean;
-  };
-  readStatus: boolean;
+    status: boolean;
 }
 
 interface NotificationDropdownProps {
@@ -24,8 +19,8 @@ interface NotificationDropdownProps {
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
-  notifications,
-  unreadCount,
+  notifications = [],
+  unreadCount = 0,
 }) => {
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const navigate = useNavigate();
@@ -35,13 +30,15 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   };
 
   const handleDetailClick = (notification: Notification) => {
-    window.location.href = `/notification-details/${notification.notification.id}`;
+    window.location.href = `/notification-details/${notification.id}`;
   };
 
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+  
   const filteredNotifications =
     filter === "all"
-      ? notifications
-      : notifications.filter((notification) => !notification.readStatus);
+      ? safeNotifications
+      : safeNotifications.filter((notification) => !notification.status);
 
   return (
     <div className="notification-dropdown">
@@ -79,7 +76,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             </div>
           </div>
 
-          {filteredNotifications.length === 0 ? (
+          {!filteredNotifications || filteredNotifications.length === 0 ? (
             <div className="empty-notification">
               <div className="empty-icon">
                 <FaBell size={24} color="#ccc" />
@@ -88,23 +85,23 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             </div>
           ) : (
             <div className="notification-list-a">
-              {filteredNotifications.slice(0, 3).map((notification) => (
+              {Array.isArray(filteredNotifications) && filteredNotifications.slice(0, 3).map((notification) => (
                 <div
-                  key={notification.notification.id}
+                  key={notification.id}
                   onClick={() => handleDetailClick(notification)}
                   className={`notification-item ${
-                    !notification.readStatus ? "unread" : ""
+                    !notification.status ? "unread" : ""
                   }`}
                 >
                   <div className="notification-title">
-                    {notification.notification.title}
+                    {notification.title}
                   </div>
                   <div className="notification-message">
-                    {notification.notification.message}
+                    {notification.message}
                   </div>
                   <div className="notification-time">
                     {new Date(
-                      notification.notification.createdAt
+                      notification.createdAt
                     ).toLocaleString()}
                   </div>
                 </div>

@@ -27,17 +27,12 @@ interface CategoryCourse {
   update_at: Date;
 }
 interface Notification {
-  notification: {
-    id: number;
-    title: string;
-    message: string;
-    topic: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedDate: string | null;
-    deleted: boolean;
-  };
-  readStatus: boolean;
+  id: number;
+  title: string;
+  message: string;
+  topic: string;
+  createdAt: string;
+  status: boolean;
 }
 
 const Header: React.FC = () => {
@@ -265,12 +260,25 @@ const Header: React.FC = () => {
           throw new Error("Failed to fetch notifications");
         }
 
-        const data: Notification[] = await response.json();
-        setNotifications(data); // Cập nhật danh sách thông báo
-        // stopLoading();
-        setUnreadCount(
-          data.filter((notification) => !notification.readStatus).length // Cập nhật số lượng chưa đọc
-        );
+        const data = await response.json();
+        // Check if the data is in a paginated format
+        if (data && typeof data === 'object' && data.content && Array.isArray(data.content)) {
+          setNotifications(data.content); 
+          // stopLoading();
+          // Ensure we're filtering an array
+          const unreadCount = Array.isArray(data.content) 
+            ? data.content.filter((notification: Notification) => !notification.status).length 
+            : 0;
+          setUnreadCount(unreadCount);
+        } else {
+          // Backward compatibility for case when API returns notifications directly as an array
+          console.log("Notifications not in expected format, trying fallback handling");
+          const safeNotifications = Array.isArray(data) ? data : [];
+          setNotifications(safeNotifications);
+          setUnreadCount(
+            safeNotifications.filter((notification: Notification) => !notification.status).length
+          );
+        }
       } catch (error) {
         // stopLoading();
         console.error("Error fetching notifications:", error);
@@ -378,7 +386,7 @@ const Header: React.FC = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
-  const handleRouter = () => {};
+  const handleRouter = () => { };
   // ... phần import và code phía trên giữ nguyên
 
   // Phần render menu trong hàm return
@@ -564,44 +572,44 @@ const Header: React.FC = () => {
                               {/* Thêm danh mục cấp 3 khóa học ở đây nếu có */}
                               {groupedCategoriesLevel3Course[level2.id]
                                 ?.length > 0 && (
-                                <ul className="sub-sub-sub-menu">
-                                  {groupedCategoriesLevel3Course[
-                                    level2.id
-                                  ]?.map((level3) => (
-                                    <li key={level3.id} className="level3-item">
-                                      <a
-                                        href={`/khoa-hoc/${removeVietnameseTones(
-                                          level3.name
-                                        )}`}
-                                        onClick={() => {
-                                          localStorage.setItem(
-                                            "danhmuckhoahoc",
-                                            removeVietnameseTones(level3.name)
-                                          );
-                                          localStorage.setItem(
-                                            "danhmuckhoahocVN",
+                                  <ul className="sub-sub-sub-menu">
+                                    {groupedCategoriesLevel3Course[
+                                      level2.id
+                                    ]?.map((level3) => (
+                                      <li key={level3.id} className="level3-item">
+                                        <a
+                                          href={`/khoa-hoc/${removeVietnameseTones(
                                             level3.name
-                                          );
-                                          localStorage.setItem(
-                                            "iddanhmuckhoahoccap1",
-                                            level1.id.toString()
-                                          );
-                                          localStorage.setItem(
-                                            "iddanhmuckhoahoccap2",
-                                            level2.id.toString()
-                                          );
-                                          localStorage.setItem(
-                                            "iddanhmuckhoahoccap3",
-                                            level3.id.toString()
-                                          );
-                                        }}
-                                      >
-                                        {level3.name}
-                                      </a>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
+                                          )}`}
+                                          onClick={() => {
+                                            localStorage.setItem(
+                                              "danhmuckhoahoc",
+                                              removeVietnameseTones(level3.name)
+                                            );
+                                            localStorage.setItem(
+                                              "danhmuckhoahocVN",
+                                              level3.name
+                                            );
+                                            localStorage.setItem(
+                                              "iddanhmuckhoahoccap1",
+                                              level1.id.toString()
+                                            );
+                                            localStorage.setItem(
+                                              "iddanhmuckhoahoccap2",
+                                              level2.id.toString()
+                                            );
+                                            localStorage.setItem(
+                                              "iddanhmuckhoahoccap3",
+                                              level3.id.toString()
+                                            );
+                                          }}
+                                        >
+                                          {level3.name}
+                                        </a>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
                             </li>
                           )
                         )}
@@ -672,9 +680,8 @@ const Header: React.FC = () => {
               {filteredDocuments.map((document) => (
                 <div className="search-result-item" key={document.documentId}>
                   <a
-                    href={`/tai-lieu/${removeVietnameseTones(document.name)}/${
-                      document.documentId
-                    }`}
+                    href={`/tai-lieu/${removeVietnameseTones(document.name)}/${document.documentId
+                      }`}
                     rel="noopener noreferrer"
                   >
                     <img
@@ -705,7 +712,7 @@ const Header: React.FC = () => {
                 </a>
               </li>
               <NotificationDropdown
-                notifications={notifications}
+                notifications={Array.isArray(notifications) ? notifications : []}
                 unreadCount={unreadCount}
               />
               <div className="user-dropdown">

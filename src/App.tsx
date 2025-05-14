@@ -129,17 +129,7 @@ function App() {
     }
   };
 
-  // useEffect(() => {
-  //   window.onerror = function (message, source, lineno, colno, error) {
-  //     if (String(message).includes("400")) {
-  //       return true; // Chặn lỗi 400 xuất hiện trên console
-  //     }
-  //   };
-  // }, []);
 
-  // if (loading) {
-  //   return <div className="loader"></div>;
-  // }
   return (
     <WebSocketProvider>
       <LoadingProvider>
