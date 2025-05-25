@@ -59,10 +59,6 @@ const CourseNav: React.FC<CourseNavProps> = ({
   const [bannerList, setBannerList] = useState<Banner[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(event.target.value);
-  };
-
   useEffect(() => {
     fetchBannerList();
   }, []);
@@ -96,8 +92,8 @@ const CourseNav: React.FC<CourseNavProps> = ({
       removeVietnameseTones(category.name)
     );
     localStorage.setItem("danhmuckhoahocVN", category.name);
-    localStorage.setItem("iddanhmuckhoahoccap1", category.id.toString());
-    localStorage.removeItem("iddanhmuckhoahoccap2");
+    localStorage.setItem("iddanhmuckhoahoc", category.id.toString());
+    localStorage.removeItem("iddanhmuckhoahoc");
     window.location.href = "/khoa-hoc/" + removeVietnameseTones(category.name);
   };
 
@@ -115,21 +111,6 @@ const CourseNav: React.FC<CourseNavProps> = ({
 
   return (
     <div className="course-nav-container">
-      {/* Search Bar */}
-      <div className="search-container">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Tìm kiếm khóa học..."
-            onChange={handleInputChange}
-            className="search-input"
-          />
-          <button className="search-button">
-            <i className="fas fa-search"></i>
-          </button>
-        </div>
-      </div>
-
       <div className="course-content-container">
         {/* Banner và Voucher */}
         <div className="row course-main-content">

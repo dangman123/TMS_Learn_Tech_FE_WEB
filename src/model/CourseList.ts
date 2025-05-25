@@ -2,11 +2,11 @@ export interface CourseList {
     id: number;
     title: string;
     imageUrl?: string;
-    duration: string;
+    duration: string | number;
     price: number;
-    cost:number;
+    cost: number;
     averageRating: number;
-    totalLessons:number
+    totalLessons: number;
     numberOfStudents: number;
     reviewCount?: number;
     author: string;
@@ -16,6 +16,13 @@ export interface CourseList {
     description: string;
     language: string;
     status: boolean;
-    type:string;
+    type: string;
     id_danhmuc?: number; 
+    
+    // Additional properties from API
+    percentDiscount?: number;
+    rating?: number;
+    itemCountReview?: number;
+    studentCount?: number;
+    level?: string;
 }

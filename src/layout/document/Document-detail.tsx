@@ -18,27 +18,30 @@ function Document_Detail() {
           const response = await axios.get(
             `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/${id}`
           );
-          const data = response.data;
-          if (Array.isArray(data) && data.length > 0) {
+          
+          // Lấy dữ liệu từ response.data.data
+          if (response.data && response.data.data) {
             const documentData = {
-              id: data[0][0],
-              createdAt: data[0][1],
-              description: data[0][2],
-              thumbnailUrl: data[0][3],
-              title: data[0][4],
-              updatedAt: data[0][5],
-              url: data[0][6],
-              views: data[0][7],
-              id_category: data[0][8],
+              id: response.data.data.id,
+              createdAt: response.data.data.createdAt,
+              description: response.data.data.description,
+              thumbnailUrl: response.data.data.fileUrl, // Sử dụng fileUrl từ API
+              title: response.data.data.title,
+              updatedAt: response.data.data.updatedAt,
+              url: response.data.data.fileUrl, // Sử dụng fileUrl từ API
+              views: response.data.data.view, // Sử dụng view từ API
+              id_category: response.data.data.categoryId, // Sử dụng categoryId từ API
             };
             setTimeout(() => {
               setDocument(documentData);
-              setLoading(false); // Stop loading after 2 seconds
-            }, 2000);
+              setLoading(false);
+            }, 1000);
+          } else {
+            console.error("Dữ liệu tài liệu không đúng định dạng:", response.data);
+            setLoading(false);
           }
         } catch (error) {
           console.error("Error fetching document details:", error);
-        } finally {
           setLoading(false);
         }
       }
@@ -58,7 +61,10 @@ function Document_Detail() {
           {document && (
             <>
               <ContentDocumentDetail document={document} />
-              <NavDocumentDetail idCategory={document.id_category} />
+              <NavDocumentDetail 
+                idCategory={document.id_category} 
+                currentDocumentId={document.id}
+              />
             </>
           )}
         </div>

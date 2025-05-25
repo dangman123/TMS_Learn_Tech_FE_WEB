@@ -254,7 +254,7 @@ export const GET_USER_DOCUMENT_BY_CATEGORY_ID = (
   page: number,
   size: number
 ) =>
-  `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/category?id=${id}&page=${page}&size=${size}`;
+  `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/public?categoryId=${id}&page=${page}&size=${size}`;
 
 // COURSE
 export const GET_USER_COURSE = (page: number, size: number) =>
@@ -267,14 +267,15 @@ export const GET_USER_COURSE_BY_CATEGORY_ID = (
   `${process.env.REACT_APP_SERVER_HOST}/api/courses/category/${id}?page=${page}&size=${size}`;
 export const GET_COURSES_BY_CATEGORIES = (
   categoryId: number,
-  categoryIds: Number,
-  page: number,
-  size: number
+
 ) =>
-  `${process.env.REACT_APP_SERVER_HOST}/api/courses/categories?categoryId=${categoryId}&categoryIds=${categoryIds}&page=${page}&size=${size}`;
+  `${process.env.REACT_APP_SERVER_HOST}/api/courses/public/filter?type=category&categoryIds=${categoryId}`;
 export const ADMIN_STATUS_COURSE = `${process.env.REACT_APP_SERVER_HOST}/api/courses/status`;
 export const ADMIN_UNSTATUS_COURSE = `${process.env.REACT_APP_SERVER_HOST}/api/courses/unstatus`;
-
+//EXAM
+export const GET_USER_CATEGORY_EXAM = `${process.env.REACT_APP_SERVER_HOST}/api/courses/get-all-result-list-course`;
+export const GET_USER_EXAM = (page: number, size: number) =>
+  `${process.env.REACT_APP_SERVER_HOST}/api/tests/exam/public?page=${page}&size=${size}`;
 //COURSE - DETAIL
 export const GET_USER_COURSE_DETAIL_BY_COURSE_ID = (id: number) =>
   `${process.env.REACT_APP_SERVER_HOST}/api/courses/${id}`;
@@ -294,7 +295,7 @@ export const GET_USER_SEARCH_DOCUMENT = (
   `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/search?title=${title}&page=${page}&size=${size}`;
 
 //BLOG
-export const GET_USER_BLOGS = `${process.env.REACT_APP_SERVER_HOST}/api/blogs`;
+export const GET_USER_BLOGS = `${process.env.REACT_APP_SERVER_HOST}/api/blogs/public`;
 
 //BLOG - DETAIL
 export const GET_USER_BLOG_DETAIL = (id: number) =>

@@ -97,7 +97,7 @@ const NavCourse = () => {
     setSelectedCategory(id);
     localStorage.setItem("iddanhmuckhoahoc", id.toString());
     localStorage.setItem("danhmuckhoahoc", removeVietnameseTones(name));
-    window.location.href = `/khoa-hoc/${removeVietnameseTones(name)}`;
+    window.location.href = `/khoa-hoc/danh-muc/${removeVietnameseTones(name)}`;
   };
 
   const toggleExpand = (id: number, e: React.MouseEvent, level: number) => {

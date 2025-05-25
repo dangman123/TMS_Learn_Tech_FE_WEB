@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 // import "./style.css";
-import CourseNav from "./Component/ComponentList/CourseNav";
+import CourseNav from "./Component/ComponentList/CourseNavBanner";
 import CourseList from "./Component/ComponentList/CourseList";
+import CourseListRow from "./Component/ComponentList/CourseListRow";
+import Combo from "./Component/Combo/Combo";
 import {
   GET_COURSES_BY_CATEGORIES,
   GET_USER_CATEGORY_LEVEL_1,
@@ -28,8 +30,7 @@ export interface Category {
 }
 
 function Courses() {
-  const courseCategoryId = localStorage.getItem("iddanhmuckhoahoccap1");
-  const courseCategoryId2 = localStorage.getItem("iddanhmuckhoahoccap2");
+  const courseCategoryId = localStorage.getItem("iddanhmuckhoahoc");
   const [courses, setCourses] = useState<CourseListUser[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -57,12 +58,7 @@ function Courses() {
 
         if (courseCategoryId) {
           // Nếu có courseCategoryId trong URL, gọi API lấy khóa học theo danh mục
-          url = GET_COURSES_BY_CATEGORIES(
-            Number(courseCategoryId),
-            Number(courseCategoryId2),
-            currentPage,
-            coursesPerPage
-          );
+          url = GET_COURSES_BY_CATEGORIES(Number(courseCategoryId));
         } else {
           // Nếu không có danh mục được chọn, gọi API không có phân loại
           url = GET_USER_COURSE(currentPage, coursesPerPage);
@@ -72,17 +68,37 @@ function Courses() {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        const data: ApiResponse = await response.json();
-        setCourses(data.content);
-        setTotalPages(data.totalPages);
-        // setLoading(false);
+        
+        const responseData = await response.json();
+        console.log("API Response:", responseData); // Log để debug
+        
+        // Trích xuất dữ liệu theo đúng cấu trúc API
+        let coursesData: CourseListUser[] = [];
+        let totalPagesCount = 0;
+        
+        if (courseCategoryId) {
+          // Cấu trúc API cho GET_COURSES_BY_CATEGORIES
+          if (responseData.status === 200 && responseData.data) {
+            coursesData = responseData.data.content || [];
+            totalPagesCount = responseData.data.totalPages || 0;
+          }
+        } else {
+          // Cấu trúc API cho GET_USER_COURSE
+          coursesData = responseData.content || [];
+          totalPagesCount = responseData.totalPages || 0;
+        }
+        
+        setCourses(coursesData);
+        setTotalPages(totalPagesCount);
+        setLoading(false);
       } catch (error) {
         console.error("Failed to fetch courses:", error);
-        // setLoading(false);
+        setCourses([]);
+        setLoading(false);
       }
     };
     fetchCourses();
-  }, [courseCategoryId, courseCategoryId2, selectedCategories, currentPage]); // Chạy lại khi courseCategoryId, selectedCategories hoặc currentPage thay đổi
+  }, [courseCategoryId, selectedCategories, currentPage]); // Chạy lại khi courseCategoryId, selectedCategories hoặc currentPage thay đổi
 
   useEffect(() => {
     const fetchCourseCategories = async () => {
@@ -121,9 +137,11 @@ function Courses() {
     fetchCourseCategories();
   }, []);
 
-  const filteredCourses = courses.filter((course) =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCourses = courses && courses.length > 0
+    ? courses.filter((course) =>
+        course.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
@@ -137,10 +155,12 @@ function Courses() {
 
   return (
     <section
-      className="courses-area  pb-120"
+      className="courses-area pb-120"
       style={{ backgroundColor: "rgb(243 244 246)" }}
     >
       <div className="container" style={{ marginTop: "0px", padding: "0px" }}>
+    
+        
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12">
             <div className="row">
@@ -155,7 +175,29 @@ function Courses() {
               </div>
             </div>
           </div>
+          
+          {/* Course Combo Section */}
+          <div className="col-lg-12 col-md-12 col-sm-12">
+            <div className="row">
+              <div className="col-md-12">
+                <Combo />
+              </div>
+            </div>
+          </div>
 
+    {/* Featured Courses Section */}
+    <div className="row mb-5">
+          <div className="col-12">
+            <CourseListRow title="Khóa Học Nổi Bật" type="popular" />
+          </div>
+        </div>
+        
+        {/* Discounted Courses Section */}
+        <div className="row mb-5">
+          <div className="col-12">
+            <CourseListRow title="Khóa Học Giảm Giá" type="discount" />
+          </div>
+        </div>
           <div className="col-lg-12 col-md-12 col-sm-12">
             <CourseList courses={filteredCourses} />
             <div className="pegi justify-content-center mt-60">

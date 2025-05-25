@@ -6,7 +6,7 @@ export interface CoureseDetail {
   createdAt: string;
   description: string;
   duration: number;
-  image_url: string;
+  imageUrl: string;
   language: string;
   price: number;
   status: boolean;
