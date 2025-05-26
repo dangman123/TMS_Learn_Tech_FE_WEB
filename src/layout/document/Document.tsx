@@ -31,28 +31,71 @@ function Document() {
 
         const response = await axios.get(url);
 
-        const convertedDocuments = response.data.content.map((doc: any[]) => ({
-          documentId: doc[0],
-          documentTitle: doc[1],
-          image_url: doc[2],
-          download_url: doc[3],
-          view: doc[4],
-          created_at: doc[5],
-          download_count: doc[6],
-          id_category: doc[7],
-        }));
+        let convertedDocuments: DocumentModel[] = [];
+        
+        if (id) {
+          // Xử lý dữ liệu từ API GET_USER_DOCUMENT_BY_CATEGORY_ID
+          // Sửa lại để truy cập đúng cấu trúc dữ liệu: response.data.data.content
+          const apiData = response.data.data ? response.data.data.content : response.data.content;
+
+          if (!apiData || apiData.length === 0) {
+            console.log("Không có dữ liệu từ API hoặc dữ liệu trống");
+            setDocuments([]);
+            setTotalPages(0);
+            setLoading(false);
+            return;
+          }
+
+          console.log("Dữ liệu API:", apiData);
+
+          convertedDocuments = apiData.map((doc: any) => ({
+            documentId: doc.id,
+            documentTitle: doc.title,
+            image_url: doc.fileUrl, // Sử dụng fileUrl làm ảnh mặc định
+            fileUrl: doc.fileUrl,
+            view: doc.view,
+            created_at: doc.createdAt,
+            download_count: doc.downloads || 0,
+            id_category: doc.categoryId,
+            categoryName: doc.categoryName,
+            format: doc.format,
+            size: doc.size,
+            status: doc.status,
+            description: doc.description
+          }));
+
+          // Cập nhật totalPages từ cấu trúc đúng của response
+          setTotalPages(response.data.data ? response.data.data.totalPages : response.data.totalPages);
+        } else {
+          // Xử lý dữ liệu từ API GET_USER_DOCUMENT_PAGE (giữ nguyên format cũ)
+          const apiData = response.data.content;
+          convertedDocuments = apiData.map((doc: any[]) => ({
+            documentId: doc[0],
+            documentTitle: doc[1],
+            image_url: doc[2],
+            download_url: doc[3],
+            view: doc[4],
+            created_at: doc[5],
+            download_count: doc[6],
+            id_category: doc[7],
+          }));
+          
+          setTotalPages(response.data.totalPages);
+        }
 
         const sortedDocuments = convertedDocuments.sort(
           (a: DocumentModel, b: DocumentModel) => {
             switch (sortCriterion) {
               case "featured":
-                return b.download_count - a.download_count;
+                // Sử dụng downloads nếu có, nếu không thì dùng download_count
+                return (b.downloads || b.download_count) - (a.downloads || a.download_count);
               case "most-viewed":
                 return b.view - a.view;
               case "newest":
+                // Sử dụng createdAt nếu có, nếu không thì dùng created_at
                 return (
-                  new Date(b.created_at).getTime() -
-                  new Date(a.created_at).getTime()
+                  new Date(b.createdAt || b.created_at).getTime() -
+                  new Date(a.createdAt || a.created_at).getTime()
                 );
               default:
                 return 0;
@@ -61,9 +104,8 @@ function Document() {
         );
 
         setDocuments(sortedDocuments);
-        setTotalPages(response.data.totalPages);
       } catch (error) {
-        console.error("Error fetching documents:", error);
+        console.error("Lỗi khi tải tài liệu:", error);
         setDocuments([]);
         setTotalPages(0);
       } finally {
@@ -89,7 +131,7 @@ function Document() {
 
   return (
     <main>
-      <section className="sptb document">
+      <section className="sptb-document">
         <div className="container">
           <div className="row">
             <NavDocument />

@@ -5,17 +5,13 @@ import useRefreshToken from "../util/fucntion/useRefreshToken";
 import "./NotificationList.css";
 
 interface Notification {
-  notification: {
-    id: number;
-    title: string;
-    message: string;
-    topic: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedDate: string | null;
-    deleted: boolean;
-  };
-  readStatus: boolean;
+
+  id: number;
+  title: string;
+  message: string;
+  topic: string;
+  createdAt: string;
+  status: boolean;
 }
 
 const NotificationList: React.FC = () => {
@@ -74,13 +70,31 @@ const NotificationList: React.FC = () => {
           throw new Error("Failed to fetch notifications");
         }
 
-        const data: Notification[] = await response.json();
-        setNotifications(data);
-        setUnreadCount(
-          data.filter((notification) => !notification.readStatus).length
-        );
+        const data = await response.json();
+        console.log("Notifications data received:", data);
+        
+        // Handle paginated response format
+        if (data && typeof data === 'object' && data.content && Array.isArray(data.content)) {
+          setNotifications(data.content);
+          setUnreadCount(
+            data.content.filter((notification: Notification) => !notification.status).length
+          );
+        } else if (Array.isArray(data)) {
+          // Direct array response
+          setNotifications(data);
+          setUnreadCount(
+            data.filter((notification: Notification) => !notification.status).length
+          );
+        } else {
+          // Unexpected format, set empty array
+          console.error("Unexpected notification data format:", data);
+          setNotifications([]);
+          setUnreadCount(0);
+        }
       } catch (error) {
         console.error("Error fetching notifications:", error);
+        setNotifications([]);
+        setUnreadCount(0);
       } finally {
         setLoading(false);
       }
@@ -115,22 +129,29 @@ const NotificationList: React.FC = () => {
     setVisibleCount(5); // Reset số lượng hiển thị khi chuyển tab
   };
 
-  const getUnreadCount = (topic: string) =>
-    notifications.filter(
+  const getUnreadCount = (topic: string) => {
+    // Ensure notifications is an array
+    if (!Array.isArray(notifications)) {
+      console.error("notifications is not an array:", notifications);
+      return 0;
+    }
+    
+    return notifications.filter(
       (notification) =>
-        notification.notification.topic === topic && !notification.readStatus
+        notification.topic === topic && !notification.status
     ).length;
+  };
 
   const handleShowMore = () => setVisibleCount((prev) => prev + 5);
 
   const handleNotificationClick = (notification: Notification) => {
     setSelectedNotification(notification);
-    if (!notification.readStatus) {
-      markAsRead(getUserData().id, notification.notification.id);
+    if (!notification.status) {
+      markAsRead(getUserData().id, notification.id);
       setNotifications((prev) =>
         prev.map((notif) =>
-          notif.notification.id === notification.notification.id
-            ? { ...notif, readStatus: true }
+          notif.id === notification.id
+            ? { ...notif, status: true }
             : notif
         )
       );
@@ -295,15 +316,15 @@ const NotificationList: React.FC = () => {
 
       // Cập nhật danh sách thông báo sau khi xóa
       setNotifications((prev) =>
-        prev.filter((notif) => notif.notification.id !== notificationId)
+        prev.filter((notif) => notif.id !== notificationId)
       );
 
       // Cập nhật số lượng thông báo chưa đọc nếu cần
       setUnreadCount(
         notifications.filter(
           (notification) =>
-            notification.notification.id !== notificationId &&
-            !notification.readStatus
+            notification.id !== notificationId &&
+            !notification.status
         ).length
       );
     } catch (error) {
@@ -322,6 +343,8 @@ const NotificationList: React.FC = () => {
   };
 
   const formatMessage = (message: string, isExpanded: boolean): string => {
+    // Handle null or undefined message
+    if (!message) return "";
     if (isExpanded || message.length <= 200) return message;
     return `${message.substring(0, 198)}...`;
   };
@@ -344,9 +367,8 @@ const NotificationList: React.FC = () => {
         <div className="notification-actions">
           <div className="notification-tabs">
             <button
-              className={`tab-button ${
-                activeTab === "important" ? "active" : ""
-              }`}
+              className={`tab-button ${activeTab === "important" ? "active" : ""
+                }`}
               onClick={() => handleTabChange("important")}
             >
               Quan trọng
@@ -355,9 +377,8 @@ const NotificationList: React.FC = () => {
               )}
             </button>
             <button
-              className={`tab-button ${
-                activeTab === "promotion" ? "active" : ""
-              }`}
+              className={`tab-button ${activeTab === "promotion" ? "active" : ""
+                }`}
               onClick={() => handleTabChange("promotion")}
             >
               Ưu đãi
@@ -399,23 +420,22 @@ const NotificationList: React.FC = () => {
           ) : (
             notifications.slice(0, visibleCount).map((notification) => (
               <div
-                key={notification.notification.id}
-                className={`notification-item ${
-                  notification.readStatus ? "read" : "unread"
-                }`}
+                key={notification.id}
+                className={`notification-item ${notification.status ? "read" : "unread"
+                  }`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="notification-title">
-                  {notification.notification.title}
+                  {notification.title}
                   <div className="notification-actions-right">
                     <span className="notification-time">
-                      {formatDate(notification.notification.createdAt)}
+                      {formatDate(notification.createdAt)}
                     </span>
                     <div className="three-dots-container">
                       <span
                         className="three-dots-icon"
                         onClick={(e) =>
-                          toggleMenu(notification.notification.id, e)
+                          toggleMenu(notification.id, e)
                         }
                       >
                         <svg
@@ -428,22 +448,22 @@ const NotificationList: React.FC = () => {
                           <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                         </svg>
                       </span>
-                      {activeMenuId === notification.notification.id && (
+                      {activeMenuId === notification.id && (
                         <div className="notification-menu">
-                          {!notification.readStatus ? (
+                          {!notification.status ? (
                             <div
                               className="menu-item"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 markAsRead(
                                   getUserData().id,
-                                  notification.notification.id
+                                  notification.id
                                 );
                                 setNotifications((prev) =>
                                   prev.map((notif) =>
-                                    notif.notification.id ===
-                                    notification.notification.id
-                                      ? { ...notif, readStatus: true }
+                                    notif.id ===
+                                      notification.id
+                                      ? { ...notif, status: true }
                                       : notif
                                   )
                                 );
@@ -487,7 +507,7 @@ const NotificationList: React.FC = () => {
                             className="menu-item"
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteNotification(notification.notification.id);
+                              deleteNotification(notification.id);
                               setActiveMenuId(null);
                             }}
                           >
@@ -513,26 +533,25 @@ const NotificationList: React.FC = () => {
                 </div>
 
                 <div
-                  className={`notification-message ${
-                    expandedItems.includes(notification.notification.id)
+                  className={`notification-message ${expandedItems.includes(notification.id)
                       ? "expanded"
                       : ""
-                  }`}
+                    }`}
                 >
                   {formatMessage(
-                    notification.notification.message,
-                    expandedItems.includes(notification.notification.id)
+                    notification.message,
+                    expandedItems.includes(notification.id)
                   )}
                 </div>
 
-                {notification.notification.message.length > 200 && (
+                {notification.message && notification.message.length > 200 && (
                   <div
                     className="expand-icon"
                     onClick={(e) =>
-                      toggleExpand(notification.notification.id, e)
+                      toggleExpand(notification.id, e)
                     }
                   >
-                    {expandedItems.includes(notification.notification.id) ? (
+                    {expandedItems.includes(notification.id) ? (
                       <>
                         Thu gọn <span>▲</span>
                       </>
@@ -561,14 +580,14 @@ const NotificationList: React.FC = () => {
             <div className="popup-content-notification">
               <div className="popup-header-notification">
                 <div className="popup-title">
-                  {selectedNotification.notification.title}
+                  {selectedNotification.title}
                 </div>
                 <div className="popup-date">
-                  {formatDate(selectedNotification.notification.createdAt)}
+                  {formatDate(selectedNotification.createdAt)}
                 </div>
               </div>
               <div className="popup-bottom-notification">
-                <p>{selectedNotification.notification.message}</p>
+                <p>{selectedNotification.message}</p>
               </div>
             </div>
             <button onClick={closePopup} className="popup-close">

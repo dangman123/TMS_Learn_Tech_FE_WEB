@@ -387,6 +387,7 @@ export const CoursePageConvert = () => {
     // const chapter = courseData?.chapters[chapterIndex];
     // const lesson = chapter?.lessons[lessonIndex];
     const token = await authTokenLogin(refreshToken, refresh, navigate);
+    console.log("Đang cập nhật tiến trình cho bài học không có test:", lessonId, chapterId);
 
     const requestData = {
       accountId: accountId, // ID của người dùng
@@ -414,11 +415,53 @@ export const CoursePageConvert = () => {
       if (!response.ok) {
         throw new Error("Failed to submit progress");
       }
+      
+      console.log("Cập nhật tiến trình thành công!");
+      // Refresh progressData sau khi cập nhật
+      await fetchProgressData();
+      
+      return true;
     } catch (error) {
       console.error("Error updating progress:", error);
+      return false;
     }
   };
+  
+  // Hàm để fetch progress data riêng
+  const fetchProgressData = async () => {
+    let token = localStorage.getItem("authToken");
 
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        window.location.href = "/dang-nhap";
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+
+    if (courseData) {
+      const courseId = courseData.course_id;
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/progress/${courseId}/progress/${accountId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setProgressData(data);
+        return data;
+      } else {
+        console.error("Failed to fetch progress data");
+      }
+    }
+  };
+  
   const handleVideoClick = (
     videoId: string,
     lessonId: string,
@@ -429,8 +472,19 @@ export const CoursePageConvert = () => {
     lesson: Lesson
   ) => {
     if (lesson.lesson_test === null) {
-      updateProgressNoTest(lessonId, chapterId);
-      window.location.reload();
+      updateProgressNoTest(lessonId, chapterId).then(() => {
+        // Kiểm tra xem đây có phải là bài đầu tiên không
+        const isFirstLesson = courseData && courseData.chapters && courseData.chapters.length > 0 &&
+          courseData.chapters[0].chapter_id === Number(chapterId) &&
+          courseData.chapters[0].lessons.length > 0 &&
+          courseData.chapters[0].lessons[0].lesson_id === Number(lessonId);
+          
+        // Nếu là bài đầu tiên, tự động cập nhật tiến trình
+        if (isFirstLesson) {
+          console.log("Đây là bài học đầu tiên, đang cập nhật tiến trình...");
+          showToast("Bài học đầu tiên đã được đánh dấu hoàn thành!");
+        }
+      });
     }
 
     listenAndSendVideoClick(accountId, selectedVideoContent?.id!);
@@ -577,6 +631,18 @@ export const CoursePageConvert = () => {
   };
 
   const isVideoCompleted = (chapterId: number, lessonId: number) => {
+    // Kiểm tra xem đây có phải là bài học đầu tiên trong chương đầu tiên không
+    const isFirstLesson = courseData && courseData.chapters && courseData.chapters.length > 0 &&
+      courseData.chapters[0].chapter_id === chapterId &&
+      courseData.chapters[0].lessons.length > 0 &&
+      courseData.chapters[0].lessons[0].lesson_id === lessonId;
+    
+    // Bài đầu tiên luôn có thể truy cập
+    if (isFirstLesson) {
+      return true;
+    }
+    
+    // Logic cũ cho các bài khác
     const lessonProgress = progressData?.find(
       (p) => p.chapterId === chapterId && p.lessonId === lessonId
     );
@@ -986,12 +1052,18 @@ export const CoursePageConvert = () => {
                                               href="#"
                                               onClick={(e) => {
                                                 e.preventDefault();
-                                                if (
-                                                  lesson.video?.video_id &&
-                                                  isVideoCompleted(
-                                                    chapter.chapter_id,
-                                                    lesson.lesson_id
-                                                  )
+                                                // Cho bài đầu tiên, luôn cho phép click
+                                                const isFirstLessonCheck = 
+                                                  courseData && courseData.chapters && courseData.chapters.length > 0 &&
+                                                  courseData.chapters[0].chapter_id === chapter.chapter_id &&
+                                                  courseData.chapters[0].lessons.length > 0 &&
+                                                  courseData.chapters[0].lessons[0].lesson_id === lesson.lesson_id;
+                                                
+                                                if (lesson.video?.video_id && 
+                                                    (isFirstLessonCheck || isVideoCompleted(
+                                                      chapter.chapter_id,
+                                                      lesson.lesson_id
+                                                    ))
                                                 ) {
                                                   handleVideoClick(
                                                     lesson.video.video_id.toString(),
@@ -1002,19 +1074,23 @@ export const CoursePageConvert = () => {
                                                     lessonIndex,
                                                     lesson
                                                   );
+                                                } else if (
+                                                  !isVideoCompleted(
+                                                    chapter.chapter_id,
+                                                    lesson.lesson_id
+                                                  ) && !isFirstLessonCheck
+                                                ) {
+                                                  showToast(
+                                                    "Hoàn thành bài học trước để mở khóa!"
+                                                  );
                                                 }
-                                                // else if (
-                                                //   !isVideoCompleted(
-                                                //     chapter.chapter_id,
-                                                //     lesson.lesson_id
-                                                //   )
-                                                // ) {
-                                                //   showToast(
-                                                //     "Hoàn thành bài học trước để mở khóa!"
-                                                //   );
-                                                // }
                                               }}
                                               className={`content-item test-item ${
+                                                // Bài đầu tiên luôn được xem là completed
+                                                (courseData && courseData.chapters && courseData.chapters.length > 0 &&
+                                                courseData.chapters[0].chapter_id === chapter.chapter_id &&
+                                                courseData.chapters[0].lessons.length > 0 &&
+                                                courseData.chapters[0].lessons[0].lesson_id === lesson.lesson_id) ||
                                                 isVideoCompleted(
                                                   chapter.chapter_id,
                                                   lesson.lesson_id

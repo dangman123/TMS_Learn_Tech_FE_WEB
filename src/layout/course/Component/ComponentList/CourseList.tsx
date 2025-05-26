@@ -54,11 +54,30 @@ function CourseList({ courses }: CourseListProps) {
   const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<
     Category[]
   >([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredCourses, setFilteredCourses] = useState<CourseListUser[]>(courses);
 
   // Effects
   useEffect(() => {
     fetchCourseCategories();
   }, []);
+  
+  // Filter courses when search term or courses change
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredCourses(courses);
+    } else {
+      const filtered = courses.filter((course) => 
+        course.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredCourses(filtered);
+    }
+  }, [searchTerm, courses]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   // Data fetching
   const fetchCourseCategories = async () => {
@@ -106,7 +125,7 @@ function CourseList({ courses }: CourseListProps) {
     );
   };
 
-  const handleCourseClick = (courseId: number, categoryId: number) => {
+  const handleCourseClick = (courseId: number, categoryId: number, courseTitle: string) => {
     if (!courseId) {
       console.error("Khóa học không hợp lệ!");
       return;
@@ -118,17 +137,45 @@ function CourseList({ courses }: CourseListProps) {
       return;
     }
 
-    const categorySlug = removeVietnameseTones(category.name);
-    localStorage.setItem("danhmuckhoahoc", categorySlug);
-    window.location.href = `/khoa-hoc/${categorySlug}/${courseId}`;
+    const courseSlug = removeVietnameseTones(courseTitle);
+    localStorage.setItem("tenkhoahoc", courseSlug);
+    
+    // Tạo URL bao gồm tên khóa học và ID, đảm bảo có dấu gạch ngang giữa chúng
+    window.location.href = `/khoa-hoc/${courseSlug}-${courseId}`;
+    
+    // Log để debug
+    console.log(`Chuyển hướng đến: /khoa-hoc/${courseSlug}-${courseId}`);
   };
 
   // Render functions
   const renderEmptyState = () => (
-    <div className="col-12" style={{ height: "400px" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "50px" }}>
-        Không có khoá học
-      </h2>
+    <div id="listCourseProductCat" className="row">
+      <div className="col-12">
+        <div className="card group space-y-3 flex flex-col text-center" 
+          style={{ maxWidth: "600px", margin: "40px auto", boxShadow: "0 5px 15px rgba(0,0,0,0.1)", border: "1px solid #e0e6f5", borderRadius: "8px" }}>
+          <div className="card-body p-5">
+            <div className="empty-state-icon mb-4" style={{ opacity: "0.2" }}>
+              <i className="fa fa-book-open" style={{ fontSize: "70px" }}></i>
+            </div>
+            <h4 style={{ fontSize: "20px", fontWeight: "600", color: "#333" }}>Không có khoá học</h4>
+            <p className="text-muted mt-2">Vui lòng thử lại với bộ lọc khác hoặc quay lại sau</p>
+            
+            <div className="mt-4">
+              <button className="btn btn-primary" 
+                style={{ 
+                  background: "linear-gradient(135deg, #4a6ee0, #60b0f4)", 
+                  border: "none", 
+                  padding: "10px 25px", 
+                  borderRadius: "6px" 
+                }}
+                onClick={() => window.location.href = "/khoa-hoc"}
+              >
+                Xem tất cả khoá học
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -209,7 +256,7 @@ function CourseList({ courses }: CourseListProps) {
               to="#"
               onClick={(e) => {
                 e.preventDefault();
-                handleCourseClick(course.id!, course.id_danhmuc!);
+                handleCourseClick(course.id!, course.id_danhmuc!, course.title);
               }}
             >
               <img
@@ -262,7 +309,7 @@ function CourseList({ courses }: CourseListProps) {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleCourseClick(course.id!, course.id_danhmuc!);
+                  handleCourseClick(course.id!, course.id_danhmuc!, course.title);
                 }}
                 className="primary-hover"
                 title={course.title}
@@ -354,7 +401,7 @@ function CourseList({ courses }: CourseListProps) {
 
   // Main render
   const hasCourses =
-    courses.length > 0 && !courses.every((course) => course.status === false);
+    filteredCourses.length > 0 && !filteredCourses.every((course) => course.status === false);
 
   return (
     <div className="row g-4">
@@ -363,11 +410,42 @@ function CourseList({ courses }: CourseListProps) {
 
       {/* Course listings */}
       <div className="col-xl-9 col-lg-8 col-md-12">
-        <div className="row g-4">
-          {hasCourses
-            ? courses.map((course) => course.status && renderCourseCard(course))
-            : renderEmptyState()}
+        {/* Search bar */}
+        <div className="search-container mb-4" style={{ width: "100%" }}>
+          <div className="search-bar" style={{ 
+            display: "flex",
+            maxWidth: "500px",
+            margin: "0 auto 20px",
+            position: "relative",
+            borderRadius: "8px",
+            overflow: "hidden",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)" 
+          }}>
+            <input
+              type="text"
+              placeholder="Tìm kiếm khóa học..."
+              onChange={handleSearchChange}
+              value={searchTerm}
+              className="search-input"
+              style={{
+                flex: "1",
+                padding: "12px 15px",
+                fontSize: "15px",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                outline: "none"
+              }}
+            />
+          </div>
         </div>
+
+        {hasCourses ? (
+          <div className="row g-4" id="listCourseProductCat">
+            {filteredCourses.map((course) => course.status && renderCourseCard(course))}
+          </div>
+        ) : (
+          renderEmptyState()
+        )}
       </div>
     </div>
   );

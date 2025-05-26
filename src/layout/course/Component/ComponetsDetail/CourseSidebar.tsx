@@ -32,8 +32,8 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
   const refresh = useRefreshToken();
   const [courseType, setCourseType] = useState<string | null>(null);
   const [isEnrolled, setIsEnrolled] = useState<boolean | null>(null);
-  const userId = JSON.parse(localStorage.getItem("authData") || "{}").id;
-  useEffect(() => {
+  const [isInCart, setIsInCart] = useState<boolean>(false);
+  const userId = JSON.parse(localStorage.getItem("authData") || "{}").id;  useEffect(() => {
     const fetchCourseData = async () => {
       try {
         // Kiểm tra loại khóa học (FREE/FEE)
@@ -62,7 +62,44 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
       }
     };
     fetchCourseData();
+    
+    // Kiểm tra xem khóa học đã có trong giỏ hàng hay chưa
+    checkIfItemInCart();
   }, []);
+  
+  // Hàm kiểm tra xem khóa học đã có trong giỏ hàng chưa
+  const checkIfItemInCart = async () => {
+    try {
+      if (!userId) return;
+      
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+      
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        console.error("Không thể kiểm tra giỏ hàng");
+        return;
+      }
+      
+      const cartData = await response.json();
+      
+      if (cartData.status === 200 && cartData.data) {
+        // Kiểm tra xem courseId có trong giỏ hàng không
+        const isCourseInCart = cartData.data.some((item: any) => 
+          item.courseId === course.id
+        );
+        
+        setIsInCart(isCourseInCart);
+      }
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra giỏ hàng:", error);
+    }
+  };
 
   const handleGoToCoursePlayer = async (courseId: number) => {
     try {
@@ -149,6 +186,84 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
     const authFromStorage = localStorage.getItem("authData");
     return authFromStorage ? JSON.parse(authFromStorage) : null;
   };
+  // Thêm khóa học vào giỏ hàng
+  const addToCart = async () => {
+    try {
+      if (!userId || !course) {
+        toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
+        navigate("/dang-nhap");
+        return;
+      }
+      
+      // Lấy token từ localStorage
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+        navigate("/dang-nhap");
+        return;
+      }
+      
+      // Tạo đối tượng dữ liệu để gửi lên API
+      const cartData = {
+        type: "COURSE", // Loại COURSE
+        price: course.price,
+        courseId: course.id,
+        testId: null,
+        courseBundleId: null,
+        cartItemId: ""
+      };
+      
+      // Gọi API để thêm vào giỏ hàng
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${userId}/add-item`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(cartData)
+      });
+      
+      const responseData = await response.json();
+      
+      // Xử lý phản hồi từ API
+      if (responseData.status === 200) {
+        toast.success("Đã thêm khóa học vào giỏ hàng");
+        setIsInCart(true); // Cập nhật state để biết khóa học đã có trong giỏ hàng
+        
+        // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
+        window.dispatchEvent(new Event('cart-updated'));
+      
+      } else if (responseData.status === 409) {
+        // Nếu khóa học đã có trong giỏ hàng (mã lỗi 409 = conflict)
+        toast.info("Khóa học này đã có trong giỏ hàng của bạn");
+        setIsInCart(true);
+      } else {
+        // Các lỗi khác
+        toast.error(responseData.message || "Không thể thêm vào giỏ hàng");
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      
+      // Kiểm tra xem khóa học đã được thêm thành công chưa
+      await checkIfItemInCart();
+      
+      if (isInCart) {
+        toast.success("Đã thêm khóa học vào giỏ hàng");
+      } else {
+        toast.error("Có lỗi xảy ra khi thêm vào giỏ hàng");
+      }
+    }
+  };
+  // Chuyển đến trang giỏ hàng
+  const goToCart = () => {
+    navigate("/gio-hang");
+  };
+  
+  // Thêm CSS cho nút giỏ hàng
+  const cartButtonStyle = {
+    backgroundColor: "#f0ad4e", // Màu cam cho nút giỏ hàng
+    borderColor: "#eea236"
+  };
 
   const handleCheck = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -159,6 +274,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
     }
 
     if (isEnrolled === true) {
+      // Nếu đã đăng ký khóa học, vào học
       handleGoToCoursePlayer(course.id);
     } else {
       if (courseType === "FREE") {
@@ -184,23 +300,14 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
           toast.error("Đã xảy ra lỗi khi ghi danh:", error);
         }
       } else {
-        const cartFromSession = sessionStorage.getItem("cart");
-        let cartItems = cartFromSession ? JSON.parse(cartFromSession) : [];
-        const existingItem = cartItems.find(
-          (item: { id: number }) => item.id === course.id
-        );
-        if (!existingItem) {
-          const newCartItem = {
-            id: course.id,
-            idTacGia: course.accountId,
-            title: course.title,
-            price: course.price,
-            image: course.image_url,
-          };
-          cartItems.push(newCartItem);
-          sessionStorage.setItem("cart", JSON.stringify(cartItems));
+        // Nếu khóa học có phí
+        if (isInCart) {
+          // Nếu đã có trong giỏ hàng, chuyển đến trang giỏ hàng
+          goToCart();
+        } else {
+          // Nếu chưa có trong giỏ hàng, thêm vào giỏ hàng
+          addToCart();
         }
-        window.location.href = "/gio-hang";
       }
     }
   };
@@ -338,14 +445,18 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
         </span>
 
         <a
-          href="/khoa-hoc/khoa-hoc-chi-tiet/tham-gia-khoa-hoc"
-          className="btn-one"
+          href="#"
+          className={`btn-one ${isInCart && !isEnrolled ? 'cart-button' : ''}`}
           onClick={handleCheck}
         >
-          {!isEnrolled
-            ? "Đăng ký khóa học"
-            : "Vào học"}
-          <i className="fa-light fa-arrow-right-long"></i>
+          {isEnrolled
+            ? "Vào học"
+            : isInCart
+              ? "Đến giỏ hàng"
+              : courseType === "FREE" 
+                ? "Đăng ký miễn phí" 
+                : "Thêm vào giỏ hàng"}
+          <i className={`${isInCart && !isEnrolled ? 'fa-solid fa-shopping-cart' : 'fa-light fa-arrow-right-long'}`}></i>
         </a>
       </div>
     </div>

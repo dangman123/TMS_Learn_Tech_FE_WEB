@@ -35,7 +35,36 @@ export interface CourseContent {
 }
 
 function CourseDetail() {
-  const { id } = useParams<{ id: string }>();
+  // Lấy slug từ URL
+  const { slug } = useParams<{ slug: string }>();
+  
+  // Trích xuất ID từ slug (lấy số cuối cùng sau dấu -)
+  const extractCourseId = () => {
+    if (!slug) return null;
+    
+    // Tìm ID ở cuối URL, sau dấu gạch ngang cuối cùng
+    const match = slug.match(/[-](\d+)$/);
+    if (match && match[1]) {
+      return match[1];
+    }
+    
+    // Nếu không tìm thấy cách trên, thử kiểm tra xem toàn bộ slug có phải là số
+    if (/^\d+$/.test(slug)) {
+      return slug;
+    }
+    
+    console.error("Không thể trích xuất ID khóa học từ URL:", slug);
+    return null;
+  };
+  
+  const id = extractCourseId();
+  
+  useEffect(() => {
+    if (!id) {
+      toast.error("Không tìm thấy thông tin khóa học từ URL");
+    }
+  }, [id]);
+  
   const [course, setCourse] = useState(null);
   const [totalLession, setTotalLession] = useState<{
     total_students: number;
@@ -64,7 +93,14 @@ function CourseDetail() {
     }
     fetch(GET_USER_COURSE_DETAIL_BY_COURSE_ID(Number(id)))
       .then((response) => response.json())
-      .then((data) => setCourse(data))
+      .then((responseData) => {
+        if (responseData && responseData.data) {
+          setCourse(responseData.data);
+        } else {
+          console.error("Dữ liệu khóa học không đúng định dạng:", responseData);
+          setCourse(null);
+        }
+      })
       .catch((error) => console.error("Error fetching course data:", error));
 
     fetch(GET_USER_COURSE_DETAIL_TOTAL_LESSION(Number(id)))
@@ -72,9 +108,15 @@ function CourseDetail() {
       .then((data) => setTotalLession(data))
       .catch((error) => console.error("Error fetching course data:", error));
 
-    fetch(`${process.env.REACT_APP_SERVER_HOST}/api/reviews/course/${id}`)
+    fetch(`${process.env.REACT_APP_SERVER_HOST}/api/reviews/course/${Number(id)}`)
       .then((response) => response.json())
-      .then((data) => setReviews(data))
+      .then((data) => {
+        if (data && data.data && data.data.content) {
+          setReviews(data.data.content);
+        } else {
+          setReviews([]);
+        }
+      })
       .catch((error) => console.error("Error fetching course reviews:", error));
   }, [id]);
 

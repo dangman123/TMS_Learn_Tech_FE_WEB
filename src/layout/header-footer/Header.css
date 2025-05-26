@@ -46,22 +46,28 @@
 .logout-btn {
   cursor: pointer;
 }
+
 span.cart-count {
   position: absolute;
-  top: -10px;
-  right: -13px;
-  height: 23px;
-  line-height: 23px;
-  text-align: center;
-  width: 20px;
-  background-color: black;
+  top: -15px;
+  right: -15px;
+  width: 18px;
+  height: 18px;
+  background-color: #ff3e3e;
   color: white;
   border-radius: 50%;
-  border: 1px solid white;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(255, 0, 0, 0.2);
 }
+
 a.gio-hang-icon {
   position: relative;
 }
+
 .gio-hang-icon .icon-giohang {
   font-size: 26px; /* Điều chỉnh kích thước icon */
 }
@@ -74,6 +80,7 @@ a.gio-hang-icon {
 .header__main .menubars {
   display: none; /* Ẩn icon menu cho desktop */
 }
+
 .offcanvas-menu {
   position: fixed;
   top: 0;
@@ -140,6 +147,7 @@ a.gio-hang-icon {
   > a {
   background-color: transparent !important;
 }
+
 .header__main
   nav
   > ul
@@ -151,6 +159,7 @@ a.gio-hang-icon {
   > ul.sub-sub-sub-menu {
   border-radius: 10px;
 }
+
 .header__main
   nav
   > ul
@@ -164,6 +173,7 @@ a.gio-hang-icon {
   > a {
   color: #333 !important;
 }
+
 .header__main
   nav
   > ul
@@ -178,10 +188,12 @@ a.gio-hang-icon {
   color: var(--primary-color) !important;
   padding-left: 25px !important;
 }
+
 /* Phần 2: Chỉ hiển thị màu xanh KHI hover vào các menu */
 .header__main nav ul li:hover > a {
   background-color: none !important;
 }
+
 .header__main nav ul li .sub-menu,
 .header__main nav ul li .sub-sub-menu,
 .header__main nav ul li .sub-sub-sub-menu {

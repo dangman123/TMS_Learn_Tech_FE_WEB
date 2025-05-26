@@ -1,116 +1,104 @@
 import React, { useEffect, useState } from "react";
-import { TextField, IconButton, Badge, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import useRefreshToken from "../../util/fucntion/useRefreshToken";
-import { useNavigate } from "react-router-dom";
-import { authTokenLogin, isTokenExpired } from "../../util/fucntion/auth";
-interface CourseUserProfile {
+import axios from "axios";
+import { FileEarmark } from "react-bootstrap-icons";
+interface Category {
   id: number;
-  image: string;
   title: string;
-  duration: string;
-  enrollment_date: string;
-  status: boolean;
-  isDeleted: boolean;
+  imageUrl: string;
+  accountId: string;
+  courseCategoryId: string;
+  cost: number;
+  price: number;
 }
-interface NavExampleProps {
-  selectedCourse: string;
-  onCourseChange: (courseId: string) => void;
-  onAddClick: () => void;
-} 
-function NavExample({ selectedCourse, onCourseChange, onAddClick }: NavExampleProps) {
-  const userId = JSON.parse(localStorage.getItem("authData") || "{}").id;
-  const [filter, setFilter] = useState(selectedCourse);
 
-  const handleFilterChange = (event: SelectChangeEvent<string>) => {
-    setFilter(event.target.value);
-    onCourseChange(event.target.value); // Call onCourseChange when a course is selected
-  };
-  const [size] = useState(1000);
-  const [count, setCount] = useState(0);
-  const navigate = useNavigate();
-  const refresh = useRefreshToken(); 
-  const refreshToken = localStorage.getItem("refreshToken");
-  const [courses, setCourses] = useState<CourseUserProfile[]>([]);
-  const [page, setPage] = useState<number>(0);
-  
-  const fetchCoursesWithPagination = async () => {
-    const token = await authTokenLogin(refreshToken, refresh, navigate);
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/courses/account/enrolled/${userId}?page=${page}&size=${size}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+interface ApiResponse {
+  status: number;
+  message: string;
+  data: Category[];
+}
+const NavExample = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
-      if (!response.ok) {
-        console.error(
-          `Failed to fetch paginated course data: ${response.status} ${response.statusText}`
-        );
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data && typeof data === "object") {
-        setCourses(data.content);
-
-      } else {
-        console.error("Invalid data format received");
-      }
-    } catch (error) {
-      console.error("Error fetching paginated course data:", error);
-    }
-  };
-
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-
-  const handleAddClick = () => {
-    //Payment mua lượt làm bài thi
+  const removeVietnameseTones = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .replace(/[^a-zA-Z0-9\s]/g, "")
+      .replace(/\s+/g, "-")
+      .toLowerCase();
   };
 
   useEffect(() => {
-    fetchCoursesWithPagination();
-  }, [page]);
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get<ApiResponse>(
+          `${process.env.REACT_APP_SERVER_HOST}/api/courses/get-all-result-list-course`
+        );
+
+        // Access the data array from the response
+        if (response.data && response.data.data) {
+          setCategories(response.data.data);
+
+          // Set selected category from localStorage if exists
+          const currentCategoryId = localStorage.getItem("danhmucdethi");
+          if (currentCategoryId) {
+            setSelectedCategory(parseInt(currentCategoryId, 10));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching exam categories:", error);
+        setCategories([]); // Set empty array on error
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryClick = (id: number, name: string) => {
+    setSelectedCategory(id);
+    localStorage.setItem("iddanhmucdethi", id.toString());
+    localStorage.setItem("danhmucdethi", removeVietnameseTones(name));
+    window.location.href = `/de-thi/${removeVietnameseTones(name)}`;
+  };
 
   return (
-    <div className="col-md-12">
-      <div className="list-subjects" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", overflowY: "auto" }}>
-        <FormControl variant="outlined" style={{ marginRight: "16px", minWidth: 120 , marginBottom:"20px" }}>
-          <InputLabel id="filter-label">Khóa học</InputLabel>
-          <Select
-            labelId="filter-label"
-            value={filter}
-            onChange={handleFilterChange}
-            label="Filter"
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {courses.map((course) => (
-              <MenuItem key={course.id} value={course.id}>
-                {course.title}
-              </MenuItem>
+    <div className="col-xl-3 col-lg-4 col-md-12">
+      <div className="document-card">
+        <div className="document-header">
+          <h3 className="document-title">Danh mục đề thi</h3>
+        </div>
+        <div className="document-body">
+          <ul className="category-list">
+            {categories.map((category) => (
+              <li
+                key={category.id}
+                className={`category-item ${
+                  selectedCategory === category.id ? "active" : ""
+                }`}
+              >
+                <div className="category-row">
+                  <a
+                    href="#"
+                    className="category-name"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleCategoryClick(category.id, category.title);
+                    }}
+                  >
+                    <FileEarmark className="category-icon" />
+                    <span>{category.title}</span>
+                  </a>
+                </div>
+              </li>
             ))}
-          </Select>
-        </FormControl>
-        <IconButton color="primary" onClick={handleAddClick}>
-          <Badge badgeContent={count} color="secondary">
-            <AddIcon />
-          </Badge>
-        </IconButton>
+          </ul>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default NavExample;

@@ -14,7 +14,6 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, title }) => {
   useEffect(() => {
     const list = listRef.current;
 
-
     if (list) {
       let scrollAmount = 0;
 
@@ -49,7 +48,10 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, title }) => {
                 <table>
                   <tbody>
                     <tr>
-                      <td className="news-item-td-homepage" style={{ width: "80px", height: "100px" }}>
+                      <td
+                        className="news-item-td-homepage"
+                        style={{ width: "80px", height: "100px" }}
+                      >
                         <a href={doc.url}>
                           <img
                             height="100px"

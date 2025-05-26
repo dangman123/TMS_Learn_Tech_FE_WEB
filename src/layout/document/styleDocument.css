@@ -1,3 +1,6 @@
+.sptb-document{
+margin-top: 30px;
+}
 .pegi button.active {
   background-color: var(--primary-color);
   color: var(--white);

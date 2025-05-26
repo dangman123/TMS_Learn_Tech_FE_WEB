@@ -116,19 +116,22 @@ export const LogicPayment = () => {
 
       // 2. Gọi tất cả các API chi tiết thanh toán và đợi tất cả hoàn tất
       const paymentDetailPromises = cart.map((item) => {
-        return fetch(`${process.env.REACT_APP_SERVER_HOST}/api/payment-details/add`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            price: item.price,
-            courseTitle: item.title,
-            paymentId: paymentData.id, // ID thanh toán vừa nhận được
-            courseId: item.id,
-          }),
-        }).then((response) => response.json());
+        return fetch(
+          `${process.env.REACT_APP_SERVER_HOST}/api/payment-details/add`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              price: item.price,
+              courseTitle: item.title,
+              paymentId: paymentData.id, // ID thanh toán vừa nhận được
+              courseId: item.id,
+            }),
+          }
+        ).then((response) => response.json());
       });
 
       // Đợi tất cả các chi tiết thanh toán được xử lý

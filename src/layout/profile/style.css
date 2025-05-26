@@ -237,6 +237,9 @@ div#historyDocument {
 .nav-item .nav-text {
   transition: color 0.3s ease;
 }
+.nav-item .nav-text{
+  color: #333 !important;
+}
 .nav-item svg {
   margin-bottom: 5px;
 }

@@ -25,6 +25,131 @@
   margin: 0;
 }
 
+/* Styles cho thanh tìm kiếm */
+.document-search {
+  padding: 15px;
+  border-bottom: 1px solid #e0e6f5;
+  position: relative;
+  width: 100%;
+}
+
+.search-input-container {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.document-search-input {
+  flex: 1;
+  border: none;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  color: #495057;
+}
+
+.document-search-input::placeholder {
+  color: #adb5bd;
+}
+
+.document-search-button {
+  background: linear-gradient(135deg, #4a6ee0, #60b0f4);
+  border: none;
+  color: white;
+  padding: 0 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.document-search-button:hover {
+  background: linear-gradient(135deg, #3f62cc, #4e9ce0);
+}
+
+.document-search-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Styles cho kết quả tìm kiếm */
+.document-search-results {
+  position: absolute;
+  top: calc(100% - 10px);
+  left: 15px;
+  right: 15px;
+  background: white;
+  border: 1px solid #e0e6f5;
+  border-radius: 6px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  max-height: 350px;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+  isolation: isolate;
+  width: calc(100% - 30px);
+}
+
+.document-search-result-item {
+  padding: 10px;
+  border-bottom: 1px solid #f0f4fa;
+  transition: background-color 0.2s;
+}
+
+.document-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.document-search-result-item a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #495057;
+}
+
+.document-search-result-item a:hover {
+  color: #4a6ee0;
+}
+
+.document-search-result-image {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e0e6f5;
+}
+
+.document-search-result-title {
+  flex: 1;
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-search-view-all {
+  padding: 10px;
+  text-align: center;
+  border-top: 1px solid #e0e6f5;
+  background-color: #f8faff;
+}
+
+.document-search-view-all a {
+  color: #4a6ee0;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.document-search-view-all a:hover {
+  text-decoration: underline;
+}
+
 .document-body {
   padding: 15px 10px;
 }
@@ -154,6 +279,15 @@
   }
 
   .category-name {
+    font-size: 13px;
+  }
+  
+  .document-search {
+    padding: 12px 10px;
+  }
+  
+  .document-search-input {
+    padding: 8px 10px;
     font-size: 13px;
   }
 }
