@@ -17,6 +17,8 @@ interface Review {
   account_id: number;
   fullname: string;
   image: string;
+  course_id?: number;
+  test_id?: number | null;
 }
 
 interface CourseReviewProps {
@@ -47,12 +49,33 @@ export const CourseReview: React.FC = () => {
     }
     return null;
   };
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  
+  // Trích xuất ID từ slug (lấy số cuối cùng sau dấu -)
+  const extractCourseId = () => {
+    if (!slug) return null;
+    
+    // Tìm ID ở cuối URL, sau dấu gạch ngang cuối cùng
+    const match = slug.match(/[-](\d+)$/);
+    if (match && match[1]) {
+      return match[1];
+    }
+    
+    // Nếu không tìm thấy cách trên, thử kiểm tra xem toàn bộ slug có phải là số
+    if (/^\d+$/.test(slug)) {
+      return slug;
+    }
+    
+    console.error("Không thể trích xuất ID khóa học từ URL:", slug);
+    return null;
+  };
+  
+  const id = extractCourseId();
   const fetchReviews = async () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/reviews/course/${id}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/reviews/course/${Number(id)}`,
         {
           method: "GET",
         }
@@ -62,10 +85,15 @@ export const CourseReview: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      setReviews(data); // Giả sử API trả về một mảng các review
+      const result = await response.json();
+      if (result && result.data && result.data.content) {
+        setReviews(result.data.content);
+      } else {
+        setReviews([]);
+      }
     } catch (error) {
       console.error("Error fetching reviews:", error);
+      setReviews([]);
     } finally {
       setLoading(false);
     }

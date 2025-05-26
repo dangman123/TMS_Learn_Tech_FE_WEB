@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Navigation,
-  Pagination,
-  Scrollbar,
-  A11y,
-} from "swiper/modules";
+import { Navigation, Pagination, Scrollbar, A11y } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -14,8 +9,7 @@ import "swiper/css/autoplay";
 import { DocumentModel } from "../../model/DocumentModel";
 import axios from "axios";
 
-export const GET_USER_DOCUMENT_TOP6 =
-  `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/view_desc/top6`;
+export const GET_USER_DOCUMENT_TOP6 = `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/view_desc/top6`;
 type Category = {
   id: number;
   name: string;

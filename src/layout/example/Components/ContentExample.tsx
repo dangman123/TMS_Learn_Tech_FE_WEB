@@ -1,77 +1,161 @@
-import React, { useState } from "react";
-import TestDetailPopup from "./TestDetailPopup";
-interface Test {
-  testId: string;
-  description: string;
-  title: string;
-  duration: number;
-  totalQuestions: number;
- 
-}
+import React, { useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ExamList as ExamListUser } from "../../../model/ExamList";
+import { formatCurrency } from "../../util/formatCurrency";
+import NavExam from "./NavExample";
+import "./examlist.css";
 
-interface ContentExampleProps {
-  tests: Test[];
-}
-function ContentExample({ tests }: ContentExampleProps) {
+type ExamListProps = {
+  exams: ExamListUser[];
+};
 
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+// Tiện ích chuyển chuỗi thành slug
+const slugify = (text: string): string =>
+  text
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
 
-  const handleTestClick = (test: Test) => {
-    setSelectedTest(test);
-    setIsPopupOpen(true); 
+// Chuyển đổi mức độ khó sang tiếng Việt
+const formatLevel = (level: string): string => {
+  switch (level.toUpperCase()) {
+    case "EASY":
+      return "Dễ";
+    case "MEDIUM":
+      return "Trung bình";
+    case "HARD":
+      return "Khó";
+    default:
+      return level;
+  }
+};
+
+// Render độ khó của đề thi
+const ExamDifficultyBadge = ({ difficulty }: { difficulty: string }) => {
+  const colorMap: Record<string, string> = {
+    easy: "#28a745",
+    medium: "#ffc107",
+    hard: "#dc3545",
   };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false); // Close the popup
-  };
+  const color = colorMap[difficulty.toLowerCase()] || "#6c757d";
   return (
-    <div className="col-md-12" style={{ background: "rgb(255, 255, 255)", height: "auto !important", minHeight: "0px !important", }}>
-      <div style={{ height: "auto !important" }}>
-        <div
-          className="card-body"
-          style={{
-            height: "auto !important",
-            minHeight: "0px !important",
-          }}
+    <div className="difficulty-badge" style={{ color }}>
+      <i className="fas fa-signal-alt mr-1"></i>
+      <span>{formatLevel(difficulty)}</span>
+    </div>
+  );
+};
 
-        >
-          <div className="row" style={{ gap:"5px" }}>
-            {tests.length === 0 ? (
-              <p>Không có khóa học</p>
-            ) : (
-              tests.map((test) => (
-                <div className="col-md-2" key={test.testId} style={{ height: "auto !important", minHeight: "0px !important" }}>
-                  <div className="item">
-                    <div className="col-md-4 col-sm-4">
-                      <a href="#" onClick={() => handleTestClick(test)}>
-                        <img src="../../assets/images/example/example.png" alt={test.title} />
-                      </a>
-                    </div>
-                    <div className="col-md-8 col-sm-8">
-                      <div className="content">
-                        <div className="title">
-                          <a href="#" onClick={() => handleTestClick(test)}>
-                            {test.title}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+// Empty State
+const EmptyState = () => (
+  <div className="col-12 empty-exam-list">
+    <h2>Không có đề thi</h2>
+  </div>
+);
+
+function ExamList({ exams = [] }: ExamListProps) {
+  const navigate = useNavigate();
+
+  // Handler khi click vào đề thi
+  const handleExamClick = useCallback(
+    (exam: ExamListUser) => {
+      if (exam.status === "INACTIVE") return;
+      const examSlug = slugify(exam.title);
+      localStorage.setItem("danhmucdethi", examSlug);
+      navigate(`/de-thi/${examSlug}-${exam.testId}`);
+    },
+    [navigate]
+  );
+
+  // Render card cho mỗi đề thi
+  const renderExamCard = (exam: ExamListUser) => {
+    const examSlug = slugify(exam.title);
+    const examDetailUrl = `/de-thi/${examSlug}-${exam.testId}`;
+    const handleLinkClick = () =>
+      localStorage.setItem("danhmucdethi", examSlug);
+
+    return (
+      <div key={exam.testId} className="col-xl-4 col-md-6">
+        <div className="exam-card">
+          <div className="exam-image">
+            <Link to={examDetailUrl} onClick={handleLinkClick}>
+              <img
+                src={exam.imageUrl || "/placeholder-exam.png"}
+                alt={exam.title || "Exam image"}
+              />
+            </Link>
+            <span className="time-limit">
+              <i className="far fa-clock"></i>
+              {Math.floor(exam.duration / 60)} phút
+            </span>
           </div>
-          {selectedTest && (
-            <TestDetailPopup
-              open={isPopupOpen}
-              onClose={handleClosePopup}
-              testDetails={selectedTest}
-            />
+          <div className="exam-content">
+            <h3 className="exam-title">
+              <Link
+                to={examDetailUrl}
+                onClick={handleLinkClick}
+                title={exam.title}
+              >
+                {exam.title}
+              </Link>
+            </h3>
+            <ul className="exam-meta">
+              <li>
+                <i className="fas fa-users"></i>
+                {exam.itemCountReview} lượt thi
+              </li>
+              <li>
+                <i className="fas fa-questions"></i>
+                {exam.totalQuestion} câu hỏi
+              </li>
+            </ul>
+            <div className="exam-footer">
+              <ExamDifficultyBadge difficulty={exam.level} />
+              <div className="exam-price">
+                {exam.examType === "FREE" ? (
+                  <span className="free-badge">Miễn Phí</span>
+                ) : (
+                  <div className="price-info">
+                    {exam.cost > exam.price && (
+                      <span className="original-price">
+                        {formatCurrency(exam.cost)}
+                      </span>
+                    )}
+                    <span className="current-price">
+                      {formatCurrency(exam.price)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Lọc chỉ đề thi ACTIVE
+  const activeExams = exams.filter((exam) => exam.status === "ACTIVE");
+
+  return (
+    <div className="row g-4">
+      <NavExam />
+      <div className="col-xl-9 col-lg-8 col-md-12">
+        <div className="row g-4">
+          {activeExams.length ? (
+            activeExams.map(renderExamCard)
+          ) : (
+            <EmptyState />
           )}
         </div>
       </div>
     </div>
   );
 }
-export default ContentExample;
+
+export default ExamList;

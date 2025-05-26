@@ -138,11 +138,11 @@ function ConfirmPurchase() {
           <div className="row">
             {/* Left Column: Course Info */}
             <div className="col-lg-8">
-              <div className="card course-info-card">
-                <div className="card-header">
+              <div className="cardd course-info-cardd">
+                <div className="cardd-header">
                   <h4>Thông tin khóa học</h4>
                 </div>
-                <div className="card-body">
+                <div className="cardd-body">
                   {cart.length > 0 ? (
                     <div className="course-list">
                       {cart.map((item, index) => (
@@ -174,11 +174,11 @@ function ConfirmPurchase() {
 
             {/* Right Column: Order Summary and Payment */}
             <div className="col-lg-4">
-              <div className="card order-summary-card">
-                <div className="card-headerr">
+              <div className="cardd order-summary-cardd">
+                <div className="cardd-headerr">
                   <h4>Tóm tắt đơn hàng</h4>
                 </div>
-                <div className="card-body">
+                <div className="cardd-body">
                   {userInfo && (
                     <div className="customer-info">
                       <div className="info-item">
@@ -219,11 +219,11 @@ function ConfirmPurchase() {
                 </div>
               </div>
 
-              <div className="card payment-methods-card">
-                <div className="card-header">
+              <div className="cardd payment-methods-cardd">
+                <div className="cardd-header">
                   <h4>Phương thức thanh toán</h4>
                 </div>
-                <div className="card-body">
+                <div className="cardd-body">
                   <p className="text-center">
                     Vui lòng chọn phương thức thanh toán
                   </p>

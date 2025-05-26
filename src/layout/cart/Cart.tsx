@@ -1,47 +1,412 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Cart.css";
-import { mockCartItems } from "./mockCartItems";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { FiShoppingBag, FiTrash2, FiCheck, FiShoppingCart, FiTag, FiGift, FiPackage } from "react-icons/fi";
 
-interface CartItem {
+interface CourseBundleResponse {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  cost: number | null;
+  courses: BundleCourse[];
+  discount: number;
+  status: string;
+  salesCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface BundleCourse {
   id: number;
   title: string;
+  imageUrl: string;
   price: number;
-  originalPrice: number;
+  author: string;
+}
+
+interface CartItem {
+  cartId: number;
+  cartItemId: number;
+  courseId: number | null;
+  testId: number | null;
+  courseBundleId: number | null;
+  price: number;
+  cost: number;
+  discount: number;
+  name: string;
+  type: string;
   image: string;
-  instructor: string;
-  quantity: number;
-  totalHours?: string;
-  totalLessons?: string;
-  level?: string;
+  timestamp: string;
+  combos?: ComboRecommendation[]; // Add recommended combos that contain this course
+}
+
+interface ComboRecommendation {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  discount: number;
+  courseIds: number[];
+  description?: string;
+  courses?: BundleCourse[];
+}
+
+interface AuthData {
+  id: number;
+  fullname: string;
+  email: string;
+  roleId: number;
 }
 
 function Cart() {
-  const [cart, setCart] = useState<CartItem[]>(mockCartItems);
-  const [totalPrice, setTotalPrice] = useState(
-    mockCartItems.reduce((acc, item) => acc + item.price, 0)
-  );
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const navigate = useNavigate();
 
-  const handleRemoveItem = (id: number) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    setCart(updatedCart);
-    calculateTotal(updatedCart);
+  useEffect(() => {
+    const userData = getUserData();
+    if (userData) {
+      setUserId(userData.id);
+    }
+    fetchCart();
+  }, []);
+
+  useEffect(() => {
+    if (selectAll) {
+      setSelectedItems(cart.map(item => item.cartItemId));
+    } else if (selectedItems.length === cart.length && cart.length > 0) {
+      setSelectAll(true);
+    }
+  }, [selectAll, cart]);
+
+  // Check for combo recommendations when cart or selected items change
+  useEffect(() => {
+    const selectedCourseItems = cart.filter(
+      item => item.type === "COURSE" && 
+      selectedItems.includes(item.cartItemId) && 
+      item.courseId !== null
+    );
+    
+    if (selectedCourseItems.length > 0) {
+      fetchComboRecommendations(selectedCourseItems);
+      
+     
+    }
+  }, [selectedItems, cart]);
+
+  // Recalculate total price whenever selected items change
+  useEffect(() => {
+    const selectedCarts = cart.filter(item => selectedItems.includes(item.cartItemId));
+    calculateTotal(selectedCarts);
+  }, [selectedItems, cart]);
+
+  const getUserData = (): AuthData | null => {
+    const authData = localStorage.getItem("authData");
+    if (!authData) return null;
+    
+    try {
+      return JSON.parse(authData) as AuthData;
+    } catch (error) {
+      console.error("Lỗi khi lấy authData:", error);
+      return null;
+    }
+  };
+
+  const getToken = (): string | null => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return null;
+    
+    return token;
+  };
+
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const userData = getUserData();
+      const token = getToken();
+      
+      if (!userData || !token) {
+        setError("Bạn cần đăng nhập để xem giỏ hàng");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${userData.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể tải giỏ hàng");
+      }
+
+      const responseData = await response.json();
+      
+      if (responseData.status === 200 && responseData.data) {
+        setCart(responseData.data);
+        setSelectedItems([]);
+        setSelectAll(false);
+        setTotalPrice(0); // Reset total price when cart is loaded
+      } else {
+        throw new Error("Dữ liệu giỏ hàng không hợp lệ");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đã xảy ra lỗi khi tải giỏ hàng");
+      toast.error("Không thể tải giỏ hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveItem = async (cartItemId: number) => {
+    try {
+      const token = getToken();
+      
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để xóa sản phẩm");
+        return;
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${cartItemId}/remove`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể xóa sản phẩm");
+      }
+
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
+      
+      // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
+      window.dispatchEvent(new Event('cart-updated'));
+      
+      // Cập nhật lại giỏ hàng
+      fetchCart();
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi xóa sản phẩm");
+      console.error("Lỗi khi xóa sản phẩm:", err);
+    }
+  };
+
+  const handleRemoveSelectedItems = async () => {
+    if (selectedItems.length === 0) {
+      toast.info("Vui lòng chọn sản phẩm để xóa");
+      return;
+    }
+
+    try {
+      const token = getToken();
+      
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để xóa sản phẩm");
+        return;
+      }
+
+      // Sử dụng Promise.all để xóa song song nhiều sản phẩm
+      await Promise.all(
+        selectedItems.map(cartItemId => 
+          fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${cartItemId}/remove`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+        )
+      );
+
+      toast.success(`Đã xóa ${selectedItems.length} sản phẩm khỏi giỏ hàng`);
+      
+      // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
+      window.dispatchEvent(new Event('cart-updated'));
+      
+      fetchCart();
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi xóa các sản phẩm đã chọn");
+      console.error("Lỗi khi xóa các sản phẩm:", err);
+    }
+  };
+
+  const toggleSelectItem = (cartItemId: number) => {
+    setSelectedItems(prev => {
+      if (prev.includes(cartItemId)) {
+        const newSelected = prev.filter(id => id !== cartItemId);
+        if (newSelected.length !== cart.length) {
+          setSelectAll(false);
+        }
+        return newSelected;
+      } else {
+        const newSelected = [...prev, cartItemId];
+        if (newSelected.length === cart.length) {
+          setSelectAll(true);
+        }
+        return newSelected;
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectAll(!selectAll);
+    if (!selectAll) {
+      setSelectedItems(cart.map(item => item.cartItemId));
+    } else {
+      setSelectedItems([]);
+    }
   };
 
   const calculateTotal = (cartItems: CartItem[]) => {
     const subtotal = cartItems.reduce((acc, item) => acc + item.price, 0);
-    setTotalPrice(subtotal);
+    const discountedTotal = discount > 0 ? subtotal * (1 - discount / 100) : subtotal;
+    setTotalPrice(discountedTotal);
   };
 
-  const applyPromoCode = () => {
-    // Giả lập mã giảm giá - trong thực tế sẽ gọi API
-    if (promoCode === "SUMMER2025") {
-      setDiscount(10);
-      const discountedTotal = totalPrice * (1 - discount / 100);
+  const applyPromoCode = async () => {
+    try {
+      if (!promoCode.trim()) {
+        toast.warning("Vui lòng nhập mã giảm giá");
+        return;
+      }
+
+      if (selectedItems.length === 0) {
+        toast.warning("Vui lòng chọn sản phẩm trước khi áp dụng mã giảm giá");
+        return;
+      }
+
+      const token = getToken();
+      
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để áp dụng mã giảm giá");
+        return;
+      }
+
+      // Gọi API để áp dụng mã giảm giá
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/discount/apply`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code: promoCode })
+      });
+
+      if (!response.ok) {
+        toast.error("Mã giảm giá không hợp lệ");
+        return;
+      }
+
+      const responseData = await response.json();
+      
+      if (responseData.status === 200) {
+        const discountPercent = responseData.data.discountPercent || 0;
+        setDiscount(discountPercent);
+        
+        // Recalculate with new discount
+        const selectedCarts = cart.filter(item => selectedItems.includes(item.cartItemId));
+        const subtotal = selectedCarts.reduce((acc, item) => acc + item.price, 0);
+        const discountedTotal = subtotal * (1 - discountPercent / 100);
       setTotalPrice(discountedTotal);
+        
+        toast.success(`Áp dụng mã giảm giá thành công: Giảm ${discountPercent}%`);
     } else {
-      alert("Mã giảm giá không hợp lệ!");
+        toast.error(responseData.message || "Mã giảm giá không hợp lệ");
+      }
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi áp dụng mã giảm giá");
+      console.error("Lỗi khi áp dụng mã giảm giá:", err);
+    }
+  };
+
+  // Function to add a combo to the cart
+  const addComboToCart = async (comboId: number, comboPrice: number) => {
+    try {
+      const token = getToken();
+      
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng");
+        return;
+      }
+
+      // Tạo dữ liệu để gửi lên API
+      const cartData = {
+        type: "COMBO",
+        price: comboPrice,
+        courseId: null,
+        testId: null,
+        courseBundleId: comboId,
+        cartItemId: ""
+      };
+      
+      // Gọi API để thêm combo vào giỏ hàng
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/cart/${userId}/add-item`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(cartData)
+        }
+      );
+      
+      const responseData = await response.json();
+      
+      if (responseData.status === 200) {
+        toast.success("Đã thêm combo vào giỏ hàng");
+        
+        // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
+        window.dispatchEvent(new Event('cart-updated'));
+        
+        // Cập nhật lại giỏ hàng
+        fetchCart();
+      } else if (responseData.status === 409) {
+        toast.info("Combo này đã có trong giỏ hàng của bạn");
+      } else {
+        toast.error(responseData.message || "Không thể thêm combo vào giỏ hàng");
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi thêm combo vào giỏ hàng");
+      console.error("Lỗi khi thêm combo vào giỏ hàng:", error);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      if (selectedItems.length === 0) {
+        toast.warning("Vui lòng chọn sản phẩm để thanh toán");
+        return;
+      }
+
+      const token = getToken();
+      
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để thanh toán");
+        return;
+      }
+
+      navigate("/thanh-toan", { 
+        state: { 
+          selectedItems,
+          totalAmount: totalPrice,
+          discount 
+        } 
+      });
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi chuyển đến trang thanh toán");
+      console.error("Lỗi khi chuyển đến trang thanh toán:", err);
     }
   };
 
@@ -49,116 +414,330 @@ function Cart() {
     return amount.toLocaleString() + " ₫";
   };
 
+  // Tính phần trăm giảm giá
+  const calculateDiscountPercent = (originalPrice: number, discountedPrice: number) => {
+    return Math.round((originalPrice - discountedPrice) / originalPrice * 100);
+  };
+
+  // Fetch combo recommendations for selected courses
+  const fetchComboRecommendations = async (courseItems: CartItem[]) => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      
+      // We'll call the API for each course item to get its bundle recommendations
+      const promises = courseItems.map(async (item) => {
+        if (!item.courseId) return null;
+        
+        const courseId = item.courseId;
+        console.log(`Fetching combo recommendations for course ID: ${courseId}`);
+        
+        // Use the correct API endpoint as provided
+        const apiUrl = `${process.env.REACT_APP_SERVER_HOST}/api/cart/course/${courseId}/bundles`;
+        console.log("Calling API:", apiUrl);
+        
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            console.error(`Error fetching recommendations for course ${courseId}:`, response.status);
+            return null;
+          }
+          
+          const data = await response.json();
+          console.log(`Recommendations for course ${courseId}:`, data);
+          
+          if (data.status === 200 && data.data && data.data.length > 0) {
+            // Map the API response to match our ComboRecommendation interface
+            const combos = data.data.map((bundle: CourseBundleResponse) => ({
+              id: bundle.id,
+              name: bundle.name,
+              price: bundle.price,
+              image: bundle.imageUrl,
+              discount: bundle.discount || 0,
+              description: bundle.description,
+              courses: bundle.courses,
+              courseIds: bundle.courses ? bundle.courses.map((c: BundleCourse) => c.id) : []
+            }));
+            
+            return { courseId, combos };
+          }
+          return null;
+        } catch (fetchError) {
+          console.error(`Network error fetching recommendations for course ${courseId}:`, fetchError);
+          return null;
+        }
+      });
+      
+      const results = await Promise.all(promises);
+      const validResults = results.filter(result => result !== null);
+      
+      if (validResults.length === 0) {
+        console.log("No combo recommendations found for any courses");
+        return;
+      }
+      
+      // Update cart items with combo recommendations
+      const updatedCart = [...cart];
+      validResults.forEach(result => {
+        if (!result) return;
+        
+        const cartItemIndex = updatedCart.findIndex(
+          cartItem => cartItem.courseId === result.courseId
+        );
+        
+        if (cartItemIndex !== -1) {
+          updatedCart[cartItemIndex] = {
+            ...updatedCart[cartItemIndex],
+            combos: result.combos
+          };
+          console.log("Updated cart item with combos:", updatedCart[cartItemIndex]);
+        }
+      });
+      
+      setCart(updatedCart);
+    } catch (error) {
+      console.error("Error in fetchComboRecommendations:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="cart-container">
+        <div className="cart-header">
+          <h1>Giỏ hàng của bạn</h1>
+        </div>
+        <div className="cart-loading">
+          <div className="cart-loading-spinner"></div>
+          <p>Đang tải giỏ hàng...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && cart.length === 0) {
+    return (
+      <div className="cart-container">
+        <div className="cart-header">
+          <h1>Giỏ hàng của bạn</h1>
+        </div>
+        <div className="cart-error">
+          <p>{error}</p>
+          <button onClick={() => navigate("/dang-nhap")} className="btn btn-primary">
+            Đăng nhập
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="cart-container">
       <div className="cart-header">
         <h1>Giỏ hàng của bạn</h1>
+        <div className="cart-controls">
+          {cart.length > 0 && (
+            <>
+              <div className="select-all-control">
+                <label className="checkbox-container">
+                  <input 
+                    type="checkbox" 
+                    checked={selectAll} 
+                    onChange={toggleSelectAll} 
+                  />
+                  <span className="checkmark"></span>
+                  <span className="select-all-text">Chọn tất cả</span>
+                </label>
+              </div>
+              {selectedItems.length > 0 && (
+                <button 
+                  className="btn-delete-selected" 
+                  onClick={handleRemoveSelectedItems}
+                >
+                  <FiTrash2 /> Xóa đã chọn ({selectedItems.length})
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="cart-content">
         <div className="cart-items">
           {cart.length === 0 ? (
             <div className="cart-empty">
-              <svg
-                className="cart-empty-img"
-                width="120"
-                height="120"
-                viewBox="0 0 64 64"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="32" cy="32" r="32" fill="#f3f6fb" />
-                <rect
-                  x="14"
-                  y="22"
-                  width="36"
-                  height="20"
-                  rx="4"
-                  fill="#e0e7ef"
-                />
-                <rect x="18" y="26" width="28" height="12" rx="2" fill="#fff" />
-                <rect
-                  x="22"
-                  y="30"
-                  width="20"
-                  height="4"
-                  rx="2"
-                  fill="#e0e7ef"
-                />
-                <circle cx="24" cy="46" r="3" fill="#b0b8c1" />
-                <circle cx="40" cy="46" r="3" fill="#b0b8c1" />
-                <rect
-                  x="28"
-                  y="18"
-                  width="8"
-                  height="8"
-                  rx="2"
-                  fill="#b0b8c1"
-                />
-              </svg>
+              <FiShoppingBag className="cart-empty-icon" />
               <div className="cart-empty-title">
                 Giỏ hàng của bạn đang trống
               </div>
               <div className="cart-empty-desc">
                 Hãy chọn khóa học để thêm vào giỏ hàng!
               </div>
-              <a href="/khoa-hoc" className="btn btn-primary cart-empty-btn">
+              <a href="/khoa-hoc" className="btn-primary cart-empty-btn">
                 Khám phá khóa học
               </a>
             </div>
           ) : (
-            cart.map((item) => (
-              <div className="cart-item" key={item.id}>
-                <div className="item-image">
-                  <img src={item.image} alt={item.title} />
-                </div>
-                <div className="item-content">
-                  <div className="item-info">
-                    <h3 className="item-title">{item.title}</h3>
-                    <p className="item-instructor">Bởi {item.instructor}</p>
-                    {item.totalHours && (
-                      <div className="item-meta">
-                        <span>Tổng số {item.totalHours}</span>
-                        {item.totalLessons && (
-                          <>
-                            <span className="dot-separator">•</span>
-                            <span>{item.totalLessons}</span>
-                          </>
-                        )}
-                        {item.level && (
-                          <>
-                            <span className="dot-separator">•</span>
-                            <span>{item.level}</span>
-                          </>
-                        )}
+            <>
+              {cart.map((item) => (
+                <React.Fragment key={item.cartItemId}>
+                  <div className={`cart-item ${selectedItems.includes(item.cartItemId) ? 'selected' : ''}`}>
+                    <div className="item-checkbox">
+                      <label className="checkbox-container">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedItems.includes(item.cartItemId)}
+                          onChange={() => toggleSelectItem(item.cartItemId)}
+                        />
+                        <span className="checkmark"></span>
+                      </label>
+                    </div>
+                    <div className="item-image">
+                      <img src={item.image} alt={item.name} />
+                    </div>
+                    <div className="item-content">
+                      <div className="item-info">
+                        <h3 className="item-title">{item.name}</h3>
+                        <div className={`item-type-badge ${item.type.toLowerCase()}-badge`}>
+                          {item.type === "COURSE" ? "Khóa học" : item.type === "COMBO" ? "Combo" : "Đề thi"}
+                        </div>
+                        <div className="item-actions">
+                          <button
+                            onClick={() => handleRemoveItem(item.cartItemId)}
+                            className="remove-btn"
+                          >
+                            <FiTrash2 /> Xóa
+                          </button>
+                        </div>
                       </div>
-                    )}
-                    <div className="item-remove">
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="remove-btn"
-                      >
-                        Xóa
-                      </button>
+                      <div className="item-price">
+                        {item.discount > 0 && (
+                          <div className="item-discount">
+                            <FiTag className="discount-icon" />
+                            <span>-{calculateDiscountPercent(item.cost, item.price)}%</span>
+                          </div>
+                        )}
+                        <div className="price-wrapper">
+                        <div className="current-price">
+                          {formatCurrency(item.price)}
+                        </div>
+                          {item.discount > 0 && (
+                        <div className="original-price">
+                              {formatCurrency(item.cost)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="item-price">
-                    <div className="current-price">
-                      {formatCurrency(item.price)}
+                  
+                  {/* Combo Recommendation Section - Now rendered outside cart-item */}
+                  {item.type === "COURSE" && selectedItems.includes(item.cartItemId) && item.combos && item.combos.length > 0 && (
+                    <div className="combo-recommendation-wrapper">
+                      <div className="combo-recommendation">
+                        <div className="combo-recommendation-header">
+                          <FiPackage className="combo-icon" />
+                          <h4>Tiết kiệm hơn với combo</h4>
+                        </div>
+                        
+                        {item.combos.map(combo => {
+                          // Get the current course price
+                          const currentItemPrice = item.price;
+                          
+                          // Calculate the savings
+                          const combinedPrice = combo.courses ? 
+                            combo.courses.reduce((sum, course) => sum + course.price, 0) : 
+                            combo.courseIds.reduce((sum, id) => {
+                              const cartItem = cart.find(item => item.courseId === id);
+                              return sum + (cartItem ? cartItem.price : 0);
+                            }, 0);
+                          
+                          const savings = combinedPrice - combo.price;
+                          const savingsPercent = combinedPrice > 0 ? Math.round((savings / combinedPrice) * 100) : combo.discount;
+                          
+                          return (
+                            <div key={combo.id} className="combo-recommendation-item">
+                              <div className="combo-recommendation-container">
+                                <div className="combo-recommendation-left">
+                                  <div className="combo-recommendation-image">
+                                    <img src={combo.image} alt={combo.name} />
+                                  </div>
+                                  <div className="combo-discount-badge">
+                                    <span>-{savingsPercent}%</span>
+                                  </div>
+                                  <h5 className="combo-title">{combo.name}</h5>
+                                  <div className="combo-price-info">
+                                    <div className="combo-current-price">{formatCurrency(combo.price)}</div>
+                                    <div className="combo-original-price">{formatCurrency(combinedPrice)}</div>
+                                  </div>
+                                </div>
+                                
+                                <div className="combo-recommendation-right">
+                                  <div className="combo-footer">
+                                    <div className="combo-savings">
+                                      <div className="savings-label">Tiết kiệm</div>
+                                      <div className="savings-value">
+                                        <span className="savings-percent">-{savingsPercent}%</span>
+                                        <span className="savings-amount">({formatCurrency(savings)})</span>
+                                      </div>
+                                    </div>
+                                    
+                                    <button 
+                                      className="combo-view-btn"
+                                      onClick={() => navigate(`/combo/${combo.id}`)}
+                                    >
+                                      Xem combo
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="original-price">
-                      {formatCurrency(item.originalPrice)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
+                  )}
+                </React.Fragment>
+              ))}
+            </>
           )}
         </div>
 
         <div className="cart-summary">
           <div className="summary-header">
-            <h2>Mã giảm giá</h2>
+            <h2>Tóm tắt đơn hàng</h2>
+          </div>
+
+          <div className="summary-content">
+            <div className="cart-summary-selection">
+              <div className="selection-info">
+                <FiShoppingCart className="cart-icon" />
+                <div className="selected-count">
+                  <span>Đã chọn:</span> 
+                  <strong>{selectedItems.length}</strong> / {cart.length} sản phẩm
+                </div>
+              </div>
+            </div>
+            
+            <div className="summary-row">
+              <span>Tổng tiền:</span>
+              <span className="summary-amount">
+                {selectedItems.length > 0 
+                  ? formatCurrency(cart
+                      .filter(item => selectedItems.includes(item.cartItemId))
+                      .reduce((sum, item) => sum + item.price, 0)
+                    )
+                  : "0 ₫"}
+              </span>
+            </div>
+            
+            <div className="promo-section">
+              <h3>Mã giảm giá</h3>
             <div className="promo-input">
               <input
                 type="text"
@@ -166,20 +745,39 @@ function Cart() {
                 onChange={(e) => setPromoCode(e.target.value)}
                 placeholder="Nhập mã giảm giá"
               />
-              <button onClick={applyPromoCode}>Áp dụng</button>
+                <button onClick={applyPromoCode} className="promo-apply-btn">Áp dụng</button>
+              </div>
             </div>
+            
+            {discount > 0 && selectedItems.length > 0 && (
+              <div className="summary-row discount">
+                <span>Giảm giá:</span>
+                <span>-{discount}%</span>
           </div>
+            )}
 
-          <div className="summary-content">
-            <div className="summary-row">
-              <span>Tạm tính:</span>
-              <span>{formatCurrency(totalPrice)}</span>
-            </div>
             <div className="summary-row total">
-              <span>Tổng cộng:</span>
-              <span>{formatCurrency(totalPrice)}</span>
+              <span>Tổng thanh toán:</span>
+              <span>{selectedItems.length > 0 ? formatCurrency(totalPrice) : "0 ₫"}</span>
             </div>
-            <button className="checkout-btn">Thanh toán</button>
+            
+            <button 
+              className={`checkout-btn ${selectedItems.length === 0 ? 'disabled' : ''}`} 
+              onClick={handleCheckout}
+              disabled={selectedItems.length === 0}
+            >
+              Thanh toán ngay
+            </button>
+            
+            {selectedItems.length === 0 && (
+              <div className="checkout-note">Vui lòng chọn ít nhất một sản phẩm để thanh toán</div>
+            )}
+            
+            <div className="secure-checkout">
+              <small>
+                <FiCheck className="secure-icon" /> Thanh toán an toàn và bảo mật
+              </small>
+            </div>
           </div>
         </div>
       </div>

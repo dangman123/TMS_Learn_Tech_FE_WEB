@@ -205,6 +205,7 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
     lessonId: string,
     chapterId: string
   ) => {
+    console.log("handleVideoClick được gọi với:", videoId, lessonId, chapterId);
     const encryptedVideoId = encryptData(videoId);
     localStorage.setItem("encryptedVideoId", encryptedVideoId);
     localStorage.removeItem("encryptedTestId");
@@ -226,7 +227,8 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
     progressData: any
   ) => {
     let targetLesson;
-    console.log("Hi");
+    console.log("NavigateToLesson:", direction, chapterId, lessonId);
+    
     if (direction === "next") {
       targetLesson = getNextLesson(chapterId, lessonId, courseData);
     } else if (direction === "previous") {
@@ -237,27 +239,50 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
       showToast("Không có bài học để chuyển.");
       return;
     }
-    let isUnlocked;
+    
+    console.log("Target lesson found:", targetLesson);
+    
+    // Kiểm tra xem targetLesson có video không
+    if (!targetLesson.video || !targetLesson.video.video_id) {
+      showToast("Không tìm thấy video cho bài học tiếp theo.");
+      return;
+    }
+
+    let isUnlocked = true; // Mặc định cho phép chuyển đến bài học trước
+    
     if (direction === "next") {
-      isUnlocked = isLessonUnlocked(
-        chapterId,
-        targetLesson.lesson_id,
-        progressData
-      );
+      // Kiểm tra xem đây có phải là bài học đầu tiên của chương đầu tiên
+      const isFirstChapter = courseData.chapters.length > 0 && 
+        courseData.chapters[0].chapter_id === chapterId;
+      const isFirstLesson = isFirstChapter && 
+        courseData.chapters[0].lessons.length > 0 && 
+        courseData.chapters[0].lessons[0].lesson_id === lessonId;
+        
+      // Nếu không phải bài đầu tiên, cần kiểm tra trạng thái mở khóa
+      if (!isFirstLesson) {
+        isUnlocked = isLessonUnlocked(
+          chapterId,
+          targetLesson.lesson_id,
+          progressData
+        );
+      }
+      
       if (!isUnlocked) {
         showToast("Bài học này chưa được mở khóa!");
         return;
       }
     }
 
-    handleVideoClick(
-      targetLesson.video?.video_id.toString(),
-      targetLesson.lesson_id.toString(),
-      chapterId.toString()
-    );
-    // console.log("Đã video", targetLesson.video?.video_id.toString());
-    // console.log("Đã lesson", targetLesson.lesson_id.toString());
-    // console.log("Đã chapter", chapterId.toString());
+    try {
+      handleVideoClick(
+        targetLesson.video.video_id.toString(),
+        targetLesson.lesson_id.toString(),
+        chapterId.toString()
+      );
+    } catch (error) {
+      console.error("Lỗi khi chuyển bài học:", error);
+      showToast("Có lỗi xảy ra khi chuyển bài học!");
+    }
   };
 
   const fetchRootComments = async (page: number) => {
@@ -520,6 +545,93 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
       fetchRootComments(currentPage);
     }
   }, [lessonId, currentPage]);
+
+  // Hàm đánh dấu bài học hiện tại là đã hoàn thành
+  const markCurrentLessonCompleted = async () => {
+    // Lấy dữ liệu từ localStorage
+    const storedChapterId = localStorage.getItem("encryptedChapterId");
+    const storedLessonId = localStorage.getItem("encryptedLessonId");
+    const courseId = localStorage.getItem("encryptedCourseId");
+
+    if (!storedChapterId || !storedLessonId || !courseId) {
+      console.error("Thiếu thông tin cần thiết để cập nhật tiến trình");
+      return;
+    }
+
+    const chapterId = decryptData(storedChapterId);
+    const lessonId = decryptData(storedLessonId);
+    const decryptedCourseId = decryptData(courseId);
+    const user = getUserData();
+
+    if (!user || !user.id) {
+      console.error("Không tìm thấy thông tin người dùng");
+      return;
+    }
+
+    // Chuẩn bị dữ liệu để cập nhật tiến trình
+    const requestData = {
+      accountId: user.id,
+      courseId: decryptedCourseId,
+      chapterId: chapterId,
+      lessonId: lessonId,
+      videoStatus: true,
+      testStatus: true,
+      isChapterTest: false,
+    };
+
+    let token = localStorage.getItem("authToken");
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        window.location.href = "/dang-nhap";
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/user-answers/submit-progress-no-test`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update lesson progress");
+      }
+
+      console.log("Bài học đã được đánh dấu hoàn thành");
+      showToast("Bài học đã hoàn thành! Bạn có thể tiếp tục bài học tiếp theo.");
+    } catch (error) {
+      console.error("Lỗi khi cập nhật tiến trình:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Khi video tải xong và bắt đầu phát
+    if (videoRef.current) {
+      const handleVideoEnded = () => {
+        console.log("Video đã kết thúc, đánh dấu bài học hoàn thành");
+        markCurrentLessonCompleted();
+      };
+
+      videoRef.current.addEventListener('ended', handleVideoEnded);
+
+      // Dọn dẹp
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('ended', handleVideoEnded);
+        }
+      };
+    }
+  }, [videoRef.current]);
+
   return (
     <div
       className="rbt-lesson-rightsidebar overflow-hidden lesson-video vaohoc"

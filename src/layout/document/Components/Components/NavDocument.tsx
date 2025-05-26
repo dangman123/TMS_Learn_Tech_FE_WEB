@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import {
   Folder,
   FileEarmark,
   ChevronRight,
   ChevronDown,
+  Search,
 } from "react-bootstrap-icons";
 import "./navDocument.css";
+import { useNavigate } from "react-router-dom";
+import { DocumentModel } from "../../../../model/DocumentModel";
 
 type Category = {
   id: number;
@@ -23,6 +26,16 @@ const NavDocument = () => {
   const [topLevelExpanded, setTopLevelExpanded] = useState<
     Record<number, boolean>
   >({});
+  
+  // Thêm state cho chức năng tìm kiếm
+  const [documentsSearch, setDocumentsSearch] = useState<DocumentModel[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredDocuments, setFilteredDocuments] = useState<DocumentModel[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  
+  const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLDivElement>(null);
+  const [searchPosition, setSearchPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const removeVietnameseTones = (str: string) => {
     return str
@@ -60,7 +73,32 @@ const NavDocument = () => {
       }
     };
 
+    // Thêm hàm fetch dữ liệu tìm kiếm
+    const fetchSearchData = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/general_documents/data`);
+        const data = await response.json();
+        
+        // Chuyển đổi dữ liệu API thành mảng các DocumentModel
+        const documentModels: DocumentModel[] = data.map((item: any) => ({
+          documentId: item[0],
+          documentTitle: item[1],
+          image_url: item[2],
+          url: item[3],
+          view: item[4],
+          created_at: item[5],
+          download_count: item[6],
+          name: item[7],
+        }));
+        
+        setDocumentsSearch(documentModels);
+      } catch (error) {
+        console.error("Error fetching search data:", error);
+      }
+    };
+
     fetchCategories();
+    fetchSearchData();
   }, []);
 
   // Hàm để mở rộng danh mục hiện tại và tất cả danh mục cha của nó
@@ -96,8 +134,8 @@ const NavDocument = () => {
 
   const handleNameClick = (id: number, name: string) => {
     setSelectedCategory(id);
-    localStorage.setItem("iddanhmuckhoahoc", id.toString());
-    localStorage.setItem("danhmuckhoahoc", removeVietnameseTones(name));
+    localStorage.setItem("iddanhmuctailieu", id.toString());
+    localStorage.setItem("danhmuctailieu", removeVietnameseTones(name));
     window.location.href = `/tai-lieu/${removeVietnameseTones(name)}`;
   };
 
@@ -168,6 +206,72 @@ const NavDocument = () => {
 
   const hasChildren = (categoryId: number) => {
     return categories.some((cat) => cat.parentId === categoryId);
+  };
+
+  // Thêm các hàm xử lý tìm kiếm
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.trim() === "") {
+      setShowResults(false);
+      setFilteredDocuments([]);
+    } else {
+      setShowResults(true);
+
+      // Tìm kiếm trong danh sách tài liệu đã tải trước
+      const results = documentsSearch.filter((document) =>
+        document.documentTitle.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredDocuments(results.slice(0, 5)); // Giới hạn 5 kết quả
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchTerm.trim() !== "") {
+      navigate(`/tim-kiem?keyword=${searchTerm}`);
+      setShowResults(false);
+    }
+  };
+
+  const handleBlur = () => {
+    // Sử dụng setTimeout để đảm bảo rằng onClick của phần tử kết quả không bị bỏ qua
+    setTimeout(() => {
+      setShowResults(false);
+    }, 200);
+  };
+
+  // Hàm cập nhật vị trí của kết quả tìm kiếm
+  const updateSearchResultsPosition = () => {
+    if (searchInputRef.current) {
+      const rect = searchInputRef.current.getBoundingClientRect();
+      setSearchPosition({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Cập nhật vị trí khi hiển thị kết quả
+    if (showResults) {
+      updateSearchResultsPosition();
+    }
+    
+    // Thêm event listener để cập nhật vị trí khi cuộn trang
+    window.addEventListener('scroll', updateSearchResultsPosition);
+    window.addEventListener('resize', updateSearchResultsPosition);
+    
+    return () => {
+      window.removeEventListener('scroll', updateSearchResultsPosition);
+      window.removeEventListener('resize', updateSearchResultsPosition);
+    };
+  }, [showResults]);
+
+  const handleFocus = () => {
+    setShowResults(true);
+    updateSearchResultsPosition();
   };
 
   const renderCategories = (parentId: number | null, level = 0) => {
@@ -251,8 +355,67 @@ const NavDocument = () => {
         <div className="document-header">
           <h3 className="document-title">Danh mục tài liệu</h3>
         </div>
+        
+        <div className="document-search">
+          <div className="search-input-container" ref={searchInputRef}>
+            <input
+              type="text"
+              placeholder="Tìm kiếm tài liệu..."
+              value={searchTerm}
+              onChange={handleSearch}
+              onKeyPress={handleKeyPress}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              className="document-search-input"
+            />
+            <button 
+              onClick={() => navigate(`/tim-kiem?keyword=${searchTerm}`)}
+              className="document-search-button"
+            >
+              <Search />
+            </button>
+          </div>
+        </div>
+        
         <div className="document-body">{renderCategories(null)}</div>
       </div>
+      
+      {/* Kết quả tìm kiếm được đặt ở cấp cao nhất của component */}
+      {showResults && searchTerm && filteredDocuments.length > 0 && (
+        <div className="document-search-results" style={{
+          position: 'fixed',
+          top: `${searchPosition.top}px`,
+          left: `${searchPosition.left}px`,
+          width: `${searchPosition.width}px`,
+          zIndex: 9999
+        }}>
+          {filteredDocuments.map((document) => (
+            <div className="document-search-result-item" key={document.documentId}>
+              <a
+                href={`/tai-lieu/${removeVietnameseTones(document.name || '')}/${document.documentId}`}
+                onClick={() => setShowResults(false)}
+              >
+                <img
+                  src={document.image_url}
+                  alt={document.documentTitle}
+                  className="document-search-result-image"
+                />
+                <span className="document-search-result-title">
+                  {document.documentTitle}
+                </span>
+              </a>
+            </div>
+          ))}
+          
+          {filteredDocuments.length > 0 && (
+            <div className="document-search-view-all">
+              <a href={`/tim-kiem?keyword=${searchTerm}`}>
+                Xem tất cả kết quả
+              </a>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

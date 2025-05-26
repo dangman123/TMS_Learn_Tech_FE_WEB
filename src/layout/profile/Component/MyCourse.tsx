@@ -16,7 +16,7 @@ import {
 
 interface CourseUserProfile {
   id: number;
-  image: string;
+  imageUrl: string;
   title: string;
   duration: string;
   enrollment_date: string;
@@ -420,7 +420,7 @@ const MyCourse = () => {
                   {filteredCourses.map((course) => (
                     <div className="course-card" key={course.id}>
                       <div className="course-thumbnail">
-                        <img src={course.image} alt={course.title} />
+                        <img src={course.imageUrl} alt={course.title} />
                         <div className="course-duration">{course.duration}</div>
                         {course.completed && (
                           <div className="course-completed-badge">
@@ -428,7 +428,7 @@ const MyCourse = () => {
                           </div>
                         )}
                       </div>
-                      <div className="course-details">
+                      <div className="course-detailss">
                         <h3 className="course-title">{course.title}</h3>
                         <div className="course-meta">
                           <div className="enrollment-date">

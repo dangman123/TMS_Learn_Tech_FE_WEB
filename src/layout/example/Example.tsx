@@ -1,70 +1,89 @@
-import React, { useState } from "react";
-import NavExample from "./Components/NavExample";
-import ContentExample from "./Components/ContentExample";
-import { useNavigate } from "react-router-dom";
-import useRefreshToken from "../util/fucntion/useRefreshToken";
-import { isTokenExpired } from "../util/fucntion/auth";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { ExamList as ExamListType, ApiResponse } from "../../model/ExamList";
+import ExamList from "./Components/ContentExample";
+import { GET_USER_EXAM } from "../../api/api";
 
-function Example() {
-  const [selectedCourse, setSelectedCourse] = useState<string>(""); // Default value for selected course
-  const [count, setCount] = useState<number>(0);
-  const [tests, setTests] = useState<any[]>([]);
-  const navigate = useNavigate();
-  const refresh = useRefreshToken();
-  const fetchTestsByCourseID = async (courseId: string) => {
-    let token = localStorage.getItem("authToken");
+function Exam() {
+  const categoryId = localStorage.getItem("iddanhmucdethi");
+  const [exams, setExams] = useState<ExamListType[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const examsPerPage = 12;
 
-    if (isTokenExpired(token)) {
-      token = await refresh();
-      if (!token) {
-        navigate("/dang-nhap");
-        return;
-      }
-      localStorage.setItem("authToken", token);
-    }
-    localStorage.setItem("courseId-exam", courseId);
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/tests/by-course?courseId=${courseId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+  useEffect(() => {
+    const fetchExams = async () => {
+      setLoading(true);
+      try {
+        const url = GET_USER_EXAM(currentPage, examsPerPage);
+        const response = await axios.get<ApiResponse>(url);
+
+        if (response.data && response.data.data) {
+          setExams(response.data.data.content);
+          setTotalPages(response.data.data.totalPages);
         }
-      );
-      const data = await response.json();
-      setTests(data.content);
-    } catch (error) {
-      console.error("Error fetching tests:", error);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch exams:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchExams();
+  }, [categoryId, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page);
     }
   };
-  const handleCourseChange = (courseId: string) => {
-    setSelectedCourse(courseId);
-    fetchTestsByCourseID(courseId); // Fetch tests when course is selected
-  };
-  const handleAddClick = () => {
-    setCount(count + 1); // For example, incrementing the count
-  };
+
   return (
-    <section
-      className="main-content main-margin"
-      style={{ height: "auto !important", marginTop: "10px" }}
-    >
-      <div className="container" style={{ height: "auto !important" }}>
-        <div className="row" style={{ height: "auto !important" }}>
-          <p> fsdfsaf</p>
-          <NavExample
-            selectedCourse={selectedCourse}
-            onCourseChange={handleCourseChange}
-            onAddClick={handleAddClick}
-          />
-          <ContentExample tests={tests} />
+    <section className="exams-area pb-120" style={{ marginTop: "40px" }}>
+      <div className="container" style={{ marginTop: "0px", padding: "0px" }}>
+        <div className="row">
+          <div className="col-lg-12 col-md-12 col-sm-12">
+            <ExamList exams={exams} />
+            {!loading && totalPages > 1 && (
+              <div className="pegi justify-content-center mt-60">
+                <a
+                  href="#0"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={`border-none ${
+                    currentPage === 0 ? "disabled" : ""
+                  }`}
+                  aria-disabled={currentPage === 0}
+                >
+                  <i className="fa-regular fa-arrow-left primary-color transition"></i>
+                </a>
+                {[...Array(totalPages)].map((_, index) => (
+                  <a
+                    key={index}
+                    href="#0"
+                    onClick={() => handlePageChange(index)}
+                    className={index === currentPage ? "active" : ""}
+                  >
+                    {index + 1}
+                  </a>
+                ))}
+                <a
+                  href="#0"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={`border-none ${
+                    currentPage === totalPages - 1 ? "disabled" : ""
+                  }`}
+                  aria-disabled={currentPage === totalPages - 1}
+                >
+                  <i className="fa-regular fa-arrow-right primary-color transition"></i>
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-export default Example;
+export default Exam;

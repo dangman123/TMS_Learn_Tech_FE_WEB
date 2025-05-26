@@ -45,6 +45,7 @@
     "json2csv": "^6.0.0-alpha.2",
     "jspdf": "^2.5.2",
     "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.510.0",
     "mammoth": "^1.8.0",
     "npm": "^10.9.2",
     "pdf-image": "^2.0.0",

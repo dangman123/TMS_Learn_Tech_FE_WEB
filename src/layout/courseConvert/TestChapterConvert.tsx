@@ -3,12 +3,12 @@ import "./CoursePageConvert.css";
 import { Col } from "react-bootstrap";
 import { isTokenExpired } from "../util/fucntion/auth";
 import useRefreshToken from "../util/fucntion/useRefreshToken";
-import { decryptData } from "../util/encryption";
+import { decryptData, encryptData } from "../util/encryption";
 import { ToastContainer, toast } from "react-toastify"; // Import Toastify và toast
 import "react-toastify/dist/ReactToastify.css";
 import GiftPopup from "./GiftPopup";
 import { Test_Chapter, Test_Lesson } from "./CoursePageConvert";
-import Timer from "./component/Timer";
+
 interface TestChapterConvertProps {
   isSidebarOpen: boolean;
   handleToggleSidebar: () => void;
@@ -98,6 +98,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
   handleToggleSidebar,
   content,
   progressCheck,
+  courseData,
 }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<{ [questionId: number]: string }>({});
@@ -680,6 +681,25 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
     );
     return progress?.videoStatus === true || progress?.testStatus === true;
   };
+  const handleVideoClick = (
+    videoId: string,
+    lessonId: string,
+    chapterId: string
+  ) => {
+    console.log("handleVideoClick được gọi với:", videoId, lessonId, chapterId);
+    const encryptedVideoId = encryptData(videoId);
+    localStorage.setItem("encryptedVideoId", encryptedVideoId);
+    localStorage.removeItem("encryptedTestId");
+    localStorage.removeItem("encryptedTestChapterId");
+
+    const encryptedChapterId = encryptData(chapterId);
+    const encryptedLessonId = encryptData(lessonId);
+    localStorage.setItem("encryptedChapterId", encryptedChapterId);
+    localStorage.setItem("encryptedLessonId", encryptedLessonId);
+
+    window.location.reload();
+  };
+
   const navigateToLesson = (
     direction: string,
     chapterId: number,
@@ -688,7 +708,8 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
     progressData: any
   ) => {
     let targetLesson;
-    console.log("Hi");
+    console.log("NavigateToLesson trong TestChapter:", direction, chapterId, lessonId);
+    
     if (direction === "next") {
       targetLesson = getNextLesson(chapterId, lessonId, courseData);
     } else if (direction === "previous") {
@@ -699,27 +720,50 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
       showToast("Không có bài học để chuyển.");
       return;
     }
-    let isUnlocked;
+    
+    console.log("Target lesson found:", targetLesson);
+    
+    // Kiểm tra xem targetLesson có video không
+    if (!targetLesson.video || !targetLesson.video.video_id) {
+      showToast("Không tìm thấy video cho bài học tiếp theo.");
+      return;
+    }
+
+    let isUnlocked = true; // Mặc định cho phép chuyển đến bài học trước
+    
     if (direction === "next") {
-      isUnlocked = isLessonUnlocked(
-        chapterId,
-        targetLesson.lesson_id,
-        progressData
-      );
+      // Kiểm tra xem đây có phải là bài học đầu tiên của chương đầu tiên
+      const isFirstChapter = courseData.chapters.length > 0 && 
+        courseData.chapters[0].chapter_id === chapterId;
+      const isFirstLesson = isFirstChapter && 
+        courseData.chapters[0].lessons.length > 0 && 
+        courseData.chapters[0].lessons[0].lesson_id === lessonId;
+        
+      // Nếu không phải bài đầu tiên, cần kiểm tra trạng thái mở khóa
+      if (!isFirstLesson) {
+        isUnlocked = isLessonUnlocked(
+          chapterId,
+          targetLesson.lesson_id,
+          progressData
+        );
+      }
+      
       if (!isUnlocked) {
         showToast("Bài học này chưa được mở khóa!");
         return;
       }
     }
 
-    // handleVideoClick(
-    //   targetLesson.video?.video_id.toString(),
-    //   targetLesson.lesson_id.toString(),
-    //   chapterId.toString()
-    // );
-    // console.log("Đã video", targetLesson.video?.video_id.toString());
-    // console.log("Đã lesson", targetLesson.lesson_id.toString());
-    // console.log("Đã chapter", chapterId.toString());
+    try {
+      handleVideoClick(
+        targetLesson.video.video_id.toString(),
+        targetLesson.lesson_id.toString(),
+        chapterId.toString()
+      );
+    } catch (error) {
+      console.error("Lỗi khi chuyển bài học:", error);
+      showToast("Có lỗi xảy ra khi chuyển bài học!");
+    }
   };
   const showToast = (message: string) => {
     toast.warning(message, {
@@ -815,9 +859,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
           className="content"
           style={{ padding: "40px 50px", width: "95%", margin: "0 auto" }}
         >
-          <div
-            style={{ display: "flex", justifyContent: "right", gap: "10px" }}
-          >
+          <div style={{ display: "flex", justifyContent: "right", gap: "10px" }}>
             <button
               type="button"
               className="rbt-btn btn-gradient hover-icon-reverse"
@@ -830,7 +872,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
               Hiển thị đáp án
             </button>
 
-            {/* <button
+            <button
               type="button"
               className="rbt-btn btn-gradient hover-icon-reverse"
               style={{
@@ -852,7 +894,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                   ? parseInt(decryptData(storedLessonId), 10)
                   : null;
 
-                if (chapterId && lessonId) {
+                if (chapterId && lessonId && courseData) {
                   // Gọi hàm chuyển bài học
                   navigateToLesson(
                     "next",
@@ -867,7 +909,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
               }}
             >
               Qua bài mới
-            </button> */}
+            </button>
           </div>
           <hr />
           <div

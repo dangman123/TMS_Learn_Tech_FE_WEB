@@ -116,6 +116,38 @@ const Header: React.FC = () => {
   const [userName, setUserName] = useState<string>("");
   const [cartItemCount, setCartItemCount] = useState<number>(0);
 
+  // Hàm lấy số lượng sản phẩm trong giỏ hàng từ API
+  const fetchCartItemsCount = async () => {
+    try {
+      const userData = getUserData();
+      if (!userData || !userData.id) return;
+
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${userData.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error("Failed to fetch cart items");
+        return;
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.status === 200 && responseData.data) {
+        // Nếu data là một mảng, thì lấy độ dài của mảng
+        const itemCount = Array.isArray(responseData.data) ? responseData.data.length : 0;
+        setCartItemCount(itemCount);
+      }
+    } catch (error) {
+      console.error("Error fetching cart items count:", error);
+    }
+  };
+
   useEffect(() => {
     let token = localStorage.getItem("authToken");
     if (token) {
@@ -130,14 +162,28 @@ const Header: React.FC = () => {
           console.error("Error parsing authData:", error);
         }
       }
+
+      // Lấy số lượng sản phẩm trong giỏ hàng từ API khi đã đăng nhập
+      fetchCartItemsCount();
     } else {
       setIsLoggedIn(false);
     }
-    const cartData = sessionStorage.getItem("cart");
-    if (cartData) {
-      const cartItems = JSON.parse(cartData);
-      setCartItemCount(cartItems.length);
-    }
+  }, []);
+
+  // Lắng nghe sự kiện cập nhật giỏ hàng
+  useEffect(() => {
+    // Tạo một hàm xử lý sự kiện
+    const handleCartUpdate = () => {
+      fetchCartItemsCount();
+    };
+
+    // Đăng ký sự kiện
+    window.addEventListener('cart-updated', handleCartUpdate);
+
+    // Dọn dẹp khi component unmount
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate);
+    };
   }, []);
 
   const navigate = useNavigate(); // Để điều hướng trang
@@ -262,21 +308,34 @@ const Header: React.FC = () => {
 
         const data = await response.json();
         // Check if the data is in a paginated format
-        if (data && typeof data === 'object' && data.content && Array.isArray(data.content)) {
-          setNotifications(data.content); 
+
+        if (
+          data &&
+          typeof data === "object" &&
+          data.content &&
+          Array.isArray(data.content)
+        ) {
+          setNotifications(data.content);
           // stopLoading();
           // Ensure we're filtering an array
-          const unreadCount = Array.isArray(data.content) 
-            ? data.content.filter((notification: Notification) => !notification.status).length 
+          const unreadCount = Array.isArray(data.content)
+            ? data.content.filter(
+              (notification: Notification) => !notification.status
+            ).length
             : 0;
           setUnreadCount(unreadCount);
         } else {
           // Backward compatibility for case when API returns notifications directly as an array
-          console.log("Notifications not in expected format, trying fallback handling");
+          console.log(
+            "Notifications not in expected format, trying fallback handling"
+          );
           const safeNotifications = Array.isArray(data) ? data : [];
           setNotifications(safeNotifications);
           setUnreadCount(
-            safeNotifications.filter((notification: Notification) => !notification.status).length
+            safeNotifications.filter(
+              (notification: Notification) => !notification.status
+            ).length
+
           );
         }
       } catch (error) {
@@ -425,10 +484,10 @@ const Header: React.FC = () => {
                           );
                           localStorage.setItem("danhmuctailieuVN", level1.name);
                           localStorage.setItem(
-                            "iddanhmuctailieucap1",
+                            "iddanhmuctailieu",
                             level1.id.toString()
                           );
-                          localStorage.removeItem("iddanhmuctailieucap2");
+                          localStorage.removeItem("iddanhmuctailieu");
                         }}
                       >
                         {level1.name}
@@ -447,15 +506,15 @@ const Header: React.FC = () => {
                                   removeVietnameseTones(level2.name)
                                 );
                                 localStorage.setItem(
-                                  "danhmuctailieuVN",
+                                  "iddanhmuctailieu",
                                   level2.name
                                 );
                                 localStorage.setItem(
-                                  "iddanhmuctailieucap1",
+                                  "iddanhmuctailieu",
                                   level1.id.toString()
                                 );
                                 localStorage.setItem(
-                                  "iddanhmuctailieucap2",
+                                  "iddanhmuctailieu",
                                   level2.id.toString()
                                 );
                               }}
@@ -478,19 +537,19 @@ const Header: React.FC = () => {
                                             removeVietnameseTones(level3.name)
                                           );
                                           localStorage.setItem(
-                                            "danhmuctailieuVN",
+                                            "iddanhmuctailieu",
                                             level3.name
                                           );
                                           localStorage.setItem(
-                                            "iddanhmuctailieucap1",
+                                            "iddanhmuctailieu",
                                             level1.id.toString()
                                           );
                                           localStorage.setItem(
-                                            "iddanhmuctailieucap2",
+                                            "iddanhmuctailieu",
                                             level2.id.toString()
                                           );
                                           localStorage.setItem(
-                                            "iddanhmuctailieucap3",
+                                            "iddanhmuctailieu",
                                             level3.id.toString()
                                           );
                                         }}
@@ -514,8 +573,8 @@ const Header: React.FC = () => {
                 <a
                   href="/khoa-hoc"
                   onClick={() => {
-                    localStorage.removeItem("iddanhmuckhoahoccap1");
-                    localStorage.removeItem("iddanhmuckhoahoccap2");
+                    localStorage.removeItem("iddanhmuckhoahoc");
+                    localStorage.removeItem("iddanhmuckhoahoc");
                   }}
                 >
                   Khóa học <i className="fa-solid fa-angle-down"></i>
@@ -524,7 +583,7 @@ const Header: React.FC = () => {
                   {level1CategoriesCourse.map((level1) => (
                     <li key={level1.id} className="level1-item">
                       <a
-                        href={`/khoa-hoc/${removeVietnameseTones(level1.name)}`}
+                        href={`/khoa-hoc/danh-muc/${removeVietnameseTones(level1.name)}`}
                         onClick={() => {
                           localStorage.setItem(
                             "danhmuckhoahoc",
@@ -532,10 +591,10 @@ const Header: React.FC = () => {
                           );
                           localStorage.setItem("danhmuckhoahocVN", level1.name);
                           localStorage.setItem(
-                            "iddanhmuckhoahoccap1",
+                            "iddanhmuckhoahoc",
                             level1.id.toString()
                           );
-                          localStorage.removeItem("iddanhmuckhoahoccap2");
+                          localStorage.removeItem("iddanhmuckhoahoc");
                         }}
                       >
                         {level1.name}
@@ -545,7 +604,7 @@ const Header: React.FC = () => {
                           (level2) => (
                             <li key={level2.id} className="level2-item">
                               <a
-                                href={`/khoa-hoc/${removeVietnameseTones(
+                                href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
                                   level2.name
                                 )}`}
                                 onClick={() => {
@@ -558,11 +617,11 @@ const Header: React.FC = () => {
                                     level2.name
                                   );
                                   localStorage.setItem(
-                                    "iddanhmuckhoahoccap1",
+                                    "iddanhmuckhoahoc",
                                     level1.id.toString()
                                   );
                                   localStorage.setItem(
-                                    "iddanhmuckhoahoccap2",
+                                    "iddanhmuckhoahoc",
                                     level2.id.toString()
                                   );
                                 }}
@@ -572,13 +631,14 @@ const Header: React.FC = () => {
                               {/* Thêm danh mục cấp 3 khóa học ở đây nếu có */}
                               {groupedCategoriesLevel3Course[level2.id]
                                 ?.length > 0 && (
+
                                   <ul className="sub-sub-sub-menu">
                                     {groupedCategoriesLevel3Course[
                                       level2.id
                                     ]?.map((level3) => (
                                       <li key={level3.id} className="level3-item">
                                         <a
-                                          href={`/khoa-hoc/${removeVietnameseTones(
+                                          href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
                                             level3.name
                                           )}`}
                                           onClick={() => {
@@ -587,19 +647,19 @@ const Header: React.FC = () => {
                                               removeVietnameseTones(level3.name)
                                             );
                                             localStorage.setItem(
-                                              "danhmuckhoahocVN",
+                                              "danhmuckhoahoc",
                                               level3.name
                                             );
                                             localStorage.setItem(
-                                              "iddanhmuckhoahoccap1",
+                                              "iddanhmuckhoahoc",
                                               level1.id.toString()
                                             );
                                             localStorage.setItem(
-                                              "iddanhmuckhoahoccap2",
+                                              "iddanhmuckhoahoc",
                                               level2.id.toString()
                                             );
                                             localStorage.setItem(
-                                              "iddanhmuckhoahoccap3",
+                                              "iddanhmuckhoahoc",
                                               level3.id.toString()
                                             );
                                           }}
@@ -610,6 +670,7 @@ const Header: React.FC = () => {
                                     ))}
                                   </ul>
                                 )}
+
                             </li>
                           )
                         )}
@@ -658,47 +719,6 @@ const Header: React.FC = () => {
         ></div>
         <div></div>
         <div className="d-flex align-items-center gap-4 gap-xl-5">
-          <div className="menu-search">
-            <input
-              type="text"
-              placeholder="Tìm kiếm tài liệu ..."
-              value={searchTerm}
-              onChange={handleSearch}
-              onKeyPress={handleKeyPress}
-              onFocus={() => setShowResults(true)} // Hiển thị khi người dùng click vào input
-              onBlur={handleBlur} // Ẩn khi người dùng rời khỏi input
-            />
-            <button onClick={() => navigate(`/tim-kiem?keyword=${searchTerm}`)}>
-              <a href="">
-                <i className="fa-regular fa-magnifying-glass"></i>
-              </a>
-            </button>
-          </div>
-
-          {showResults && searchTerm && filteredDocuments.length > 0 && (
-            <div className="search-results">
-              {filteredDocuments.map((document) => (
-                <div className="search-result-item" key={document.documentId}>
-                  <a
-                    href={`/tai-lieu/${removeVietnameseTones(document.name)}/${document.documentId
-                      }`}
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src={document.image_url}
-                      alt={document.documentTitle}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        marginRight: "10px",
-                      }}
-                    />
-                    {document.documentTitle}
-                  </a>
-                </div>
-              ))}
-            </div>
-          )}
 
           {isLoggedIn ? (
             // Nếu đã đăng nhập, hiển thị icon User và tên người dùng
@@ -712,7 +732,11 @@ const Header: React.FC = () => {
                 </a>
               </li>
               <NotificationDropdown
-                notifications={Array.isArray(notifications) ? notifications : []}
+
+                notifications={
+                  Array.isArray(notifications) ? notifications : []
+                }
+
                 unreadCount={unreadCount}
               />
               <div className="user-dropdown">

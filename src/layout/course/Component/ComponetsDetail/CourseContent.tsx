@@ -14,14 +14,15 @@ interface Review {
 
 interface CourseContentProps {
   course: CoureseDetail;
-  reviews: Review[];
+  reviews: Review[] | null;
 }
 
-export const CourseContent: React.FC<CourseContentProps> = ({ course, reviews }) => {
+export const CourseContent: React.FC<CourseContentProps> = ({ course, reviews = [] }) => {
 
   const { averageRating, totalReviews } = useMemo(() => {
-    const totalReviews = reviews.length;
-    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    const reviewsArray = Array.isArray(reviews) ? reviews : [];
+    const totalReviews = reviewsArray.length;
+    const totalRating = reviewsArray.reduce((sum, review) => sum + review.rating, 0);
     const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
 
     return { averageRating, totalReviews };
@@ -41,7 +42,7 @@ export const CourseContent: React.FC<CourseContentProps> = ({ course, reviews })
   return (
     <div className="courses-details__item-left" style={{ backgroundColor: "white", borderRadius: "10px" }}>
       <div className="image">
-        <img src={course.image_url} alt={course.title} className="img-detail-course" ></img>
+        <img src={course.imageUrl} alt={course.title} className="img-detail-course" ></img>
       </div>
       <div style={{ padding: "20px" }}>
         <a href="#0" className="tag" >

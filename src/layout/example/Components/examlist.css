@@ -1,0 +1,186 @@
+/* CSS cho ExamList */
+
+/* Card Container */
+.exam-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.exam-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Image Section */
+.exam-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.exam-image img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.exam-image:hover img {
+  transform: scale(1.05);
+}
+
+.time-limit {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Content Section */
+.exam-content {
+  position: relative;
+  padding: 20px !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Exam Title */
+.exam-title {
+  min-height: 40px;
+  max-height: 70px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  margin-bottom: 15px;
+}
+
+.exam-title a {
+  color: #333;
+  transition: color 0.3s;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.exam-title a:hover {
+  color: #0056b3;
+}
+
+/* Meta Info */
+.exam-meta {
+  margin: 15px 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.exam-meta li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.exam-meta li i {
+  color: #0056b3;
+}
+
+/* Exam Footer */
+.exam-footer {
+  padding-top: 15px;
+  margin-top: auto;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Difficulty Badge */
+.difficulty-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Price Section */
+.exam-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.free-badge {
+  background: #28a745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.price-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.original-price {
+  font-size: 0.8rem;
+  text-decoration: line-through;
+  color: #888;
+  white-space: nowrap;
+}
+
+.current-price {
+  font-weight: bold;
+  color: #e94560;
+  white-space: nowrap;
+  font-size: 1.1rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .exam-title {
+    min-height: 40px;
+    max-height: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .exam-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .exam-footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .exam-price {
+    width: 100%;
+    text-align: left;
+  }
+}

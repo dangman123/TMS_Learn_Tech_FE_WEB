@@ -14,7 +14,7 @@ import Example_Detail from "./layout/example/Example_Detail";
 import Courses from "./layout/course/Courses";
 import Blogs from "./layout/blogs/Blogs";
 import BlogDetail from "./layout/blogs/BlogDetail";
-import Contacts from "./layout/contact/Contacs";
+import Contacts from "./layout/contact/Contact";
 import MainLayout from "./layout/main-dom/MainLayout";
 import Login from "./layout/login/Login";
 import Register from "./layout/login/Register";
@@ -26,6 +26,7 @@ import withAuth from "./layout/DOM/withAuth";
 import Cart from "./layout/cart/Cart";
 import Checkout from "./layout/checkout/Checkout";
 import ConfirmPuchase from "./layout/course/ConfirmPuchase";
+import ComboDetail from "./layout/course/Component/Combo/Combodetail";
 
 import NotificationDetails from "./layout/header-footer/NotificationDetails";
 import NotificationDropdown from "./layout/header-footer/NotificationDropdown";
@@ -39,7 +40,6 @@ import Test_Admin22 from "./layout/login/tesss2";
 import { PaymentFail } from "./layout/payment/PaymentFail";
 import PaymentSuccess from "./layout/payment/PaymentSuccess";
 import { LogicPayment } from "./layout/util/LogicPayment";
-import BlogCategory from "./layout/blogs/BlogCategory";
 
 import Error403 from "./layout/util/bao-loi-403";
 import CourseVaoHoc from "./layout/course/CourseVaoHoc";
@@ -156,7 +156,7 @@ function App() {
                 path="/tai-lieu"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <Document />
                   </MainLayout>
                 }
@@ -165,7 +165,7 @@ function App() {
                 path="/tai-lieu/:danhmuc"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <Document />
                   </MainLayout>
                 }
@@ -174,7 +174,7 @@ function App() {
                 path="/tai-lieu/:danhmuc/:id"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <Document_Detail />
                   </MainLayout>
                 }
@@ -189,7 +189,7 @@ function App() {
                 }
               />
               <Route
-                path="/de-thi/:testId"
+                path="/de-thi/:slug"
                 element={
                   <MainLayout>
                     {/* <Breadcum /> */}
@@ -207,16 +207,7 @@ function App() {
                 }
               />
               <Route
-                path="/khoa-hoc/:danh-muc"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Courses />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/khoa-hoc/:danh-muc/:id"
+                path="/khoa-hoc/:slug"
                 element={
                   <MainLayout>
                     {/* <Breadcum /> */}
@@ -225,10 +216,19 @@ function App() {
                 }
               />
               <Route
+                path="/khoa-hoc/danh-muc/:categoryName"
+                element={
+                  <MainLayout>
+                    {/* <Breadcum /> */}
+                    <Courses />
+                  </MainLayout>
+                }
+              />
+              <Route
                 path="/khoa-hoc/thanh-toan"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <ConfirmPuchase />
                   </MainLayout>
                 }
@@ -237,7 +237,7 @@ function App() {
                 path="/khoa-hoc/thanh-toan/fail"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <PaymentFail />
                   </MainLayout>
                 }
@@ -246,8 +246,17 @@ function App() {
                 path="/khoa-hoc/thanh-toan/success"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <PaymentSuccess />
+                  </MainLayout>
+                }
+              />
+              <Route
+                path="/combo/:id"
+                element={
+                  <MainLayout>
+                    {/* <Breadcum /> */}
+                    <ComboDetail />
                   </MainLayout>
                 }
               />
@@ -255,25 +264,17 @@ function App() {
                 path="/bai-viet"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <Blogs />
                   </MainLayout>
                 }
               />
-              <Route
-                path="/bai-viet/danh-muc-bai-viet/:id"
-                element={
-                  <MainLayout>
-                    <Breadcum />
-                    <BlogCategory />
-                  </MainLayout>
-                }
-              />
+
               <Route
                 path="/bai-viet/:id"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <BlogDetail />
                   </MainLayout>
                 }
@@ -282,7 +283,7 @@ function App() {
                 path="/ho-tro"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <Contacts />
                   </MainLayout>
                 }
@@ -366,7 +367,7 @@ function App() {
                 path="/gio-hang"
                 element={
                   <MainLayout>
-                    <Breadcum />
+                    {/* <Breadcum /> */}
                     <Cart />
                   </MainLayout>
                 }

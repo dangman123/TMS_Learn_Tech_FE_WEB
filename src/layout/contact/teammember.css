@@ -3,11 +3,6 @@
   position: relative;
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
 .scroll-container {
   display: flex;
   gap: 20px;

@@ -2,3 +2,31 @@
     border: 1px solid;
     margin-bottom: 10px;
 }
+
+/* Styles for download limit information */
+.download-limit-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.download-limit-info .text-info {
+  color: #0d6efd;
+  font-weight: 500;
+}
+
+.download-limit-info .text-danger {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.download-limit-info div {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.download-limit-info .btn-link {
+  padding: 0;
+  font-weight: 600;
+  text-decoration: none;
+}
