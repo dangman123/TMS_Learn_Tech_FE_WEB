@@ -1,5 +1,5 @@
-Styles cho trang Contact
-.support-banner {
+/* CSS Module cho trang Contact */
+.supportBanner {
   background: linear-gradient(90deg, #2eb97e 0%, #3abf85 100%);
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(46, 185, 126, 0.25);
@@ -9,7 +9,7 @@ Styles cho trang Contact
   overflow: hidden;
 }
 
-.support-banner::before {
+.supportBanner::before {
   content: "";
   position: absolute;
   top: -30px;
@@ -20,71 +20,31 @@ Styles cho trang Contact
   border-radius: 50%;
 }
 
-.support-banner-content {
+.supportBannerContent {
   display: flex;
   align-items: center;
 }
 
-.support-banner-icon {
+.supportBannerIcon {
   font-size: 2.5rem;
   margin-right: 20px;
   color: rgba(255, 255, 255, 0.9);
 }
 
-.support-banner-text h4 {
+.supportBannerText h4 {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 8px;
   color: #fff;
 }
 
-.support-banner-text p {
+.supportBannerText p {
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0;
 }
 
-.support-banner-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.search-container {
-  max-width: 700px;
-  margin: 0 auto 40px;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  background-color: #f5f7fa;
-  border-radius: 10px;
-  padding: 12px 20px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e8eef3;
-}
-
-.search-icon {
-  color: #9aa3af;
-  font-size: 18px;
-  margin-right: 15px;
-}
-
-.search-input {
-  width: 100%;
-  border: none;
-  background: transparent;
-  font-size: 16px;
-  color: #555;
-  outline: none;
-}
-
-.search-input::placeholder {
-  color: #a0a8b3;
-}
-
-.section-title {
+.sectionTitle {
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
@@ -93,7 +53,7 @@ Styles cho trang Contact
   padding-bottom: 10px;
 }
 
-.section-title::after {
+.sectionTitle::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -117,79 +77,112 @@ Styles cho trang Contact
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-.card-header {
+.cardHeader {
   background-color: #f8f9fa;
   padding: 15px 20px;
   border-bottom: 1px solid #e8eef3;
 }
 
-.card-header h5 {
+.cardHeader h5 {
   font-size: 1.15rem;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.accordion-item {
+.accordionItem {
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 15px;
-  border: 1px solid #e8eef3;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  border: none;
+  box-shadow: none;
+  background-color: #e3f7ef;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.accordion-button {
+.accordionItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(46, 185, 126, 0.2);
+}
+
+.accordionButton {
+  width: 100%;
+  text-align: left;
   font-weight: 600;
-  color: #444;
+  font-size: 1.1rem;
+  color: #2eb97e;
   padding: 18px 25px;
-  background-color: #f8fafb;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
   transition: all 0.3s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.accordion-button:not(.collapsed) {
-  background-color: #f0f9f5;
+.accordionButton:after {
+  content: '\f105';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  right: 25px;
+  transition: transform 0.3s ease;
+  color: #2eb97e;
+}
+
+.accordionButton:not(.collapsed):after {
+  transform: rotate(90deg);
+}
+
+.accordionButton:not(.collapsed) {
+  background-color: #e3f7ef;
   color: #2eb97e;
   box-shadow: none;
 }
 
-.accordion-button:focus {
+.accordionButton:focus {
   box-shadow: none;
-  border-color: #e8eef3;
+  outline: none;
 }
 
-.accordion-body {
-  padding: 20px 25px;
-  color: #555;
+.accordionBody {
+  padding: 0 25px 20px 25px;
+  color: #444;
   line-height: 1.6;
+  background-color: #e3f7ef;
 }
 
-.list-group-item {
+.listGroupItem {
   padding: 15px 20px;
   border-color: #e8eef3;
   transition: background-color 0.2s;
 }
 
-.list-group-item:hover {
+.listGroupItem:hover {
   background-color: #f5f9ff;
 }
 
-.feedback-section .card {
+.feedbackSection .card {
   background: linear-gradient(145deg, #f8fafb, #ffffff);
+  margin-bottom: 20px;
 }
 
-.contact__map {
+.contactMap {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
-.contact__map iframe {
+.contactMap iframe {
   width: 100%;
   height: 450px;
   border: none;
 }
 
-.contact-support {
+.contactSupport {
   background-color: #fff;
   border-radius: 12px;
   padding: 30px;
@@ -201,30 +194,30 @@ Styles cho trang Contact
   transition: transform 0.3s;
 }
 
-.contact-support:hover {
+.contactSupport:hover {
   transform: translateY(-5px);
 }
 
-.contact-support svg,
-.contact-support i {
+.contactSupport svg,
+.contactSupport i {
   margin-bottom: 20px;
   color: #2eb97e;
 }
 
-.contact-support h3 {
+.contactSupport h3 {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 10px;
   color: #333;
 }
 
-.contact-support p {
+.contactSupport p {
   color: #666;
   line-height: 1.6;
 }
 
 /* Guide Category Card styles */
-.guide-category-card {
+.guideCategoryCard {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
@@ -234,12 +227,12 @@ Styles cho trang Contact
   border: 1px solid rgba(46, 185, 126, 0.15);
 }
 
-.guide-category-card:hover {
+.guideCategoryCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(46, 185, 126, 0.15);
 }
 
-.guide-category-header {
+.guideCategoryHeader {
   background: linear-gradient(135deg, #f8fafb, #f0f9f5);
   padding: 20px 25px;
   border-bottom: 1px solid rgba(46, 185, 126, 0.15);
@@ -247,7 +240,7 @@ Styles cho trang Contact
   align-items: center;
 }
 
-.category-icon {
+.categoryIcon {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -258,23 +251,23 @@ Styles cho trang Contact
   margin-right: 15px;
 }
 
-.category-icon i {
+.categoryIcon i {
   font-size: 22px;
   color: white;
 }
 
-.guide-category-header h5 {
+.guideCategoryHeader h5 {
   font-size: 1.25rem;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.guide-items-container {
+.guideItemsContainer {
   padding: 15px 0;
 }
 
-.guide-item {
+.guideItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -284,21 +277,21 @@ Styles cho trang Contact
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.guide-item:last-child {
+.guideItem:last-child {
   border-bottom: none;
 }
 
-.guide-item:hover {
+.guideItem:hover {
   background-color: rgba(46, 185, 126, 0.05);
 }
 
-.guide-item-content {
+.guideItemContent {
   display: flex;
   align-items: center;
   max-width: 85%;
 }
 
-.guide-item-icon {
+.guideItemIcon {
   width: 36px;
   height: 36px;
   display: flex;
@@ -310,24 +303,24 @@ Styles cho trang Contact
   flex-shrink: 0;
 }
 
-.guide-item-icon i {
+.guideItemIcon i {
   font-size: 16px;
   color: #2eb97e;
 }
 
-.guide-item-text {
+.guideItemText {
   flex-grow: 1;
   overflow: hidden;
 }
 
-.guide-item-text h6 {
+.guideItemText h6 {
   font-size: 1rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 5px;
 }
 
-.guide-item-description {
+.guideItemDescription {
   font-size: 0.875rem;
   color: #777;
   margin: 0;
@@ -336,23 +329,23 @@ Styles cho trang Contact
   white-space: nowrap;
 }
 
-.guide-item-arrow {
+.guideItemArrow {
   flex-shrink: 0;
   opacity: 0.5;
   transition: all 0.2s;
 }
 
-.guide-item:hover .guide-item-arrow {
+.guideItem:hover .guideItemArrow {
   opacity: 1;
   transform: translateX(5px);
 }
 
-.guide-item-arrow i {
+.guideItemArrow i {
   color: #2eb97e;
 }
 
 /* Guide content styles */
-.guide-heading-1 {
+.guideHeading1 {
   font-size: 1.8rem;
   font-weight: 700;
   color: #333;
@@ -362,7 +355,7 @@ Styles cho trang Contact
   position: relative;
 }
 
-.guide-heading-1:after {
+.guideHeading1:after {
   content: '';
   position: absolute;
   bottom: -1px;
@@ -373,7 +366,7 @@ Styles cho trang Contact
   border-radius: 3px;
 }
 
-.guide-heading-2-container {
+.guideHeading2Container {
   display: flex;
   align-items: center;
   margin: 2rem 0 1rem;
@@ -382,27 +375,27 @@ Styles cho trang Contact
   border-radius: 8px;
 }
 
-.guide-step-icon {
+.guideStepIcon {
   color: #2eb97e;
   font-size: 1.2rem;
   margin-right: 10px;
 }
 
-.guide-heading-2 {
+.guideHeading2 {
   font-size: 1.4rem;
   font-weight: 600;
   color: #444;
   margin: 0;
 }
 
-.guide-paragraph {
+.guideParagraph {
   color: #555;
   line-height: 1.7;
   margin-bottom: 1.2rem;
   font-size: 1rem;
 }
 
-.guide-bullet {
+.guideBullet {
   display: flex;
   align-items: flex-start;
   margin-bottom: 1rem;
@@ -410,26 +403,26 @@ Styles cho trang Contact
   transition: transform 0.2s;
 }
 
-.guide-bullet:hover {
+.guideBullet:hover {
   transform: translateX(5px);
 }
 
-.guide-bullet-dot {
+.guideBulletDot {
   color: #2eb97e;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
-.guide-bullet-dot i {
+.guideBulletDot i {
   font-size: 0.9rem;
 }
 
-.guide-spacer {
+.guideSpacer {
   height: 20px;
 }
 
 /* Modal styles */
-.tms-modal-overlay {
+.tmsModalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -452,7 +445,7 @@ Styles cho trang Contact
   to { opacity: 1; }
 }
 
-.tms-modal-dialog {
+.tmsModalDialog {
   margin: 1.75rem auto;
   max-width: 800px;
   width: calc(100% - 2rem);
@@ -468,7 +461,7 @@ Styles cho trang Contact
   to { transform: translateY(0); opacity: 1; }
 }
 
-.tms-modal-content {
+.tmsModalContent {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -483,7 +476,7 @@ Styles cho trang Contact
   overflow: hidden;
 }
 
-.tms-modal-header {
+.tmsModalHeader {
   background: linear-gradient(135deg, #f8fafb, #f0f9f5);
   border-bottom: 1px solid rgba(46, 185, 126, 0.15);
   padding: 1rem 1.5rem;
@@ -492,12 +485,12 @@ Styles cho trang Contact
   justify-content: space-between;
 }
 
-.tms-modal-title-container {
+.tmsModalTitleContainer {
   display: flex;
   align-items: center;
 }
 
-.tms-modal-icon {
+.tmsModalIcon {
   width: 42px;
   height: 42px;
   border-radius: 12px;
@@ -509,19 +502,19 @@ Styles cho trang Contact
   flex-shrink: 0;
 }
 
-.tms-modal-icon i {
+.tmsModalIcon i {
   font-size: 20px;
   color: white;
 }
 
-.tms-modal-title {
+.tmsModalTitle {
   font-size: 1.25rem;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.tms-btn-close {
+.tmsBtnClose {
   opacity: 0.7;
   transition: all 0.2s;
   background: transparent;
@@ -535,25 +528,25 @@ Styles cho trang Contact
   color: #444;
 }
 
-.tms-btn-close:hover {
+.tmsBtnClose:hover {
   opacity: 1;
   transform: scale(1.1);
 }
 
-.tms-modal-body {
+.tmsModalBody {
   padding: 1.5rem;
   overflow-y: auto;
   max-height: 60vh;
 }
 
-.tms-modal-footer {
+.tmsModalFooter {
   padding: 1rem 1.5rem;
   border-top: 1px solid rgba(46, 185, 126, 0.15);
   display: flex;
   justify-content: flex-end;
 }
 
-.tms-btn-primary {
+.tmsBtnPrimary {
   background: linear-gradient(135deg, #2eb97e, #3abf85);
   border: none;
   padding: 10px 20px;
@@ -563,7 +556,7 @@ Styles cho trang Contact
   color: white;
 }
 
-.tms-btn-primary:hover {
+.tmsBtnPrimary:hover {
   box-shadow: 0 5px 15px rgba(46, 185, 126, 0.3);
   transform: translateY(-2px);
   background: linear-gradient(135deg, #26a46f, #33b57c);
@@ -572,48 +565,66 @@ Styles cho trang Contact
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .support-banner {
+  .supportBanner {
     padding: 20px;
   }
 
-  .support-banner-icon {
+  .supportBannerIcon {
     font-size: 2rem;
     margin-right: 15px;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 1.4rem;
   }
 
-  .guide-category-header {
+  .guideCategoryHeader {
     padding: 15px 20px;
   }
 
-  .category-icon {
+  .categoryIcon {
     width: 40px;
     height: 40px;
   }
 
-  .guide-item {
+  .guideItem {
     padding: 12px 20px;
   }
 
-  .guide-heading-1 {
+  .guideHeading1 {
     font-size: 1.5rem;
   }
 
-  .guide-heading-2 {
+  .guideHeading2 {
     font-size: 1.2rem;
   }
 
-  .tms-modal-dialog {
+  .tmsModalDialog {
     margin: 0.5rem auto;
     max-width: 95%;
     max-height: 85vh;
   }
   
-  .tms-modal-body {
+  .tmsModalBody {
     padding: 1rem;
     max-height: 50vh;
   }
 }
+
+/* Thêm các class mới */
+.faqSection {
+  margin-bottom: 3rem;
+}
+
+.guidesSection {
+  margin-bottom: 3rem;
+}
+
+.contactArea {
+  padding-top: 120px;
+  padding-bottom: 120px;
+}
+
+.contactInfo {
+  padding-bottom: 60px;
+} 

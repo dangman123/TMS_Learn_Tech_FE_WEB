@@ -1,0 +1,253 @@
+.historyContainer {
+  background-color: #fff;
+  padding: 25px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  height: 100%;
+}
+
+.tabsContent {
+  width: 100%;
+}
+
+/* Tab Styles */
+.tabsHeader {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.tab {
+  padding: 12px 20px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 500;
+  color: #718096;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab:hover {
+  color: #4a6cf7;
+}
+
+.activeTab {
+  color: #4a6cf7;
+  border-bottom: 3px solid #4a6cf7;
+}
+
+.tabIcon {
+  font-size: 1.2rem;
+}
+
+/* Table Styles */
+.tableContainer {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+  width: 100%;
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.historyTable thead tr {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.historyTable th {
+  padding: 16px;
+  text-align: left;
+  color: #4a5568;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.historyTable tbody tr {
+  border-bottom: 1px solid #edf2f7;
+  transition: background-color 0.2s;
+}
+
+.historyTable tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.historyTable td {
+  padding: 16px;
+  color: #4a5568;
+  vertical-align: middle;
+}
+
+.columnStt {
+  width: 60px;
+  text-align: center;
+}
+
+.columnScore {
+  width: 80px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.columnCorrect {
+  width: 100px;
+  text-align: center;
+}
+
+.columnTime {
+  width: 180px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.columnDownload {
+  width: 80px;
+  text-align: center;
+}
+
+.downloadButton {
+  background-color: transparent;
+  border: none;
+  color: #4a6cf7;
+  cursor: pointer;
+  transition: transform 0.2s;
+  padding: 8px;
+}
+
+.downloadButton:hover {
+  transform: translateY(-2px);
+  color: #2d4ed8;
+}
+
+/* Empty State and Loading */
+.loadingContainer, .noDataContainer {
+  padding: 30px 0;
+  text-align: center;
+}
+
+.loadingSpinner {
+  border: 3px solid rgba(74, 108, 247, 0.2);
+  border-radius: 50%;
+  border-top: 3px solid #4a6cf7;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingText, .noDataText {
+  color: #718096;
+  margin-top: 10px;
+}
+
+.noDataIcon {
+  font-size: 2.5rem;
+  color: #cbd5e0;
+  margin-bottom: 10px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 24px;
+}
+
+.paginationItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  border-radius: 4px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.paginationItem:hover:not(.paginationArrowDisabled) {
+  background-color: #edf2f7;
+  color: #2d3748;
+}
+
+.paginationItemActive {
+  background-color: #4a6cf7;
+  color: white;
+}
+
+.paginationItemActive:hover {
+  background-color: #3854c5 !important;
+  color: white !important;
+}
+
+.paginationArrow {
+  font-size: 0.85rem;
+}
+
+.paginationArrowDisabled {
+  color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.documentTitle {
+  cursor: pointer;
+  color: #4a6cf7;
+}
+
+.documentTitle:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .tabIcon {
+    margin-right: 8px;
+    font-size: 16px;
+  }
+
+  .historyTable th, .historyTable td {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab {
+    padding: 14px;
+  }
+
+  .columnStt, .columnScore, .columnCorrect, .columnTime, .columnDownload {
+    width: auto;
+  }
+} 

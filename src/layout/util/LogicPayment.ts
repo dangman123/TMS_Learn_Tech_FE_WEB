@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface CartItem {
   id: number;
   title: string;
   price: number;
   quantity: number;
+  idTacGia?: number;
 }
 
 interface AuthData {
@@ -15,13 +16,59 @@ interface AuthData {
   roleId: number;
 }
 
+interface PaymentDetail {
+  id: null;
+  courseId: number | null;
+  testId: number | null;
+  courseBundleId: number | null;
+  price: number;
+  type: string; // "COURSE" | "EXAM" | "COMBO" | "WALLET" | "SUBSCRIPTION"
+}
+
+interface CartCheckout {
+  id: null;
+  paymentDate: string;
+  subTotalPayment: number;
+  totalPayment: number;
+  totalDiscount: number;
+  discountValue: number;
+  paymentMethod: string;
+  transactionId: string;
+  accountId: number;
+  paymentType: string; // "WALLET" | "SUBSCRIPTION" | "PRODUCT"
+  note: string;
+  paymentDetails: PaymentDetail[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const LogicPayment = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
   let didEffectRun = useRef(false);
-  const getCartFromSession = (): CartItem[] => {
-    const cartFromStorage = sessionStorage.getItem("cart");
-    return cartFromStorage ? JSON.parse(cartFromStorage) : [];
+
+  const clearSessionData = () => {
+    // Save lecturer IDs to localStorage if available in cart
+    const cartData = sessionStorage.getItem("cart");
+
+    if (cartData) {
+      const cartItems = JSON.parse(cartData);
+      if (Array.isArray(cartItems)) {
+        const idTacGiaArray = cartItems
+          .filter(item => item.idTacGia)
+          .map(item => item.idTacGia);
+        
+        if (idTacGiaArray.length > 0) {
+          console.log("Saving lecturer IDs:", idTacGiaArray);
+          localStorage.setItem("idTacGiaArray", JSON.stringify(idTacGiaArray));
+        }
+      }
+    }
+
+    // Clear session data
+    sessionStorage.removeItem("cart");
+    sessionStorage.removeItem("paymentMethod");
+    sessionStorage.removeItem("cartcheckout");
   };
 
   const getAuthDataFromLocalStorage = (): AuthData | null => {
@@ -29,152 +76,143 @@ export const LogicPayment = () => {
     return authFromStorage ? JSON.parse(authFromStorage) : null;
   };
 
-  const getPaymentMethodFromSession = (): string | null => {
-    return sessionStorage.getItem("paymentMethod");
-  };
-
-  const clearSessionData = () => {
-    // Lấy dữ liệu từ sessionStorage và parse thành mảng (nếu có)
-    const cartData = sessionStorage.getItem("cart");
-
-    if (cartData) {
-      // Parse chuỗi JSON thành đối tượng hoặc mảng
-      const cartItems = JSON.parse(cartData);
-      console.log(cartData);
-      // Kiểm tra nếu cartItems là mảng và chứa đối tượng có trường idTacGia
-      if (Array.isArray(cartItems)) {
-        const idTacGiaArray = cartItems.map(
-          (item: { idTacGia: number }) => item.idTacGia
-        );
-        console.log(idTacGiaArray);
-
-        // Lưu idTacGiaArray vào localStorage
-        localStorage.setItem("idTacGiaArray", JSON.stringify(idTacGiaArray));
-      } else {
-        console.error("Cart data is not in the correct format.");
-      }
-    }
-
-    sessionStorage.removeItem("cart");
-    sessionStorage.removeItem("paymentMethod");
-  };
-
-  const handlePayment = async () => {
-    const cart = getCartFromSession();
-    const authData = getAuthDataFromLocalStorage();
-    const paymentMethod = getPaymentMethodFromSession();
-
-    if (!authData) {
-      console.error("Người dùng chưa đăng nhập.");
-      setLoading(false);
+  const processPayment = async () => {
+    // Check if we have URL parameters from ZaloPay callback
+    const urlParams = new URLSearchParams(location.search);
+    const status = urlParams.get("status");
+    const amount = urlParams.get("amount") || "0";
+    const appTransId = urlParams.get("apptransid") || "";
+    const discountamount = urlParams.get("discountamount") || "0";
+    
+    // If no status parameter, not a ZaloPay callback
+    if (!status) {
+      console.log("No status parameter found in URL");
+      navigate("/khoa-hoc/thanh-toan/fail");
       return;
     }
 
-    if (cart.length === 0) {
-      console.error("Giỏ hàng trống.");
-      setLoading(false);
+    console.log("Payment callback received with status:", status);
+    console.log("Transaction ID:", appTransId);
+    console.log("Amount:", amount);
+
+    // Determine if payment was successful (status=1) or failed (status=0)
+    if (status !== "1") {
+      console.error("Payment failed with status:", status);
+      navigate("/khoa-hoc/thanh-toan/fail");
       return;
     }
-
-    const totalAmount = cart.reduce((acc, item) => acc + item.price, 0);
-
-    // console.log(totalAmount);
-    // console.log(authData);
-    // console.log(cart);
 
     try {
+      // Get cart checkout data from sessionStorage
+      const cartCheckoutData = sessionStorage.getItem("cartcheckout");
+      
+      if (!cartCheckoutData) {
+        console.error("Cart checkout data not found in session storage");
+        navigate("/khoa-hoc/thanh-toan/fail");
+        return;
+      }
+      
+      // Parse cart checkout data to get paymentDetails
+      const cartCheckout = JSON.parse(cartCheckoutData);
+      console.log("Cart checkout data:", cartCheckout);
+      
+      // Get auth data for account ID
+      const authData = getAuthDataFromLocalStorage();
+      if (!authData) {
+        console.error("Authentication data not found");
+        navigate("/khoa-hoc/thanh-toan/fail");
+        return;
+      }
+      
+      // Get current time for timestamps with explicit year
+      const now = new Date();
+      const currentTime = now.toISOString();
+      console.log("Current timestamp:", currentTime);
+      
+      // Map items from cartcheckout to paymentDetails format
+      const paymentDetails = cartCheckout.items ? cartCheckout.items.map((item: any) => {
+        return {
+          id: null,
+          courseId: item.courseId,
+          testId: item.testId,
+          courseBundleId: item.courseBundleId,
+          price: item.price,
+          type: item.type // "COURSE", "EXAM", "COMBO", etc.
+        };
+      }) : [];
+      
+      // Construct the request body as specified
+      const requestBody: any = {
+        id: null,
+        paymentDate: currentTime,
+        subTotalPayment: parseInt(amount),
+        totalPayment: parseInt(amount),
+        totalDiscount: parseInt(discountamount),
+        discountValue: parseInt(discountamount),
+        paymentMethod: "Zalo Pay",
+        transactionId: appTransId,
+        accountId: authData.id,
+        paymentType: "PRODUCT",
+        note: `Thanh toán thành công cho đơn hàng #${appTransId}`,
+        paymentDetails: paymentDetails, // Use the mapped items
+        createdAt: currentTime,
+        updatedAt: currentTime
+      };
+      
+      console.log("Sending payment data to API:", requestBody);
+      
+      // Get authentication token
       const token = localStorage.getItem("authToken");
+      if (!token) {
+        console.error("Authentication token not found");
+        navigate("/khoa-hoc/thanh-toan/fail");
+        return;
+      }
 
-      // 1. Gọi API thanh toán
+      // Call API to process payment
       const paymentResponse = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/payments/add`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/payments/v2`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            payment_date: new Date().toISOString(),
-            total_payment: totalAmount,
-            paymentMethod: paymentMethod,
-            account_id: authData.id,
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
-      const paymentData = await paymentResponse.json();
-      localStorage.setItem("totalPayment", JSON.stringify(paymentData));
       if (!paymentResponse.ok) {
-        console.error("Lỗi khi thanh toán:", paymentData);
-        setLoading(false);
+        const errorData = await paymentResponse.json();
+        console.error("Lỗi khi xử lý thanh toán:", errorData);
         navigate("/khoa-hoc/thanh-toan/fail");
         return;
       }
 
-      // console.log("Thanh toán thành công:", paymentData);
-
-      // 2. Gọi tất cả các API chi tiết thanh toán và đợi tất cả hoàn tất
-      const paymentDetailPromises = cart.map((item) => {
-        return fetch(
-          `${process.env.REACT_APP_SERVER_HOST}/api/payment-details/add`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              price: item.price,
-              courseTitle: item.title,
-              paymentId: paymentData.id, // ID thanh toán vừa nhận được
-              courseId: item.id,
-            }),
-          }
-        ).then((response) => response.json());
-      });
-
-      // Đợi tất cả các chi tiết thanh toán được xử lý
-      await Promise.all(paymentDetailPromises);
-
-      console.log("Tất cả các chi tiết thanh toán đã được thêm thành công.");
-
-      // 3. Sau khi chi tiết thanh toán hoàn thành, gọi API ghi danh vào khóa học
-      const enrollPromises = cart.map((item) => {
-        return fetch(
-          `${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/enroll?accountId=${authData.id}&courseId=${item.id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        ).then((response) => response.text()); // Xử lý phản hồi dạng text
-      });
-
-      // Đợi tất cả các API ghi danh hoàn tất
-      await Promise.all(enrollPromises);
-
-      console.log("Tất cả các khóa học đã được ghi danh thành công.");
-
-      // 4. Xóa dữ liệu trong sessionStorage và điều hướng tới trang success
+      // Store payment response for PaymentSuccess component
+      const responseData = await paymentResponse.json();
+      console.log("Thanh toán thành công:", responseData);
+      
+      // Save payment data to localStorage for PaymentSuccess component
+      localStorage.setItem("totalPayment", JSON.stringify(responseData.data || responseData));
+      
+      // Clear session data and redirect to success page immediately
       clearSessionData();
-      setLoading(false);
-      window.location.href = "/khoa-hoc/thanh-toan/success";
+      navigate("/khoa-hoc/thanh-toan/success");
+      
     } catch (error) {
-      setLoading(false);
-      window.location.href = "/khoa-hoc/thanh-toan/fail";
+      console.error("Error processing payment:", error);
+      navigate("/khoa-hoc/thanh-toan/fail");
     }
   };
 
   useEffect(() => {
-    // Kiểm tra nếu effect chưa chạy
+    // Only run once
     if (!didEffectRun.current) {
-      didEffectRun.current = true; // Đánh dấu là đã chạy
-      handlePayment();
+      didEffectRun.current = true;
+      processPayment();
     }
-  }, []);
+  }, [location.search]);
 
   return null;
 };

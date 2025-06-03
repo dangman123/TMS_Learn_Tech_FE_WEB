@@ -5,11 +5,25 @@ import { database } from "../util/fucntion/firebaseConfig";
 
 interface PaymentData {
   id: number;
-  payment_date: string;
-  total_payment: number;
+  payment_date?: string;
+  paymentDate?: string;
+  total_payment?: number;
+  totalPayment?: number;
   paymentMethod: string;
-  account_id: number;
-  courses: CourseItem[];
+  account_id?: number;
+  accountId?: number;
+  courses?: CourseItem[];
+  paymentDetails?: PaymentDetail[];
+}
+
+interface PaymentDetail {
+  id: number | null;
+  courseId: number | null;
+  testId: number | null;
+  courseBundleId: number | null;
+  price: number;
+  type: string;   // COURSE, EXAM, COMBO, WALLET, SUBSCRIPTION
+  courseTitle?: string;
 }
 
 interface CourseItem {
@@ -31,23 +45,38 @@ function PaymentSuccess() {
       setIsLoading(false);
     }, 800);
 
-    // Get actual payment data or use mock data for demo
+    // Get payment data from localStorage
     const paymentDataString = localStorage.getItem("totalPayment");
 
     if (paymentDataString) {
       try {
         const paymentDataParsed = JSON.parse(paymentDataString);
-        setPaymentData(paymentDataParsed);
-        const userId = paymentDataParsed.account_id.toString();
+        console.log("Payment data from localStorage:", paymentDataParsed);
+        
+        // Normalize payment data structure (handle both formats)
+        const normalizedPaymentData = {
+          id: paymentDataParsed.id,
+          paymentDate: paymentDataParsed.paymentDate || paymentDataParsed.payment_date,
+          totalPayment: paymentDataParsed.totalPayment || paymentDataParsed.total_payment || 0,
+          paymentMethod: paymentDataParsed.paymentMethod,
+          accountId: paymentDataParsed.accountId || paymentDataParsed.account_id,
+          paymentDetails: paymentDataParsed.paymentDetails || [],
+        };
+        
+        setPaymentData(normalizedPaymentData);
+        
+        // Get user ID for conversation handling
+        const userId = (normalizedPaymentData.accountId || 0).toString();
+        
+        // Handle lecturer conversation initialization
         const idTacGiaArrayString = localStorage.getItem("idTacGiaArray");
-
         if (idTacGiaArrayString) {
           const idTacGiaArray = JSON.parse(idTacGiaArrayString);
           const processedUserIds = new Set();
 
           const conversationPromises = idTacGiaArray
             .filter((otherUserId: any) => {
-              if (!processedUserIds.has(otherUserId)) {
+              if (!processedUserIds.has(otherUserId) && otherUserId) {
                 processedUserIds.add(otherUserId);
                 return true;
               }
@@ -79,26 +108,28 @@ function PaymentSuccess() {
       // Use mock data for demo/preview
       setPaymentData({
         id: 10243859,
-        payment_date: new Date().toISOString(),
-        total_payment: 2490000,
-        paymentMethod: "VNPAY",
-        account_id: 12345,
-        courses: [
+        paymentDate: new Date().toISOString(),
+        totalPayment: 2490000,
+        paymentMethod: "Zalo Pay",
+        accountId: 12345,
+        paymentDetails: [
           {
-            id: 1,
-            title: "Lập trình React.js Nâng cao",
+            id: null,
+            courseId: 1,
+            testId: null,
+            courseBundleId: null,
             price: 1490000,
-            image: "../../assets/images/courses/react-advanced.jpg",
-            instructor: "Nguyễn Thành Long",
+            type: "COURSE"
           },
           {
-            id: 2,
-            title: "Master JavaScript từ cơ bản đến chuyên sâu",
+            id: null,
+            courseId: null,
+            testId: 2,
+            courseBundleId: null,
             price: 1000000,
-            image: "../../assets/images/courses/javascript-master.jpg",
-            instructor: "Trần Minh Hiếu",
-          },
-        ],
+            type: "EXAM"
+          }
+        ]
       });
       setIsLoading(false);
     }
@@ -163,21 +194,55 @@ function PaymentSuccess() {
     );
   }
 
+  // Calculate total payment amount
+  const totalAmount = paymentData.totalPayment || 
+    (paymentData.paymentDetails && 
+     paymentData.paymentDetails.reduce((total, item) => total + (item.price || 0), 0)) || 
+    0;
+  
   const formattedTotalPayment = new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
-  }).format(paymentData.total_payment);
+  }).format(totalAmount);
 
-  const formattedDate = new Date(paymentData.payment_date).toLocaleDateString(
-    "vi-VN",
-    {
+  // Fix date formatting - handle possible incorrect date format and fix year
+  const getFormattedDate = () => {
+    try {
+      // Try to use payment date from data
+      const rawDate = paymentData.paymentDate || paymentData.payment_date;
+      if (rawDate) {
+        const date = new Date(rawDate);
+        // Check if date is valid
+        if (!isNaN(date.getTime())) {
+          // Create new date with current year but keep month, day, hours, minutes
+          const currentYear = new Date().getFullYear();
+          const correctedDate = new Date(date);
+          correctedDate.setFullYear(currentYear);
+          
+          return correctedDate.toLocaleDateString("vi-VN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error formatting date:", error);
+    }
+    
+    // Fallback to current date if above fails
+    return new Date().toLocaleDateString("vi-VN", {
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }
-  );
+    });
+  };
+
+  const formattedDate = getFormattedDate();
 
   return (
     <section className="compact-payment-result-section payment-success">
@@ -216,6 +281,13 @@ function PaymentSuccess() {
                     className="payment-icon"
                   />
                 )}
+                {paymentData.paymentMethod === "Zalo Pay" && (
+                  <img
+                    src="../../assets/images/logo/zalopay.jpg" 
+                    alt="ZaloPay"
+                    className="payment-icon"
+                  />
+                )}
                 {paymentData.paymentMethod}
               </span>
             </div>
@@ -234,7 +306,7 @@ function PaymentSuccess() {
           </div>
 
           <div className="compact-next-actions">
-            <a href="/khoa-hoc-cua-toi" className="compact-btn btn-primary">
+            <a href="/tai-khoan/khoa-hoc" className="compact-btn btn-primary">
               <i className="fa fa-play-circle"></i> Bắt đầu học
             </a>
             <a href="/" className="compact-btn btn-outline">
@@ -248,7 +320,7 @@ function PaymentSuccess() {
             </p>
             <p>
               <i className="fa fa-question-circle"></i> Cần hỗ trợ?{" "}
-              <a href="/lien-he">Liên hệ</a>
+              <a href="/ho-tro">Liên hệ</a>
             </p>
           </div>
         </div>

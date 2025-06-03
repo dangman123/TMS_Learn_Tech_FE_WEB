@@ -51,7 +51,7 @@ function Document() {
           convertedDocuments = apiData.map((doc: any) => ({
             documentId: doc.id,
             documentTitle: doc.title,
-            image_url: doc.fileUrl, // Sử dụng fileUrl làm ảnh mặc định
+            image_url: doc.thumbnailUrl, // Sử dụng fileUrl làm ảnh mặc định
             fileUrl: doc.fileUrl,
             view: doc.view,
             created_at: doc.createdAt,
