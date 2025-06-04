@@ -67,6 +67,7 @@ import VerifyOTPSMS from "./layout/login/VerifyOTPSMS";
 import TakeTest from "./layout/take-test/take-test";
 import ContentExampleDetail from "./layout/example/ComponentDetail/ContentExampleDetail";
 import OverView from "./layout/profile/Component/OverView/OverView";
+import { NotificationProvider } from "./layout/util/NotificationContext";
 const ProtectedAccountManagement = withAuth(AccountManagement);
 const ProtectedChechOut = withAuth(Checkout);
 
@@ -129,290 +130,282 @@ function App() {
     }
   };
 
-  // useEffect(() => {
-  //   window.onerror = function (message, source, lineno, colno, error) {
-  //     if (String(message).includes("400")) {
-  //       return true; // Chặn lỗi 400 xuất hiện trên console
-  //     }
-  //   };
-  // }, []);
 
-  // if (loading) {
-  //   return <div className="loader"></div>;
-  // }
   return (
-    <WebSocketProvider>
-      <LoadingProvider>
-        <div className="App">
-          <BrowserRouter>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <MainLayout>
-                    <Index />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/tim-kiem"
-                element={
-                  <MainLayout>
-                    <Search />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/tai-lieu"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Document />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/tai-lieu/:danhmuc"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Document />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/tai-lieu/:danhmuc/:id"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Document_Detail />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/de-thi"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Example />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/de-thi/:slug"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <ContentExampleDetail />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/khoa-hoc"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Courses />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/khoa-hoc/:slug"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <CourseDetail />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/khoa-hoc/danh-muc/:categoryName"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Courses />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/thanh-toan"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <ConfirmPuchase />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/khoa-hoc/thanh-toan/fail"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <PaymentFail />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/khoa-hoc/thanh-toan/success"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <PaymentSuccess />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/combo/:id"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <ComboDetail />
-                  </MainLayout>
-                }
-              />
-                 <Route
-                path="/take-test"
-                element={
-  
-     
+    <NotificationProvider >
+      <WebSocketProvider>
+
+        <LoadingProvider>
+          <div className="App">
+            <BrowserRouter>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <MainLayout>
+                      <Index />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/tim-kiem"
+                  element={
+                    <MainLayout>
+                      <Search />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/tai-lieu"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Document />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/tai-lieu/:danhmuc"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Document />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/tai-lieu/:danhmuc/:id"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Document_Detail />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/de-thi"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Example />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/de-thi/:slug"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <ContentExampleDetail />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/khoa-hoc"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Courses />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/khoa-hoc/:slug"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <CourseDetail />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/khoa-hoc/danh-muc/:categoryName"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Courses />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/thanh-toan"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <ConfirmPuchase />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/khoa-hoc/thanh-toan/fail"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <PaymentFail />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/khoa-hoc/thanh-toan/success"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <PaymentSuccess />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/combo/:id"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <ComboDetail />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/take-test"
+                  element={
+
+
                     <TakeTest />
-   
-                }
-              />
-              <Route
-                path="/bai-viet"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Blogs />
-                  </MainLayout>
-                }
-              />
-                   <Route
-                path="/bai-viet/danh-muc/:categoryName"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Blogs />
-                  </MainLayout>
-                }
-              />
 
-              <Route
-                path="/bai-viet/:id"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <BlogDetail />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/ho-tro"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Contacts />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/notification-all"
-                element={
-                  <MainLayout>
-                    <NotificationList />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/notification-details/:id"
-                element={
-                  <MainLayout>
-                    <NotificationDetails />
-                  </MainLayout>
-                }
-              />
+                  }
+                />
+                <Route
+                  path="/bai-viet"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Blogs />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/bai-viet/danh-muc/:categoryName"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Blogs />
+                    </MainLayout>
+                  }
+                />
 
-              <Route path="/dang-nhap" element={<Login />} />
+                <Route
+                  path="/bai-viet/:id"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <BlogDetail />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/ho-tro"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Contacts />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/notification-all"
+                  element={
+                    <MainLayout>
+                      <NotificationList />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/notification-details/:id"
+                  element={
+                    <MainLayout>
+                      <NotificationDetails />
+                    </MainLayout>
+                  }
+                />
 
-              <Route path="/dang-ky" element={<Register />} />
-              <Route
-                path="/dang-ky-method"
-                element={<ChooseRegisterMethod />}
-              />
+                <Route path="/dang-nhap" element={<Login />} />
 
-              <Route path="/verify-otp-email" element={<VerifyOTP />} />
-              <Route path="/verify-otp-sms" element={<VerifyOTPSMS />} />
-              {/* <Route path="/test" element={<Test_Admin />} />
+                <Route path="/dang-ky" element={<Register />} />
+                <Route
+                  path="/dang-ky-method"
+                  element={<ChooseRegisterMethod />}
+                />
+
+                <Route path="/verify-otp-email" element={<VerifyOTP />} />
+                <Route path="/verify-otp-sms" element={<VerifyOTPSMS />} />
+                {/* <Route path="/test" element={<Test_Admin />} />
           <Route path="/test2" element={<Test_Admin22 />} /> */}
-              {/* <Route path="/demo" element={<Header11 />} /> */}
+                {/* <Route path="/demo" element={<Header11 />} /> */}
 
-              <Route
-                path="/demo"
-                element={
-                  <MainLayout>
-                    <Example />
-                  </MainLayout>
-                }
-              />
+                <Route
+                  path="/demo"
+                  element={
+                    <MainLayout>
+                      <Example />
+                    </MainLayout>
+                  }
+                />
 
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-              <Route path="/home" element={<HomeLogin />} />
+                <Route path="/home" element={<HomeLogin />} />
 
-              <Route path="/bao-loi-403" element={<Error403 />} />
+                <Route path="/bao-loi-403" element={<Error403 />} />
 
-              <Route
-                path="/tai-khoan"
-                element={<ProtectedAccountManagement />}
-              />
-              <Route
-                path="/tai-khoan/:menu"
-                element={<ProtectedAccountManagement />}
-              />
+                <Route
+                  path="/tai-khoan"
+                  element={<ProtectedAccountManagement />}
+                />
+                <Route
+                  path="/tai-khoan/:menu"
+                  element={<ProtectedAccountManagement />}
+                />
 
-              <Route
-                path="/khoa-hoc-thu/vao-hoc"
-                element={<CoursePageConvert />}
-              />
+                <Route
+                  path="/khoa-hoc-thu/vao-hoc"
+                  element={<CoursePageConvert />}
+                />
 
-              <Route path="/khoa-hoc/vao-hoc" element={<CourseVaoHoc />} />
-              <Route
-                path="/khoa-hoc/vao-hoc/video"
-                element={<CourseVaoHoc />}
-              />
-              <Route path="/khoa-hoc/vao-hoc/test" element={<CourseVaoHoc />} />
-              <Route
-                path="/khoa-hoc/vao-hoc/test-chapter"
-                element={<CourseVaoHoc />}
-              />
+                <Route path="/khoa-hoc/vao-hoc" element={<CourseVaoHoc />} />
+                <Route
+                  path="/khoa-hoc/vao-hoc/video"
+                  element={<CourseVaoHoc />}
+                />
+                <Route path="/khoa-hoc/vao-hoc/test" element={<CourseVaoHoc />} />
+                <Route
+                  path="/khoa-hoc/vao-hoc/test-chapter"
+                  element={<CourseVaoHoc />}
+                />
 
-              {/* <Route path="/demomoi" element={<DemoEcrypt/>} /> */}
+                {/* <Route path="/demomoi" element={<DemoEcrypt/>} /> */}
 
-              {/* Giỏ hàng */}
-              <Route
-                path="/gio-hang"
-                element={
-                  <MainLayout>
-                    {/* <Breadcum /> */}
-                    <Cart />
-                  </MainLayout>
-                }
-              />
-              <Route
-                path="/thanh-toan/logic"
-                element={
-                  //   <MainLayout>
+                {/* Giỏ hàng */}
+                <Route
+                  path="/gio-hang"
+                  element={
+                    <MainLayout>
+                      {/* <Breadcum /> */}
+                      <Cart />
+                    </MainLayout>
+                  }
+                />
+                <Route
+                  path="/thanh-toan/logic"
+                  element={
+                    //   <MainLayout>
 
-                  <LogicPayment />
-                  // </MainLayout>
-                }
-              />
-            </Routes>
+                    <LogicPayment />
+                    // </MainLayout>
+                  }
+                />
+              </Routes>
 
-            <Routes>
-              {/* <Route
+              <Routes>
+                {/* <Route
               path="/admin/tai-lieu"
               element={
                 <Home>
@@ -421,7 +414,7 @@ function App() {
               }
             /> */}
 
-              {/* <Route
+                {/* <Route
                 path="/admin/add-question"
                 element={
                   <Home>
@@ -430,7 +423,7 @@ function App() {
                 }
               /> */}
 
-              {/* <Route
+                {/* <Route
                 path="/admin/edit-bai-kiem-tra/:id"
                 element={
                   <Home>
@@ -438,7 +431,7 @@ function App() {
                   </Home>
                 }
               /> */}
-              {/* <Route
+                {/* <Route
                 path="/admin/add-bai-kiem-tra"
                 element={
                   <Home>
@@ -447,7 +440,7 @@ function App() {
                 }
               /> */}
 
-              {/* <Route
+                {/* <Route
               path="/admin/bai-hoc"
               element={
                 <Home>
@@ -455,7 +448,7 @@ function App() {
                 </Home>
               }
             /> */}
-              {/* <Route
+                {/* <Route
                 path="/admin/edit-bai-hoc/:id"
                 element={
                   <Home>
@@ -464,7 +457,7 @@ function App() {
                 }
               /> */}
 
-              {/* <Route
+                {/* <Route
               path="/admin/login"
               element={
                 <Home>
@@ -472,11 +465,13 @@ function App() {
                 </Home>
               }
             /> */}
-            </Routes>
-          </BrowserRouter>
-        </div>
-      </LoadingProvider>
-    </WebSocketProvider>
+              </Routes>
+            </BrowserRouter>
+            <ToastContainer />
+          </div>
+        </LoadingProvider>
+      </WebSocketProvider>
+    </NotificationProvider>
   );
 }
 

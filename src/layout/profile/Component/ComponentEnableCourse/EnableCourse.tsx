@@ -12,7 +12,7 @@ const EnableCourse = () => {
     const handleCourseCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCourseCode(event.target.value);
         setErrorMessage("");  // Reset error message when user types
-    }; const [showForm, setShowForm] = useState(false); 
+    }; const [showForm, setShowForm] = useState(false);
     const getAuthData = () => {
         const authData = localStorage.getItem("authData");
         if (authData) {
@@ -41,7 +41,7 @@ const EnableCourse = () => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ code: courseCode, accountId: auth.id}), // Send the code in the request body
+                body: JSON.stringify({ code: courseCode, accountId: auth.id }), // Send the code in the request body
             });
 
             const result = await response.json();
@@ -87,7 +87,7 @@ const EnableCourse = () => {
                 </div>
 
                 {errorMessage && <p className="errorMessage">{errorMessage}</p>}
-                {/* {showForm && <DialogFormInformation courseCode={courseCode} />} */}
+                {showForm && <DialogFormInformation open={openDialog} onClose={closeDialogHandler} courseCode={courseCode} />}
 
                 <DialogFormInformation open={openDialog} onClose={closeDialogHandler} courseCode={courseCode} />
 
