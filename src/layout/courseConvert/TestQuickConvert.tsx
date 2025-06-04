@@ -1572,519 +1572,893 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
               <div
                 style={{ display: "flex", justifyContent: "right", gap: "10px" }}
               >
-                {!isSubmitted ? (
-                  <Timer initialTime={testDuration} onTimeUpdate={handleTimeUpdate} />
-                ) : (
-                  <div className="completed-test-badge" style={{
-                    background: "#4caf50",
-                    color: "white",
-                    padding: "8px 15px",
-                    borderRadius: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "14px",
-                    fontWeight: "bold"
-                  }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle" viewBox="0 0 16 16" style={{ marginRight: "5px" }}>
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                      <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z" />
-                    </svg>
-                    Đã hoàn thành: {Math.floor(usedTime / 60)} phút
-                  </div>
-                )}
-                {/* <button
-                  type="button"
-                  className="rbt-btn btn-gradient hover-icon-reverse"
+                <input
+                  type="checkbox"
+                  id="type-multiple-choice"
+                  checked={isQuestionTypeSelected("multiple-choice")}
+                  onChange={() => handleQuestionTypeToggle("multiple-choice")}
                   style={{
-                    background: "#4caf50",
-                    color: "white",
+                    width: "18px",
+                    height: "18px",
+                    accentColor: "#4caf50",
+                    cursor: "pointer"
                   }}
-                  onClick={showAnswer}
-                >
-                  Hiển thị đáp án
-                </button> */}
+                />
+                <label htmlFor="type-multiple-choice" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                  Trắc nghiệm {questionTypeCounts['multiple-choice'] && <span style={{ marginLeft: "5px", background: "#4caf50", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['multiple-choice']}</span>}
+                </label>
+
               </div>
 
-              {/* Hiển thị thời gian đã sử dụng */}
-              {usedTime > 0 && !isSubmitted && (
-                <div style={{ textAlign: "right", marginTop: "5px", fontSize: "14px", color: "#666" }}>
-                  Thời gian đã làm bài: {Math.floor(usedTime / 60)} phút {usedTime % 60} giây
-                </div>
-              )}
-
-              <hr />
-              <div className="question-type-filter" style={{ marginBottom: "20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                  <h5 style={{ margin: 0 }}>Lọc loại câu hỏi:</h5>
-                  <button
-                    onClick={() => handleQuestionTypeToggle("all")}
-                    style={{
-                      background: selectedQuestionType === "all" ? "#4caf50" : "#e0e0e0",
-                      color: selectedQuestionType === "all" ? "white" : "#333",
-                      border: "none",
-                      padding: "6px 15px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      transition: "all 0.2s ease",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.12)"
-                    }}
-                  >
-                    Hiển thị tất cả
-                  </button>
-                </div>
-                <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginBottom: "15px" }}>
-                  <div
-                    className="filter-item"
-                    style={getFilterItemStyle(isQuestionTypeSelected("multiple-choice"))}
-                    onClick={() => handleQuestionTypeToggle("multiple-choice")}
-                    onMouseOver={(e) => {
-                      if (!isQuestionTypeSelected("multiple-choice")) {
-                        e.currentTarget.style.backgroundColor = "#eaf4ff";
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!isQuestionTypeSelected("multiple-choice")) {
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                        e.currentTarget.style.transform = "translateY(0)";
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      id="type-multiple-choice"
-                      checked={isQuestionTypeSelected("multiple-choice")}
-                      onChange={() => handleQuestionTypeToggle("multiple-choice")}
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        accentColor: "#4caf50",
-                        cursor: "pointer"
-                      }}
-                    />
-                    <label htmlFor="type-multiple-choice" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
-                      Trắc nghiệm {questionTypeCounts['multiple-choice'] && <span style={{ marginLeft: "5px", background: "#4caf50", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['multiple-choice']}</span>}
-                    </label>
-                  </div>
-
-                  <div
-                    className="filter-item"
-                    style={getFilterItemStyle(isQuestionTypeSelected("essay"))}
-                    onClick={() => handleQuestionTypeToggle("essay")}
-                    onMouseOver={(e) => {
-                      if (!isQuestionTypeSelected("essay")) {
-                        e.currentTarget.style.backgroundColor = "#eaf4ff";
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!isQuestionTypeSelected("essay")) {
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                        e.currentTarget.style.transform = "translateY(0)";
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      id="type-essay"
-                      checked={isQuestionTypeSelected("essay")}
-                      onChange={() => handleQuestionTypeToggle("essay")}
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        accentColor: "#2196f3",
-                        cursor: "pointer"
-                      }}
-                    />
-                    <label htmlFor="type-essay" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
-                      Tự luận {questionTypeCounts['essay'] && <span style={{ marginLeft: "5px", background: "#2196f3", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['essay']}</span>}
-                    </label>
-                  </div>
-
-                  <div
-                    className="filter-item"
-                    style={getFilterItemStyle(isQuestionTypeSelected("fill-in-the-blank"))}
-                    onClick={() => handleQuestionTypeToggle("fill-in-the-blank")}
-                    onMouseOver={(e) => {
-                      if (!isQuestionTypeSelected("fill-in-the-blank")) {
-                        e.currentTarget.style.backgroundColor = "#eaf4ff";
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!isQuestionTypeSelected("fill-in-the-blank")) {
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                        e.currentTarget.style.transform = "translateY(0)";
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      id="type-fill-in-the-blank"
-                      checked={isQuestionTypeSelected("fill-in-the-blank")}
-                      onChange={() => handleQuestionTypeToggle("fill-in-the-blank")}
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        accentColor: "#ff9800",
-                        cursor: "pointer"
-                      }}
-                    />
-                    <label htmlFor="type-fill-in-the-blank" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
-                      Điền khuyết {questionTypeCounts['fill-in-the-blank'] && <span style={{ marginLeft: "5px", background: "#ff9800", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['fill-in-the-blank']}</span>}
-                    </label>
-                  </div>
-
-                  <div
-                    className="filter-item"
-                    style={getFilterItemStyle(isQuestionTypeSelected("checkbox"))}
-                    onClick={() => handleQuestionTypeToggle("checkbox")}
-                    onMouseOver={(e) => {
-                      if (!isQuestionTypeSelected("checkbox")) {
-                        e.currentTarget.style.backgroundColor = "#eaf4ff";
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!isQuestionTypeSelected("checkbox")) {
-                        e.currentTarget.style.backgroundColor = "#f5f5f5";
-                        e.currentTarget.style.transform = "translateY(0)";
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      id="type-checkbox"
-                      checked={isQuestionTypeSelected("checkbox")}
-                      onChange={() => handleQuestionTypeToggle("checkbox")}
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        accentColor: "#9c27b0",
-                        cursor: "pointer"
-                      }}
-                    />
-                    <label htmlFor="type-checkbox" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
-                      Nhiều lựa chọn {questionTypeCounts['checkbox'] && <span style={{ marginLeft: "5px", background: "#9c27b0", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['checkbox']}</span>}
-                    </label>
-                  </div>
-                </div>
-                <div style={{ marginTop: "10px", fontStyle: "italic" }}>
-                  Đang hiển thị: <strong>{filteredQuestions.length}</strong> / {questions.length} câu hỏi
-                  {selectedQuestionType !== "all" && (
-                    <span style={{ marginLeft: "8px", color: "#1890ff" }}>
-                      ➤ Loại: <strong>
-                        {selectedQuestionType === "multiple-choice"
-                          ? "Trắc nghiệm"
-                          : selectedQuestionType === "essay"
-                            ? "Tự luận"
-                            : selectedQuestionType === "fill-in-the-blank"
-                              ? "Điền khuyết"
-                              : "Nhiều lựa chọn"
-                        }
-                      </strong>
-                    </span>
-                  )}
-                </div>
-              </div>
               <div
-                className="rbt-dashboard-table table-responsive mobile-table-750 mt--30 overflow-hidden"
-                style={{ marginTop: "30px" }}
+                className="filter-item"
+                style={getFilterItemStyle(isQuestionTypeSelected("essay"))}
+                onClick={() => handleQuestionTypeToggle("essay")}
+                onMouseOver={(e) => {
+                  if (!isQuestionTypeSelected("essay")) {
+                    e.currentTarget.style.backgroundColor = "#eaf4ff";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isQuestionTypeSelected("essay")) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
               >
-                <form id="quiz-form" className="quiz-form-wrapper">
-                  {filteredQuestions.map((question, index) => (
-                    <div
-                      key={question.questionId}
-                      className="rbt-single-quiz"
-                      style={{ marginTop: "10px" }}
-                    >
-                      <h4 style={{ fontSize: "20px", marginBottom: "10px" }}>
-                        Câu {index + 1}: {question.content}
-                      </h4>
+                <input
+                  type="checkbox"
+                  id="type-essay"
+                  checked={isQuestionTypeSelected("essay")}
+                  onChange={() => handleQuestionTypeToggle("essay")}
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    accentColor: "#2196f3",
+                    cursor: "pointer"
+                  }}
+                />
+                <label htmlFor="type-essay" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                  Tự luận {questionTypeCounts['essay'] && <span style={{ marginLeft: "5px", background: "#2196f3", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['essay']}</span>}
+                </label>
+              </div>
 
-                      {/* Các loại câu hỏi khác nhau */}
-                      {question.type === "multiple-choice" && (
-                        <div className="row g-3">
-                          {["A", "B", "C", "D"].map((option) => {
-                            const optionValue = question[`option${option}` as keyof Question];
-                            if (!optionValue) return null;
+              <div
+                className="filter-item"
+                style={getFilterItemStyle(isQuestionTypeSelected("fill-in-the-blank"))}
+                onClick={() => handleQuestionTypeToggle("fill-in-the-blank")}
+                onMouseOver={(e) => {
+                  if (!isQuestionTypeSelected("fill-in-the-blank")) {
+                    e.currentTarget.style.backgroundColor = "#eaf4ff";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isQuestionTypeSelected("fill-in-the-blank")) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id="type-fill-in-the-blank"
+                  checked={isQuestionTypeSelected("fill-in-the-blank")}
+                  onChange={() => handleQuestionTypeToggle("fill-in-the-blank")}
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    accentColor: "#ff9800",
+                    cursor: "pointer"
+                  }}
+                />
+                <label htmlFor="type-fill-in-the-blank" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                  Điền khuyết {questionTypeCounts['fill-in-the-blank'] && <span style={{ marginLeft: "5px", background: "#ff9800", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['fill-in-the-blank']}</span>}
+                </label>
+              </div>
 
-                            const isCorrect = checkAnswer(question.questionId);
-                            const isSelected = answers[question.questionId] === option;
-                            const isSelectedCheck =
-                              userAnswerTest?.find(
-                                (pickme) => pickme.questionId == question.questionId
-                              )?.result == option;
-                            const isAnswerCorrect = question.resultCheck === option;
+              <div
+                className="filter-item"
+                style={getFilterItemStyle(isQuestionTypeSelected("checkbox"))}
+                onClick={() => handleQuestionTypeToggle("checkbox")}
+                onMouseOver={(e) => {
+                  if (!isQuestionTypeSelected("checkbox")) {
+                    e.currentTarget.style.backgroundColor = "#eaf4ff";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isQuestionTypeSelected("checkbox")) {
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id="type-checkbox"
+                  checked={isQuestionTypeSelected("checkbox")}
+                  onChange={() => handleQuestionTypeToggle("checkbox")}
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    accentColor: "#9c27b0",
+                    cursor: "pointer"
+                  }}
+                />
+                <label htmlFor="type-checkbox" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                  Nhiều lựa chọn {questionTypeCounts['checkbox'] && <span style={{ marginLeft: "5px", background: "#9c27b0", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['checkbox']}</span>}
+                </label>
+              </div>
+            </>
+          )}
 
-                            const optionClass = isSubmitted
-                              ? isSelectedCheck
-                                ? isAnswerCorrect
-                                  ? "correct"
-                                  : "incorrect"
-                                : ""
-                              : "";
+          <div style={{ marginTop: "10px", fontStyle: "italic" }}>
+            Đang hiển thị: <strong>{filteredQuestions.length}</strong> / {questions.length} câu hỏi
+            {selectedQuestionType !== "all" && (
+              <span style={{ marginLeft: "8px", color: "#1890ff" }}>
+                ➤ Loại: <strong>
+                  {selectedQuestionType === "multiple-choice"
+                    ? "Trắc nghiệm"
+                    : selectedQuestionType === "essay"
+                      ? "Tự luận"
+                      : selectedQuestionType === "fill-in-the-blank"
+                        ? "Điền khuyết"
+                        : "Nhiều lựa chọn"
+                  }
+                </strong>
+              </span>
+            )}
+          </div>
+        </div>
 
-                            return (
-                              <div className="col-lg-6" key={option}>
-                                <div className="rbt-form-check">
-                                  <input
-                                    type="radio"
-                                    name={`question-${question.questionId}`}
-                                    id={`question-${question.questionId}-${option}`}
-                                    checked={answers[question.questionId] === option}
-                                    onChange={() =>
-                                      handleAnswerChange(question.questionId, option)
-                                    }
-                                    disabled={isSubmitted} // Disable sau khi nộp bài
-                                  />
-                                  <label
-                                    htmlFor={`question-${question.questionId}-${option}`}
-                                    className={optionClass}
-                                    style={{ width: "100%", height: "100%" }}
-                                  >
-                                    <strong style={{ marginRight: "2px" }}>
-                                      {option}.
-                                    </strong>
-                                    {optionValue}{" "}
-                                    {isSubmitted && (
-                                      <span
-                                        className="answer-status"
-                                        style={{
-                                          fontWeight: "900",
-                                          float: "right",
-                                          color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
-                                        }}
-                                      >
-                                        {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
-                                      </span>
-                                    )}
-                                  </label>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+        <div
+          className="rbt-dashboard-table table-responsive mobile-table-750 mt--30 overflow-hidden"
+          style={{ marginTop: "30px" }}
+        >
+          <form id="quiz-form" className="quiz-form-wrapper">
+            {filteredQuestions.map((question, index) => (
+              <div
+                key={question.questionId}
+                className="rbt-single-quiz"
+                style={{ marginTop: "10px" }}
+              >
+                <h4 style={{ fontSize: "20px", marginBottom: "10px" }}>
+                  Câu {index + 1}: {question.content}
+                </h4>
 
-                      {/* Câu hỏi tự luận */}
-                      {question.type === "essay" && (
-                        <div className="row">
-                          <div className="col-12">
-                            <textarea
-                              className="form-control"
-                              placeholder="Nhập câu trả lời tự luận của bạn..."
-                              rows={5}
-                              disabled={isSubmitted}
-                              value={answers[question.questionId] || ""}
-                              onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
-                              style={textareaEssayStyle}
-                              onFocus={textareaFocusHandler}
-                              onBlur={textareaBlurHandler}
-                            ></textarea>
-                          </div>
-                        </div>
-                      )}
+                {/* Các loại câu hỏi khác nhau */}
+                {question.type === "multiple-choice" && (
+                  <div className="row g-3">
+                    {["A", "B", "C", "D"].map((option) => {
+                      const optionValue = question[`option${option}` as keyof Question];
+                      if (!optionValue) return null;
 
-                      {/* Câu hỏi điền khuyết */}
-                      {question.type === "fill-in-the-blank" && (
-                        <div className="row">
-                          <div className="col-12">
-                            <textarea
-                              className="form-control"
-                              placeholder="Điền đáp án vào đây..."
-                              rows={3}
-                              disabled={isSubmitted}
-                              value={answers[question.questionId] || ""}
-                              onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
-                              style={textareaFillStyle}
-                              onFocus={textareaFocusHandler}
-                              onBlur={textareaBlurHandler}
-                            ></textarea>
-                            {isSubmitted && (
-                              <div className="mt-2">
-                                <strong>Đáp án đúng:</strong> {question.result}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      const isCorrect = checkAnswer(question.questionId);
+                      const isSelected = answers[question.questionId] === option;
+                      const isSelectedCheck =
+                        userAnswerTest?.find(
+                          (pickme) => pickme.questionId == question.questionId
+                        )?.result == option;
+                      const isAnswerCorrect = question.resultCheck === option;
 
-                      {/* Câu hỏi checkbox */}
-                      {question.type === "checkbox" && (
-                        <div className="row g-3">
-                          {["A", "B", "C", "D"].map((option, optionIndex) => {
-                            const optionValue = question[`option${option}` as keyof Question];
-                            if (!optionValue) return null;
+                      const optionClass = isSubmitted
+                        ? isSelectedCheck
+                          ? isAnswerCorrect
+                            ? "correct"
+                            : "incorrect"
+                          : ""
+                        : "";
 
-                            // Xử lý để kiểm tra xem option này có được chọn không
-                            const selectedOptions = answers[question.questionId]?.split(",") || [];
-                            const isSelected = selectedOptions.includes((optionIndex + 1).toString());
-
-                            // Kiểm tra xem option này có phải đáp án đúng không
-                            const correctOptions = question.resultCheck?.split(",") || [];
-                            const isCorrect = correctOptions.includes((optionIndex + 1).toString());
-
-                            const optionClass = isSubmitted
-                              ? isSelected
-                                ? isCorrect
-                                  ? "correct"
-                                  : "incorrect"
-                                : ""
-                              : "";
-
-                            return (
-                              <div className="col-lg-6" key={option}>
-                                <div
-                                  className="rbt-form-check"
+                      return (
+                        <div className="col-lg-6" key={option}>
+                          <div className="rbt-form-check">
+                            <input
+                              type="radio"
+                              name={`question-${question.questionId}`}
+                              id={`question-${question.questionId}-${option}`}
+                              checked={answers[question.questionId] === option}
+                              onChange={() =>
+                                handleAnswerChange(question.questionId, option)
+                              }
+                              disabled={isSubmitted} // Disable sau khi nộp bài
+                            />
+                            <label
+                              htmlFor={`question-${question.questionId}-${option}`}
+                              className={optionClass}
+                              style={{ width: "100%", height: "100%" }}
+                            >
+                              <strong style={{ marginRight: "2px" }}>
+                                {option}.
+                              </strong>
+                              {optionValue}{" "}
+                              {isSubmitted && (
+                                <span
+                                  className="answer-status"
                                   style={{
-                                    border: "1px solid #e9e9e9",
-                                    borderRadius: "5px",
-                                    padding: "10px",
-                                    marginBottom: "5px",
-                                    transition: "all 0.2s ease",
-                                    cursor: "pointer",
-                                    background: isSelected ? "#f0f5ff" : "", // Highlight nếu được chọn
-                                    borderColor: isSelected ? "#6c63ff" : "#e9e9e9", // Border màu nếu được chọn
-                                  }}
-                                  onMouseOver={(e) => {
-                                    e.currentTarget.style.backgroundColor = isSelected ? "#e6ecff" : "#f0f0f0";
-                                    e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.15)";
-                                  }}
-                                  onMouseOut={(e) => {
-                                    e.currentTarget.style.backgroundColor = isSelected ? "#f0f5ff" : "";
-                                    e.currentTarget.style.boxShadow = "";
-                                  }}
-                                  onClick={(e) => {
-                                    if (!isSubmitted) {
-                                      const checkbox = document.getElementById(`question-${question.questionId}-${option}`) as HTMLInputElement;
-                                      if (checkbox) {
-                                        checkbox.checked = !checkbox.checked;
-                                        handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
-                                      }
-                                    }
+                                    fontWeight: "900",
+                                    float: "right",
+                                    color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
                                   }}
                                 >
-                                  <input
-                                    type="checkbox"
-                                    name={`question-${question.questionId}`}
-                                    id={`question-${question.questionId}-${option}`}
-                                    checked={isSelected}
-                                    onChange={(e) => {
-                                      e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
-                                      handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
-                                    }}
-                                    disabled={isSubmitted}
-                                    style={{
-                                      width: "20px",
-                                      height: "20px",
-                                      accentColor: "#6c63ff",
-                                      cursor: "pointer",
-                                      marginRight: "10px"
-                                    }}
-                                  />
-                                  <label
-                                    htmlFor=""  // Loại bỏ liên kết với checkbox
-                                    className={optionClass}
-                                    style={{
-                                      width: "calc(100% - 30px)",
-                                      height: "100%",
-                                      display: "inline-block",
-                                      verticalAlign: "middle",
-                                      cursor: "pointer",
-                                      fontWeight: isSelected ? "600" : "normal", // Đậm nếu được chọn
-                                      userSelect: "none" // Ngăn việc bôi chọn text
-                                    }}
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
-                                      if (!isSubmitted) {
-                                        handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
-                                      }
-                                    }}
-                                  >
-                                    <strong style={{ marginRight: "2px" }}>
-                                      {option}.
-                                    </strong>
-                                    {optionValue}{" "}
-                                    {isSubmitted && isCorrect && (
-                                      <span
-                                        className="answer-status"
-                                        style={{
-                                          fontWeight: "900",
-                                          float: "right",
-                                          color: "green",
-                                        }}
-                                      >
-                                        (Đúng)
-                                      </span>
-                                    )}
-                                  </label>
-                                </div>
-                              </div>
-                            );
-                          })}
+                                  {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
+                                </span>
+                              )}
+                            </label>
+                          </div>
                         </div>
-                      )}
+                      );
+                    })}
+                  </div>
+                )}
 
-                      {isSubmitted && question.instruction && (
-                        <div className="answer-review" style={{ margin: "15px 0px 20px 0px" }}>
-                          <p>
-                            <b>Giải thích: </b>
-                            {question.instruction}
-                          </p>
+                {/* Câu hỏi tự luận */}
+                {question.type === "essay" && (
+                  <div className="row">
+                    <div className="col-12">
+                      <textarea
+                        className="form-control"
+                        placeholder="Nhập câu trả lời tự luận của bạn..."
+                        rows={5}
+                        disabled={isSubmitted}
+                        value={answers[question.questionId] || ""}
+                        onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
+                        style={textareaEssayStyle}
+                        onFocus={textareaFocusHandler}
+                        onBlur={textareaBlurHandler}
+                      ></textarea>
+                    </div>
+                  </div>
+                )}
+
+                {/* Câu hỏi điền khuyết */}
+                {question.type === "fill-in-the-blank" && (
+                  <div className="row">
+                    <div className="col-12">
+                      <textarea
+                        className="form-control"
+                        placeholder="Điền đáp án vào đây..."
+                        rows={3}
+                        disabled={isSubmitted}
+                        value={answers[question.questionId] || ""}
+                        onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
+                        style={textareaFillStyle}
+                        onFocus={textareaFocusHandler}
+                        onBlur={textareaBlurHandler}
+                      ></textarea>
+                      {isSubmitted && (
+                        <div className="mt-2">
+                          <strong>Đáp án đúng:</strong> {question.result}
                         </div>
                       )}
                     </div>
-                  ))}
+                  </div>
+                )}
 
-                  <div className="submit-btn mt--20" style={{ marginTop: "20px" }}>
-                    <button
-                      type="button"
-                      className="rbt-btn btn-gradient hover-icon-reverse"
-                      style={{
-                        background: isSubmitted ? "#f44336" : "#4caf50", // Màu đỏ nếu đã nộp bài, màu xanh nếu chưa nộp
-                        color: "white",
-                        position: "relative",
-                        padding: isSubmitting ? "12px 40px" : "12px 20px", // Padding lớn hơn khi đang loading
-                        opacity: isSubmitting ? 0.8 : 1 // Mờ hơn khi đang loading
-                      }}
-                      onClick={
-                        isSubmitted ? handleRetry : submitTestAndUpdateProgress
+                {/* Câu hỏi checkbox */}
+                {question.type === "checkbox" && (
+                  <div className="row g-3">
+                    {["A", "B", "C", "D"].map((option, optionIndex) => {
+                      const optionValue = question[`option${option}` as keyof Question];
+                      if (!optionValue) return null;
+
+                      // Xử lý để kiểm tra xem option này có được chọn không
+                      const selectedOptions = answers[question.questionId]?.split(",") || [];
+                      const isSelected = selectedOptions.includes((optionIndex + 1).toString());
+
+                      // Kiểm tra xem option này có phải đáp án đúng không
+                      const correctOptions = question.resultCheck?.split(",") || [];
+                      const isCorrect = correctOptions.includes((optionIndex + 1).toString());
+
+                      const optionClass = isSubmitted
+                        ? isSelected
+                          ? isCorrect
+                            ? "correct"
+                            : "incorrect"
+                          : ""
+                        : "";
+
+                      return (
+                        <div className="col-lg-6" key={option}>
+                          <div
+                            className="rbt-form-check"
+                            style={{
+                              border: "1px solid #e9e9e9",
+                              borderRadius: "5px",
+                              padding: "10px",
+                              marginBottom: "5px",
+                              transition: "all 0.2s ease",
+                              cursor: "pointer",
+                              background: isSelected ? "#f0f5ff" : "", // Highlight nếu được chọn
+                              borderColor: isSelected ? "#6c63ff" : "#e9e9e9", // Border màu nếu được chọn
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.backgroundColor = isSelected ? "#e6ecff" : "#f0f0f0";
+                              e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.backgroundColor = isSelected ? "#f0f5ff" : "";
+                              e.currentTarget.style.boxShadow = "";
+                            }}
+                            onClick={(e) => {
+                              if (!isSubmitted) {
+                                const checkbox = document.getElementById(`question-${question.questionId}-${option}`) as HTMLInputElement;
+                                if (checkbox) {
+                                  checkbox.checked = !checkbox.checked;
+                                  handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
+                                }
+                              }
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              name={`question-${question.questionId}`}
+                              id={`question-${question.questionId}-${option}`}
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
+                                handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
+                              }}
+                              disabled={isSubmitted}
+                              style={{
+                                width: "20px",
+                                height: "20px",
+                                accentColor: "#6c63ff",
+                                cursor: "pointer",
+                                marginRight: "10px"
+                              }}
+                            />
+                            <label
+                              htmlFor=""  // Loại bỏ liên kết với checkbox
+                              className={optionClass}
+                              style={{
+                                width: "calc(100% - 30px)",
+                                height: "100%",
+                                display: "inline-block",
+                                verticalAlign: "middle",
+                                cursor: "pointer",
+                                fontWeight: isSelected ? "600" : "normal", // Đậm nếu được chọn
+                                userSelect: "none" // Ngăn việc bôi chọn text
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
+                                if (!isSubmitted) {
+                                  handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
+                                }
+                              }}
+                            >
+                              <strong style={{ marginRight: "2px" }}>
+                                {option}.
+                              </strong>
+                              {optionValue}{" "}
+                              {isSubmitted && isCorrect && (
+                                <span
+                                  className="answer-status"
+                                  style={{
+                                    fontWeight: "900",
+                                    float: "right",
+                                    color: "green",
+                                  }}
+                                >
+                                  (Đúng)
+                                </span>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {isSubmitted && question.instruction && (
+                  <div className="answer-review" style={{ margin: "15px 0px 20px 0px" }}>
+                    <p>
+                      <b>Giải thích: </b>
+                      {question.instruction}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <div className="submit-btn mt--20" style={{ marginTop: "20px" }}>
+              <button
+                type="button"
+                className="rbt-btn btn-gradient hover-icon-reverse"
+                style={{
+                  background: "#4caf50",
+                  color: "white",
+                }}
+                onClick={showAnswer}
+              >
+                Hiển thị đáp án
+              </button>
+            </div>
+
+            {/* Hiển thị thời gian đã sử dụng */}
+            {usedTime > 0 && !isSubmitted && (
+              <div style={{ textAlign: "right", marginTop: "5px", fontSize: "14px", color: "#666" }}>
+                Thời gian đã làm bài: {Math.floor(usedTime / 60)} phút {usedTime % 60} giây
+              </div>
+            )}
+
+            <hr />
+            <div className="question-type-filter" style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <h5 style={{ margin: 0 }}>Lọc loại câu hỏi:</h5>
+                <button
+                  onClick={() => handleQuestionTypeToggle("all")}
+                  style={{
+                    background: selectedQuestionType === "all" ? "#4caf50" : "#e0e0e0",
+                    color: selectedQuestionType === "all" ? "white" : "#333",
+                    border: "none",
+                    padding: "6px 15px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    transition: "all 0.2s ease",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.12)"
+                  }}
+                >
+                  Hiển thị tất cả
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginBottom: "15px" }}>
+                <div
+                  className="filter-item"
+                  style={getFilterItemStyle(isQuestionTypeSelected("multiple-choice"))}
+                  onClick={() => handleQuestionTypeToggle("multiple-choice")}
+                  onMouseOver={(e) => {
+                    if (!isQuestionTypeSelected("multiple-choice")) {
+                      e.currentTarget.style.backgroundColor = "#eaf4ff";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isQuestionTypeSelected("multiple-choice")) {
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    id="type-multiple-choice"
+                    checked={isQuestionTypeSelected("multiple-choice")}
+                    onChange={() => handleQuestionTypeToggle("multiple-choice")}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      accentColor: "#4caf50",
+                      cursor: "pointer"
+                    }}
+                  />
+                  <label htmlFor="type-multiple-choice" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                    Trắc nghiệm {questionTypeCounts['multiple-choice'] && <span style={{ marginLeft: "5px", background: "#4caf50", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['multiple-choice']}</span>}
+                  </label>
+                </div>
+
+                <div
+                  className="filter-item"
+                  style={getFilterItemStyle(isQuestionTypeSelected("essay"))}
+                  onClick={() => handleQuestionTypeToggle("essay")}
+                  onMouseOver={(e) => {
+                    if (!isQuestionTypeSelected("essay")) {
+                      e.currentTarget.style.backgroundColor = "#eaf4ff";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isQuestionTypeSelected("essay")) {
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    id="type-essay"
+                    checked={isQuestionTypeSelected("essay")}
+                    onChange={() => handleQuestionTypeToggle("essay")}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      accentColor: "#2196f3",
+                      cursor: "pointer"
+                    }}
+                  />
+                  <label htmlFor="type-essay" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                    Tự luận {questionTypeCounts['essay'] && <span style={{ marginLeft: "5px", background: "#2196f3", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['essay']}</span>}
+                  </label>
+                </div>
+
+                <div
+                  className="filter-item"
+                  style={getFilterItemStyle(isQuestionTypeSelected("fill-in-the-blank"))}
+                  onClick={() => handleQuestionTypeToggle("fill-in-the-blank")}
+                  onMouseOver={(e) => {
+                    if (!isQuestionTypeSelected("fill-in-the-blank")) {
+                      e.currentTarget.style.backgroundColor = "#eaf4ff";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isQuestionTypeSelected("fill-in-the-blank")) {
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    id="type-fill-in-the-blank"
+                    checked={isQuestionTypeSelected("fill-in-the-blank")}
+                    onChange={() => handleQuestionTypeToggle("fill-in-the-blank")}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      accentColor: "#ff9800",
+                      cursor: "pointer"
+                    }}
+                  />
+                  <label htmlFor="type-fill-in-the-blank" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                    Điền khuyết {questionTypeCounts['fill-in-the-blank'] && <span style={{ marginLeft: "5px", background: "#ff9800", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['fill-in-the-blank']}</span>}
+                  </label>
+                </div>
+
+                <div
+                  className="filter-item"
+                  style={getFilterItemStyle(isQuestionTypeSelected("checkbox"))}
+                  onClick={() => handleQuestionTypeToggle("checkbox")}
+                  onMouseOver={(e) => {
+                    if (!isQuestionTypeSelected("checkbox")) {
+                      e.currentTarget.style.backgroundColor = "#eaf4ff";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isQuestionTypeSelected("checkbox")) {
+                      e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    id="type-checkbox"
+                    checked={isQuestionTypeSelected("checkbox")}
+                    onChange={() => handleQuestionTypeToggle("checkbox")}
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      accentColor: "#9c27b0",
+                      cursor: "pointer"
+                    }}
+                  />
+                  <label htmlFor="type-checkbox" style={{ marginLeft: "8px", marginBottom: "0", cursor: "pointer" }}>
+                    Nhiều lựa chọn {questionTypeCounts['checkbox'] && <span style={{ marginLeft: "5px", background: "#9c27b0", color: "white", padding: "2px 6px", borderRadius: "10px", fontSize: "12px" }}>{questionTypeCounts['checkbox']}</span>}
+                  </label>
+                </div>
+              </div>
+              <div style={{ marginTop: "10px", fontStyle: "italic" }}>
+                Đang hiển thị: <strong>{filteredQuestions.length}</strong> / {questions.length} câu hỏi
+                {selectedQuestionType !== "all" && (
+                  <span style={{ marginLeft: "8px", color: "#1890ff" }}>
+                    ➤ Loại: <strong>
+                      {selectedQuestionType === "multiple-choice"
+                        ? "Trắc nghiệm"
+                        : selectedQuestionType === "essay"
+                          ? "Tự luận"
+                          : selectedQuestionType === "fill-in-the-blank"
+                            ? "Điền khuyết"
+                            : "Nhiều lựa chọn"
                       }
-                      disabled={isSubmitting} // Vô hiệu hóa khi đang gửi bài
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="loading-spinner" style={{
-                            display: "inline-block",
-                            width: "20px",
-                            height: "20px",
-                            border: "3px solid rgba(255,255,255,0.3)",
-                            borderRadius: "50%",
-                            borderTopColor: "#fff",
-                            animation: "spin 1s ease-in-out infinite",
-                            marginRight: "10px",
-                            verticalAlign: "middle"
-                          }}></span>
-                          <style>
-                            {`
+                    </strong>
+                  </span>
+                )}
+              </div>
+            </div>
+            <div
+              className="rbt-dashboard-table table-responsive mobile-table-750 mt--30 overflow-hidden"
+              style={{ marginTop: "30px" }}
+            >
+              <form id="quiz-form" className="quiz-form-wrapper">
+                {filteredQuestions.map((question, index) => (
+                  <div
+                    key={question.questionId}
+                    className="rbt-single-quiz"
+                    style={{ marginTop: "10px" }}
+                  >
+                    <h4 style={{ fontSize: "20px", marginBottom: "10px" }}>
+                      Câu {index + 1}: {question.content}
+                    </h4>
+
+                    {/* Các loại câu hỏi khác nhau */}
+                    {question.type === "multiple-choice" && (
+                      <div className="row g-3">
+                        {["A", "B", "C", "D"].map((option) => {
+                          const optionValue = question[`option${option}` as keyof Question];
+                          if (!optionValue) return null;
+
+                          const isCorrect = checkAnswer(question.questionId);
+                          const isSelected = answers[question.questionId] === option;
+                          const isSelectedCheck =
+                            userAnswerTest?.find(
+                              (pickme) => pickme.questionId == question.questionId
+                            )?.result == option;
+                          const isAnswerCorrect = question.resultCheck === option;
+
+                          const optionClass = isSubmitted
+                            ? isSelectedCheck
+                              ? isAnswerCorrect
+                                ? "correct"
+                                : "incorrect"
+                              : ""
+                            : "";
+
+                          return (
+                            <div className="col-lg-6" key={option}>
+                              <div className="rbt-form-check">
+                                <input
+                                  type="radio"
+                                  name={`question-${question.questionId}`}
+                                  id={`question-${question.questionId}-${option}`}
+                                  checked={answers[question.questionId] === option}
+                                  onChange={() =>
+                                    handleAnswerChange(question.questionId, option)
+                                  }
+                                  disabled={isSubmitted} // Disable sau khi nộp bài
+                                />
+                                <label
+                                  htmlFor={`question-${question.questionId}-${option}`}
+                                  className={optionClass}
+                                  style={{ width: "100%", height: "100%" }}
+                                >
+                                  <strong style={{ marginRight: "2px" }}>
+                                    {option}.
+                                  </strong>
+                                  {optionValue}{" "}
+                                  {isSubmitted && (
+                                    <span
+                                      className="answer-status"
+                                      style={{
+                                        fontWeight: "900",
+                                        float: "right",
+                                        color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
+                                      }}
+                                    >
+                                      {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
+                                    </span>
+                                  )}
+                                </label>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Câu hỏi tự luận */}
+                    {question.type === "essay" && (
+                      <div className="row">
+                        <div className="col-12">
+                          <textarea
+                            className="form-control"
+                            placeholder="Nhập câu trả lời tự luận của bạn..."
+                            rows={5}
+                            disabled={isSubmitted}
+                            value={answers[question.questionId] || ""}
+                            onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
+                            style={textareaEssayStyle}
+                            onFocus={textareaFocusHandler}
+                            onBlur={textareaBlurHandler}
+                          ></textarea>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Câu hỏi điền khuyết */}
+                    {question.type === "fill-in-the-blank" && (
+                      <div className="row">
+                        <div className="col-12">
+                          <textarea
+                            className="form-control"
+                            placeholder="Điền đáp án vào đây..."
+                            rows={3}
+                            disabled={isSubmitted}
+                            value={answers[question.questionId] || ""}
+                            onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
+                            style={textareaFillStyle}
+                            onFocus={textareaFocusHandler}
+                            onBlur={textareaBlurHandler}
+                          ></textarea>
+                          {isSubmitted && (
+                            <div className="mt-2">
+                              <strong>Đáp án đúng:</strong> {question.result}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Câu hỏi checkbox */}
+                    {question.type === "checkbox" && (
+                      <div className="row g-3">
+                        {["A", "B", "C", "D"].map((option, optionIndex) => {
+                          const optionValue = question[`option${option}` as keyof Question];
+                          if (!optionValue) return null;
+
+                          // Xử lý để kiểm tra xem option này có được chọn không
+                          const selectedOptions = answers[question.questionId]?.split(",") || [];
+                          const isSelected = selectedOptions.includes((optionIndex + 1).toString());
+
+                          // Kiểm tra xem option này có phải đáp án đúng không
+                          const correctOptions = question.resultCheck?.split(",") || [];
+                          const isCorrect = correctOptions.includes((optionIndex + 1).toString());
+
+                          const optionClass = isSubmitted
+                            ? isSelected
+                              ? isCorrect
+                                ? "correct"
+                                : "incorrect"
+                              : ""
+                            : "";
+
+                          return (
+                            <div className="col-lg-6" key={option}>
+                              <div
+                                className="rbt-form-check"
+                                style={{
+                                  border: "1px solid #e9e9e9",
+                                  borderRadius: "5px",
+                                  padding: "10px",
+                                  marginBottom: "5px",
+                                  transition: "all 0.2s ease",
+                                  cursor: "pointer",
+                                  background: isSelected ? "#f0f5ff" : "", // Highlight nếu được chọn
+                                  borderColor: isSelected ? "#6c63ff" : "#e9e9e9", // Border màu nếu được chọn
+                                }}
+                                onMouseOver={(e) => {
+                                  e.currentTarget.style.backgroundColor = isSelected ? "#e6ecff" : "#f0f0f0";
+                                  e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.15)";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.currentTarget.style.backgroundColor = isSelected ? "#f0f5ff" : "";
+                                  e.currentTarget.style.boxShadow = "";
+                                }}
+                                onClick={(e) => {
+                                  if (!isSubmitted) {
+                                    const checkbox = document.getElementById(`question-${question.questionId}-${option}`) as HTMLInputElement;
+                                    if (checkbox) {
+                                      checkbox.checked = !checkbox.checked;
+                                      handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
+                                    }
+                                  }
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  name={`question-${question.questionId}`}
+                                  id={`question-${question.questionId}-${option}`}
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
+                                    handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
+                                  }}
+                                  disabled={isSubmitted}
+                                  style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    accentColor: "#6c63ff",
+                                    cursor: "pointer",
+                                    marginRight: "10px"
+                                  }}
+                                />
+                                <label
+                                  htmlFor=""  // Loại bỏ liên kết với checkbox
+                                  className={optionClass}
+                                  style={{
+                                    width: "calc(100% - 30px)",
+                                    height: "100%",
+                                    display: "inline-block",
+                                    verticalAlign: "middle",
+                                    cursor: "pointer",
+                                    fontWeight: isSelected ? "600" : "normal", // Đậm nếu được chọn
+                                    userSelect: "none" // Ngăn việc bôi chọn text
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
+                                    if (!isSubmitted) {
+                                      handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
+                                    }
+                                  }}
+                                >
+                                  <strong style={{ marginRight: "2px" }}>
+                                    {option}.
+                                  </strong>
+                                  {optionValue}{" "}
+                                  {isSubmitted && isCorrect && (
+                                    <span
+                                      className="answer-status"
+                                      style={{
+                                        fontWeight: "900",
+                                        float: "right",
+                                        color: "green",
+                                      }}
+                                    >
+                                      (Đúng)
+                                    </span>
+                                  )}
+                                </label>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {isSubmitted && question.instruction && (
+                      <div className="answer-review" style={{ margin: "15px 0px 20px 0px" }}>
+                        <p>
+                          <b>Giải thích: </b>
+                          {question.instruction}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <div className="submit-btn mt--20" style={{ marginTop: "20px" }}>
+                  <button
+                    type="button"
+                    className="rbt-btn btn-gradient hover-icon-reverse"
+                    style={{
+                      background: isSubmitted ? "#f44336" : "#4caf50", // Màu đỏ nếu đã nộp bài, màu xanh nếu chưa nộp
+                      color: "white",
+                      position: "relative",
+                      padding: isSubmitting ? "12px 40px" : "12px 20px", // Padding lớn hơn khi đang loading
+                      opacity: isSubmitting ? 0.8 : 1 // Mờ hơn khi đang loading
+                    }}
+                    onClick={
+                      isSubmitted ? handleRetry : submitTestAndUpdateProgress
+                    }
+                    disabled={isSubmitting} // Vô hiệu hóa khi đang gửi bài
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="loading-spinner" style={{
+                          display: "inline-block",
+                          width: "20px",
+                          height: "20px",
+                          border: "3px solid rgba(255,255,255,0.3)",
+                          borderRadius: "50%",
+                          borderTopColor: "#fff",
+                          animation: "spin 1s ease-in-out infinite",
+                          marginRight: "10px",
+                          verticalAlign: "middle"
+                        }}></span>
+                        <style>
+                          {`
                               @keyframes spin {
                                 to { transform: rotate(360deg); }
                               }
                             `}
-                          </style>
-                          Đang gửi bài...
-                        </>
-                      ) : (
-                        isSubmitted ? "Làm bài lại" : "Nộp bài"
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </>
-          )}
+                        </style>
+                        Đang gửi bài...
+                      </>
+                    ) : (
+                      isSubmitted ? "Làm bài lại" : "Nộp bài"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+
+          </form>
+
         </div>
       </div>
     </div>

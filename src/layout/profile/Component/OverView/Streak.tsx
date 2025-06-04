@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   format,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
   getDay,
+  parseISO,
 } from "date-fns";
 import { vi } from "date-fns/locale";
 import "./Streak.css";
@@ -18,8 +19,59 @@ import {
 } from "react-icons/fa";
 import { BsTrophy, BsCalendarCheck } from "react-icons/bs";
 
+// Adjust this to use your actual auth context or get userId from another source
+// import { useAuth } from "../../../../context/AuthContext";
+
+interface StreakData {
+  currentStreak: number;
+  maxStreak: number;
+  activeDates: string[];
+}
+
 const Streak: React.FC = () => {
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 3, 22)); // Tháng 4/2025
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [streakData, setStreakData] = useState<StreakData>({
+    currentStreak: 0,
+    maxStreak: 0,
+    activeDates: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  
+  // Get userId from authData and token from authToken in localStorage
+  const authData = localStorage.getItem('authData') ? JSON.parse(localStorage.getItem('authData') || '{}') : {};
+  const userId = authData.id || '';
+  const token = localStorage.getItem('authToken') || '';
+
+  // Fetch streak data from API
+  useEffect(() => {
+    const fetchStreakData = async () => {
+      if (!userId || !token) return;
+      
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/activity/streak/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        setStreakData(result.data);
+      } catch (err) {
+        setError("Không thể tải dữ liệu streak");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStreakData();
+  }, [userId, token]);
 
   const start = startOfMonth(currentDate);
   const end = endOfMonth(currentDate);
@@ -27,47 +79,57 @@ const Streak: React.FC = () => {
 
   const firstDayOfMonth = getDay(start);
 
-  // Số ngày streak hiện tại
-  const streakCount = 15;
+  // Convert activeDates to Day objects for checking completed days
+  const activeDateObjects = streakData.activeDates.map(date => parseISO(date));
+  
+  // Check if a day is in the activeDates
+  const isActiveDay = (day: Date) => {
+    return activeDateObjects.some(activeDate => 
+      activeDate.getDate() === day.getDate() && 
+      activeDate.getMonth() === day.getMonth() && 
+      activeDate.getFullYear() === day.getFullYear()
+    );
+  };
 
-  // Tỷ lệ hoàn thành
-  const completionRate = 100;
+  // Today's date for comparison
+  const today = new Date();
 
-  // Danh sách ngày đã điểm danh và ngày đã bỏ lỡ
-  const completedDays = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  const skippedDays = [13, 14];
-
-  // Ngày hiện tại là ngày 15
-  const today = new Date(2025, 3, 15);
-
-  // Trạng thái của ngày hôm nay
+  // Status of today (pending by default)
   const [todayStatus, setTodayStatus] = useState<
     "pending" | "completed" | "skipped"
   >("pending");
 
-  // Xử lý khi nhấn nút Hoàn thành
+  // Update today's status based on API data
+  useEffect(() => {
+    if (isActiveDay(today)) {
+      setTodayStatus("completed");
+    }
+  }, [streakData]);
+
+  // Handlers (these would need to call your API to update the streak data)
   const handleComplete = () => {
     setTodayStatus("completed");
-    // Thêm logic cập nhật completedDays nếu cần
+    // Add API call to update streak
   };
 
-  // Xử lý khi nhấn nút Bỏ lỡ
   const handleSkip = () => {
     setTodayStatus("skipped");
-    // Thêm logic cập nhật skippedDays nếu cần
+    // Add API call to update streak
   };
+
+  if (loading) {
+    return <div className="wrapper">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="wrapper">Error: {error}</div>;
+  }
 
   return (
     <div className="wrapper">
       <div className="container-steack">
         {/* Phần được bọc màu vàng nhạt */}
         <div className="highlighted-section">
-          {/* Số ngày streak */}
-          <div className="streak-count">
-            <h1 className="streak-number">{streakCount}</h1>
-            <div className="streak-text">ngày streak</div>
-          </div>
-
           {/* Thông báo */}
           <div className="motivation-box">
             <div className="motivation-icon">
@@ -76,37 +138,13 @@ const Streak: React.FC = () => {
             <div>
               <p>
                 <span>
-                  Bạn đang xây dựng thói quen học tập tốt.{" "}
-                  <span className="motivation-link">Hãy tiếp tục duy trì!</span>
+                  {streakData.currentStreak > 0 
+                    ? `Bạn đang có ${streakData.currentStreak} ngày học liên tục. Hãy tiếp tục duy trì!` 
+                    : "Bắt đầu xây dựng thói quen học tập ngay hôm nay!"}
+                  <span className="motivation-link"> Hãy tiếp tục duy trì!</span>
                 </span>
               </p>
             </div>
-          </div>
-
-          {/* Nút hành động */}
-          <div className="streak-actions">
-            <button
-              className={`btn-complete ${
-                todayStatus === "completed" ? "active" : ""
-              }`}
-              onClick={handleComplete}
-              disabled={
-                todayStatus === "completed" || todayStatus === "skipped"
-              }
-            >
-              Hoàn thành
-            </button>
-            <button
-              className={`btn-skip ${
-                todayStatus === "skipped" ? "active" : ""
-              }`}
-              onClick={handleSkip}
-              disabled={
-                todayStatus === "completed" || todayStatus === "skipped"
-              }
-            >
-              Bỏ lỡ
-            </button>
           </div>
         </div>
 
@@ -119,7 +157,7 @@ const Streak: React.FC = () => {
               <div className="stat-icon trophy-bg">
                 <BsTrophy />
               </div>
-              <div className="stat-value">{streakCount}</div>
+              <div className="stat-value">{streakData.maxStreak}</div>
               <div className="stat-label">Chuỗi dài nhất</div>
             </div>
 
@@ -127,8 +165,8 @@ const Streak: React.FC = () => {
               <div className="stat-icon calendar-bg">
                 <BsCalendarCheck />
               </div>
-              <div className="stat-value">{completionRate}%</div>
-              <div className="stat-label">Tỷ lệ hoàn thành</div>
+              <div className="stat-value">{streakData.currentStreak}</div>
+              <div className="stat-label">Số ngày streak</div>
             </div>
           </div>
         </div>
@@ -181,12 +219,12 @@ const Streak: React.FC = () => {
             ))}
 
             {days.map((day) => {
-              const dayNumber = day.getDate();
               const isToday =
                 day.getDate() === today.getDate() &&
-                day.getMonth() === today.getMonth();
-              const isCompleted = completedDays.includes(dayNumber);
-              const isSkipped = skippedDays.includes(dayNumber);
+                day.getMonth() === today.getMonth() &&
+                day.getFullYear() === today.getFullYear();
+              const isCompleted = isActiveDay(day);
+              const isSkipped = false; // You may need to implement this based on your requirements
               const isFuture = day > today;
 
               return (
@@ -196,7 +234,7 @@ const Streak: React.FC = () => {
                     isCompleted ? "completed" : ""
                   } ${isSkipped ? "skipped" : ""} ${isFuture ? "future" : ""}`}
                 >
-                  {dayNumber}
+                  {day.getDate()}
                   {isCompleted && (
                     <div className="day-status completed">
                       <FaFire className="fire-icon" />

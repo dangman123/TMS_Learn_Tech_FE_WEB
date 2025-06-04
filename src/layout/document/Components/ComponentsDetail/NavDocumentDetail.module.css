@@ -1,0 +1,119 @@
+/* Container for the entire sidebar column */
+.container {
+  background-color: #fff;
+  padding: 1rem;
+  height: 100%;
+  /* Important: This ensures the container establishes a positioning context */
+  position: relative;
+}
+
+/* Sticky container for related documents */
+.relatedDocumentsContainer {
+  position: -webkit-sticky; /* Safari support */
+  position: sticky;
+  top: 220px; /* Distance from the top when sticky */
+  width: 100%;
+  height: auto;
+  background-color: #fff;
+  margin-bottom: 20px;
+  z-index: 10;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.headingCard {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+  font-weight: 600;
+  font-size: 18px;
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.headingDocument {
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  background-color: #fff;
+}
+
+.navDocumentDetail {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 5px 0;
+  transition: background-color 0.2s ease;
+}
+
+.navDocumentDetail:hover {
+  background-color: rgba(46, 185, 126, 0.05);
+}
+
+.navDocumentDetail:last-child {
+  border-bottom: none;
+}
+
+.documentLink {
+  color: #333;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+  padding: 0 10px;
+}
+
+.documentLink:hover {
+  color: #2EB97E;
+}
+
+.documentLink p {
+  margin: 0;
+  padding: 5px 0;
+}
+
+.textMuted {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.noDocuments {
+  padding: 15px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.cardBody {
+  padding: 8px;
+  padding-bottom: 0;
+}
+
+.stats {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 0;
+  padding-bottom: 8px;
+}
+
+.statItem {
+  margin-left: 20px;
+  display: inline-block;
+}
+
+/* Add responsive behavior for medium and small screens */
+@media (max-width: 991.98px) {
+  .fixedContainer {
+    position: relative;
+    max-width: 100%;
+    width: 100%;
+    top: 0;
+  }
+} 

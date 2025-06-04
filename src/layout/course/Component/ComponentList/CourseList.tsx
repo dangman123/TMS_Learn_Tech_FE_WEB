@@ -151,29 +151,39 @@ function CourseList({ courses }: CourseListProps) {
   const renderEmptyState = () => (
     <div id="listCourseProductCat" className="row">
       <div className="col-12">
-        <div className="card group space-y-3 flex flex-col text-center" 
-          style={{ maxWidth: "600px", margin: "40px auto", boxShadow: "0 5px 15px rgba(0,0,0,0.1)", border: "1px solid #e0e6f5", borderRadius: "8px" }}>
-          <div className="card-body p-5">
-            <div className="empty-state-icon mb-4" style={{ opacity: "0.2" }}>
-              <i className="fa fa-book-open" style={{ fontSize: "70px" }}></i>
-            </div>
-            <h4 style={{ fontSize: "20px", fontWeight: "600", color: "#333" }}>Không có khoá học</h4>
-            <p className="text-muted mt-2">Vui lòng thử lại với bộ lọc khác hoặc quay lại sau</p>
-            
-            <div className="mt-4">
-              <button className="btn btn-primary" 
-                style={{ 
-                  background: "linear-gradient(135deg, #4a6ee0, #60b0f4)", 
-                  border: "none", 
-                  padding: "10px 25px", 
-                  borderRadius: "6px" 
-                }}
-                onClick={() => window.location.href = "/khoa-hoc"}
-              >
-                Xem tất cả khoá học
-              </button>
-            </div>
+        <div 
+          className="empty-state-container text-center" 
+          style={{ 
+            width: "100%", 
+            margin: "60px auto", 
+            padding: "40px 20px", 
+            backgroundColor: "#f7f9fc", 
+            borderRadius: "16px", 
+            boxShadow: "0 8px 30px rgba(0,0,0,0.06)",
+            border: "1px solid #e6eef9"
+          }}
+        >
+          <div className="empty-state-icon mb-4">
+            <i 
+              className="fas fa-search" 
+              style={{ 
+                fontSize: "60px", 
+                color: "#2eb97e", 
+                padding: "30px", 
+                backgroundColor: "rgba(46, 185, 126, 0.1)", 
+                borderRadius: "50%",
+                marginBottom: "15px"
+              }}
+            ></i>
           </div>
+          
+          <h3 style={{ fontSize: "24px", fontWeight: "700", color: "#333", marginBottom: "16px" }}>
+            Không tìm thấy khóa học nào
+          </h3>
+          
+          <p style={{ fontSize: "16px", color: "#666", maxWidth: "400px", margin: "0 auto" }}>
+            Hiện không có khóa học nào phù hợp với tiêu chí tìm kiếm của bạn. Vui lòng thử lại với bộ lọc khác!
+          </p>
         </div>
       </div>
     </div>

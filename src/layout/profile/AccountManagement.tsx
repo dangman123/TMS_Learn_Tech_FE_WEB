@@ -84,13 +84,7 @@ const AccountManagement: React.FC = () => {
             {activeMenu === "history-document" && <DocumentHistory />}
             {activeMenu === "overview" && (
               <Overview
-                userId={8}
-                dayStreaks={15}
-                points={250}
-                courses={4}
-                documents={12}
-                balance={500000}
-                onAddFunds={() => console.log("Add funds clicked")}
+      
                 onViewDetails={() => console.log("View details clicked")}
               />
             )}

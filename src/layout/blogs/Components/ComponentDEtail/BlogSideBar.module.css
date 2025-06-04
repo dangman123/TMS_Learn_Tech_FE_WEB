@@ -1,0 +1,152 @@
+.sidebar {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.relatedPostsSection {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+  color: #333;
+  position: relative;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 70px;
+  height: 2px;
+  background-color: #2EB97E;
+}
+
+.postsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.postItem {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: transform 0.3s ease;
+}
+
+.postItem:hover {
+  transform: translateY(-5px);
+}
+
+.postItem:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.postLink {
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+}
+
+.postImage {
+  width: 90px;
+  height: 70px;
+  flex-shrink: 0;
+  margin-right: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.postImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.postLink:hover .postImage img {
+  transform: scale(1.08);
+}
+
+.postContent {
+  flex: 1;
+}
+
+.postTitle {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 8px;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.postLink:hover .postTitle {
+  color: #2EB97E;
+}
+
+.postMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #777;
+}
+
+.postDate, .postViews {
+  color: #2EB97E;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+
+.postDate svg, .postViews svg {
+  margin-right: 5px;
+  font-size: 14px;
+}
+
+.errorMessage {
+  color: #dc3545;
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  background-color: #f8d7da;
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 30px 15px;
+}
+
+.loadingSpinner {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(46, 185, 126, 0.3);
+  border-radius: 50%;
+  border-top-color: #2EB97E;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 

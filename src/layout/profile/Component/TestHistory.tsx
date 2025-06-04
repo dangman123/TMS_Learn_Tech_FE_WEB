@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-
-import "./TestHistory.css";
+import styles from "./testHistory.module.css";
 import { TestHistoryNav } from "./ComponentTest/TestHistoryNav";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../../util/fucntion/auth";
@@ -9,7 +8,7 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 
-import DocumentHistory from "../Component/DocumentHistory"; // Import component Lịch sử tải tài liệu
+import DocumentHistory from "./DocumentHistory"; // Import component Lịch sử tải tài liệu
 
 export interface TestResult {
   id: number;
@@ -34,7 +33,7 @@ interface TestResultDownload {
   userAnswer: string;
 }
 
-type TabType = "test" | "login" | "document";
+type TabType = "test" | "document";
 
 const TestHistory = () => {
   // State cho chức năng chuyển tab
@@ -335,76 +334,60 @@ const TestHistory = () => {
   };
 
   return (
-    <div id="historyTest" className="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    <div className={`${styles.historyContainer} col-md-12 col-lg-12 px-0`}>
       {/* Tab Navigation */}
-      <div className="history-tabs-header">
-        <div className="history-tabs">
+      <div className={styles.tabsHeader}>
+        <div className={styles.tabs}>
           <button
-            className={`history-tab ${activeTab === "test" ? "active" : ""}`}
+            className={`${styles.tab} ${activeTab === "test" ? styles.activeTab : ""}`}
             onClick={() => handleTabChange("test")}
           >
-            <i className="fas fa-clipboard-check tab-icon"></i>
-            <span className="tab-text">Lịch sử làm bài</span>
+            <i className={`fas fa-clipboard-check ${styles.tabIcon}`}></i>
+            <span className={styles.tabText}>Lịch sử làm bài</span>
           </button>
 
           <button
-            className={`history-tab ${
-              activeTab === "document" ? "active" : ""
-            }`}
+            className={`${styles.tab} ${activeTab === "document" ? styles.activeTab : ""}`}
             onClick={() => handleTabChange("document")}
           >
-            <i className="fas fa-file-download tab-icon"></i>
-            <span className="tab-text">Lịch sử tải tài liệu</span>
+            <i className={`fas fa-file-download ${styles.tabIcon}`}></i>
+            <span className={styles.tabText}>Lịch sử tải tài liệu</span>
           </button>
         </div>
       </div>
 
       {/* Tab Content */}
-      <div className="history-tabs-content">
+      <div className={styles.tabsContent}>
         {/* Tab Lịch sử làm bài */}
         {activeTab === "test" && (
           <>
-            <hr />
             <TestHistoryNav
               onSearch={setSearchKeyword}
               size={size}
               setSize={handleSizeChange}
               onFilterByTime={setFilterByTime}
             />
-            <hr />
 
-            {/* Cập nhật phần body của bảng trong TestHistory.tsx */}
-            <div className="table-responsive test-history-user">
-              <table className="table table-sm">
+            {/* Bảng kết quả làm bài */}
+            <div className={styles.tableContainer}>
+              <table className={styles.historyTable}>
                 <thead>
                   <tr>
-                    <th scope="col" className="col-stt">
-                      STT
-                    </th>
-                    <th scope="col" className="col-ten-bai-kiem-tra">
-                      Tên bài kiểm tra
-                    </th>
-                    <th scope="col" className="col-diem">
-                      Điểm
-                    </th>
-                    <th scope="col" className="col-diem">
-                      Số câu đúng
-                    </th>
-                    <th scope="col" className="col-thoi-gian">
-                      Thời gian
-                    </th>
-                    <th scope="col" className="col-xoa">
-                      Tải xuống
-                    </th>
+                    <th className={styles.columnStt}>STT</th>
+                    <th>Tên bài kiểm tra</th>
+                    <th className={styles.columnScore}>Điểm</th>
+                    <th className={styles.columnCorrect}>Số câu đúng</th>
+                    <th className={styles.columnTime}>Thời gian</th>
+                    <th className={styles.columnDownload}>Tải xuống</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
                       <td colSpan={6}>
-                        <div className="loading-container">
-                          <div className="loading-spinner"></div>
-                          <span className="loading-text">
+                        <div className={styles.loadingContainer}>
+                          <div className={styles.loadingSpinner}></div>
+                          <span className={styles.loadingText}>
                             Đang tải dữ liệu...
                           </span>
                         </div>
@@ -413,29 +396,29 @@ const TestHistory = () => {
                   ) : filteredResults.length === 0 ? (
                     <tr>
                       <td colSpan={6}>
-                        <div className="no-data-message">
-                          <i className="fas fa-inbox"></i>
-                          <p>Không có dữ liệu</p>
+                        <div className={styles.noDataContainer}>
+                          <i className={`fas fa-inbox ${styles.noDataIcon}`}></i>
+                          <p className={styles.noDataText}>Không có dữ liệu</p>
                         </div>
                       </td>
                     </tr>
                   ) : (
                     filteredResults.map((result, index) => (
                       <tr key={result.id}>
-                        <th scope="row" className="col-stt">
+                        <td className={styles.columnStt}>
                           {index + 1 + page * size}
-                        </th>
+                        </td>
                         <td>{result.testTitle}</td>
-                        <td className="col-diem">{result.score.toFixed(1)}</td>
-                        <td className="col-diem">
+                        <td className={styles.columnScore}>{result.score.toFixed(1)}</td>
+                        <td className={styles.columnCorrect}>
                           {result.correctAnswers}/{result.totalQuestions}
                         </td>
-                        <td className="col-thoi-gian">
+                        <td className={styles.columnTime}>
                           {new Date(result.completedAt).toLocaleString()}
                         </td>
-                        <td className="col-tai-xuong">
+                        <td className={styles.columnDownload}>
                           <button
-                            className="btn-link text-danger"
+                            className={styles.downloadButton}
                             onClick={() => generateDocument(result.id, result)}
                             title="Tải xuống bài kiểm tra"
                           >
@@ -449,36 +432,89 @@ const TestHistory = () => {
               </table>
             </div>
 
-            {/* Cập nhật phân trang */}
-
-            <div className="pegi justify-content-center mt-60">
-              <a
-                href="#0"
-                onClick={() => handlePageChange(page - 1)}
-                className={`border-none ${page === 0 ? "disabled" : ""}`}
-              >
-                <i className="fa-regular fa-arrow-left primary-color transition"></i>
-              </a>
-              {[...Array(totalPages)].map((_, index) => (
+            {/* Phân trang */}
+            {filteredResults.length > 0 && (
+              <div className={styles.pagination}>
                 <a
-                  key={index}
                   href="#0"
-                  onClick={() => handlePageChange(index)}
-                  className={index === page ? "active" : ""}
+                  onClick={(e) => { e.preventDefault(); handlePageChange(page - 1); }}
+                  className={`${styles.paginationItem} ${styles.paginationArrow} ${page === 0 ? styles.paginationArrowDisabled : ''}`}
                 >
-                  {index + 1}
+                  <i className="fa-regular fa-arrow-left"></i>
                 </a>
-              ))}
-              <a
-                href="#0"
-                onClick={() => handlePageChange(page + 1)}
-                className={`border-none ${
-                  page === totalPages - 1 ? "disabled" : ""
-                }`}
-              >
-                <i className="fa-regular fa-arrow-right primary-color transition"></i>
-              </a>
-            </div>
+                {totalPages <= 7 ? (
+                  // Hiển thị tất cả trang khi có ít trang
+                  [...Array(totalPages)].map((_, index) => (
+                    <a
+                      key={index}
+                      href="#0"
+                      onClick={(e) => { e.preventDefault(); handlePageChange(index); }}
+                      className={`${styles.paginationItem} ${index === page ? styles.paginationItemActive : ''}`}
+                    >
+                      {index + 1}
+                    </a>
+                  ))
+                ) : (
+                  // Logic phân trang cho nhiều trang
+                  <>
+                    {/* Luôn hiển thị trang đầu tiên */}
+                    <a
+                      href="#0"
+                      onClick={(e) => { e.preventDefault(); handlePageChange(0); }}
+                      className={`${styles.paginationItem} ${0 === page ? styles.paginationItemActive : ''}`}
+                    >
+                      1
+                    </a>
+
+                    {/* Hiển thị dấu "..." nếu trang hiện tại > 3 */}
+                    {page > 3 && (
+                      <span className={styles.paginationItem}>...</span>
+                    )}
+
+                    {/* Hiển thị các trang xung quanh trang hiện tại */}
+                    {[...Array(totalPages)].map((_, index) => {
+                      if (
+                        (index > 0 && index < totalPages - 1) && // Không phải trang đầu hoặc cuối
+                        (index >= page - 1 && index <= page + 1) // Trong phạm vi hiển thị
+                      ) {
+                        return (
+                          <a
+                            key={index}
+                            href="#0"
+                            onClick={(e) => { e.preventDefault(); handlePageChange(index); }}
+                            className={`${styles.paginationItem} ${index === page ? styles.paginationItemActive : ''}`}
+                          >
+                            {index + 1}
+                          </a>
+                        );
+                      }
+                      return null;
+                    })}
+
+                    {/* Hiển thị dấu "..." nếu trang hiện tại < totalPages - 4 */}
+                    {page < totalPages - 4 && (
+                      <span className={styles.paginationItem}>...</span>
+                    )}
+
+                    {/* Luôn hiển thị trang cuối cùng */}
+                    <a
+                      href="#0"
+                      onClick={(e) => { e.preventDefault(); handlePageChange(totalPages - 1); }}
+                      className={`${styles.paginationItem} ${totalPages - 1 === page ? styles.paginationItemActive : ''}`}
+                    >
+                      {totalPages}
+                    </a>
+                  </>
+                )}
+                <a
+                  href="#0"
+                  onClick={(e) => { e.preventDefault(); handlePageChange(page + 1); }}
+                  className={`${styles.paginationItem} ${styles.paginationArrow} ${page === totalPages - 1 ? styles.paginationArrowDisabled : ''}`}
+                >
+                  <i className="fa-regular fa-arrow-right"></i>
+                </a>
+              </div>
+            )}
           </>
         )}
 

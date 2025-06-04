@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Combo.css";
+import styles from "./Combo.module.css";
 
 interface Course {
   id: number;
@@ -99,7 +99,7 @@ const Combo: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="combo-loading">Đang tải gói combo khóa học...</div>;
+    return <div className={styles["combo-loading"]}>Đang tải gói combo khóa học...</div>;
   }
 
   if (bundles.length === 0) {
@@ -110,55 +110,55 @@ const Combo: React.FC = () => {
   const displayedBundles = showAll ? bundles : bundles.slice(0, 2);
 
   return (
-    <div className="combo-section">
-      <div className="combo-header">
-        <h2 className="combo-title">Combo Khóa Học</h2>
-        <p className="combo-subtitle">Tiết kiệm hơn với các gói combo khóa học</p>
+    <div className={styles["combo-section"]}>
+      <div className={styles["combo-header"]}>
+        <h2 className={styles["combo-title"]}>Combo Khóa Học</h2>
+        <p className={styles["combo-subtitle"]}>Tiết kiệm hơn với các gói combo khóa học</p>
       </div>
       
-      <div className="combo-container two-column">
+      <div className={`${styles["combo-container"]} ${styles["two-column"]}`}>
         {displayedBundles.map((bundle) => (
           <div 
             key={bundle.id} 
-            className="combo-card" 
+            className={styles["combo-card"]} 
             onClick={() => handleBundleClick(bundle.id)}
           >
-            <div className="combo-image-container">
-              <img src={bundle.imageUrl} alt={bundle.name} className="combo-image" />
-              <span className="combo-save-badge">Tiết kiệm {calculateSavingsPercentage(bundle)}%</span>
+            <div className={styles["combo-image-container"]}>
+              <img src={bundle.imageUrl} alt={bundle.name} className={styles["combo-image"]} />
+              <span className={styles["combo-save-badge"]}>Tiết kiệm {calculateSavingsPercentage(bundle)}%</span>
             </div>
             
-            <div className="combo-content">
-              <h3 className="combo-name">{bundle.name}</h3>
-              <p className="combo-description">{bundle.description}</p>
+            <div className={styles["combo-content"]}>
+              <h3 className={styles["combo-name"]}>{bundle.name}</h3>
+              <p className={styles["combo-description"]}>{bundle.description}</p>
               
-              <div className="combo-courses-count">
+              <div className={styles["combo-courses-count"]}>
                 <i className="fa-solid fa-book-open"></i> {bundle.courses?.length || 0} khóa học
               </div>
               
-              <div className="combo-price-container">
-                <span className="combo-price">
+              <div className={styles["combo-price-container"]}>
+                <span className={styles["combo-price"]}>
                   {bundle.price.toLocaleString('vi-VN')}đ
                 </span>
                 {bundle.cost > bundle.price && (
-                  <span className="combo-original-price">
+                  <span className={styles["combo-original-price"]}>
                     {bundle.cost.toLocaleString('vi-VN')}đ
                   </span>
                 )}
               </div>
               
-              <div className="combo-savings">
+              <div className={styles["combo-savings"]}>
                 Tiết kiệm {calculateSavings(bundle).toLocaleString('vi-VN')}đ
               </div>
               
-              <button className="combo-btn">Xem chi tiết</button>
+              <button className={styles["combo-btn"]}>Xem chi tiết</button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="combo-show-more">
-        <button className="combo-show-more-btn" onClick={toggleShowAll}>
+      <div className={styles["combo-show-more"]}>
+        <button className={styles["combo-show-more-btn"]} onClick={toggleShowAll}>
           {showAll ? "Thu gọn" : "Xem thêm combo"}
           <i className={`fa-solid ${showAll ? "fa-angle-up" : "fa-angle-down"} ms-2`}></i>
         </button>

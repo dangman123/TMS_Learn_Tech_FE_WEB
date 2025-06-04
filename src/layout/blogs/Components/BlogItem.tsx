@@ -22,6 +22,7 @@ interface BlogModel {
 
 interface BlogItemProps {
   blog: BlogModel;
+  onViewIncrement?: (blogId: string | number) => void;
 }
 
 // CSS tùy chỉnh cho BlogItem
@@ -141,7 +142,7 @@ const blogItemStyles = {
   }
 };
 
-export const BlogItem: React.FC<BlogItemProps> = ({ blog }) => {
+export const BlogItem: React.FC<BlogItemProps> = ({ blog, onViewIncrement }) => {
   // Xử lý trường hợp ngày tháng không hợp lệ
   const formatDate = (dateString: string) => {
     try {
@@ -160,6 +161,12 @@ export const BlogItem: React.FC<BlogItemProps> = ({ blog }) => {
 
   const dateFormatted = formatDate(blog.createdAt);
 
+  const handleClick = () => {
+    if (onViewIncrement) {
+      onViewIncrement(blog.id);
+    }
+  };
+
   return (
     <div className="col-xl-4 col-md-6 wow fadeInUp" data-wow-delay="400ms" data-wow-duration="1500ms">
       <div 
@@ -175,7 +182,11 @@ export const BlogItem: React.FC<BlogItemProps> = ({ blog }) => {
         }}
       >
         <div style={blogItemStyles.imageWrapper}>
-          <a href={`/bai-viet/${blog.id}`} style={{ display: "block", height: "100%" }}>
+          <a 
+            href={`/bai-viet/${blog.id}`}
+            onClick={handleClick} 
+            style={{ display: "block", height: "100%" }}
+          >
             <img 
               src={blog.image} 
               alt={blog.title} 
@@ -198,7 +209,8 @@ export const BlogItem: React.FC<BlogItemProps> = ({ blog }) => {
           
           <h3 style={blogItemStyles.title}>
             <a 
-              href={`/bai-viet/${blog.id}`} 
+              href={`/bai-viet/${blog.id}`}
+              onClick={handleClick}
               style={{ 
                 color: "#333", 
                 textDecoration: "none",

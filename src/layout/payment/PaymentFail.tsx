@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./PaymentStyles.css";
+
 
 interface PaymentError {
   code: string;

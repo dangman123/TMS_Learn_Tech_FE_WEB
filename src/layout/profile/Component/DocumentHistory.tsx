@@ -3,12 +3,15 @@ import "../style.css";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../../util/fucntion/auth";
 import { DocumentHistoryNav } from "./ComponentDocument/DocumentHistoryNav";
+import styles from "./testHistory.module.css"; // Use the same styles as TestHistory
+
 export interface Document {
   documentId: number;
   title: string;
   dateDownload: string;
   url: string;
 }
+
 function DocumentHistory() {
   const [documents, setDocuments] = useState<Document[]>([]); // Dữ liệu gốc
   const [loading, setLoading] = useState(true);
@@ -140,8 +143,9 @@ function DocumentHistory() {
   const handleDownload = (url: string) => {
     window.open(url, "_blank");
   };
+
   return (
-    <div id="historyDocument" className="col-md-9 ml-sm-9 col-lg-10 px-md-4">
+    <>
       <DocumentHistoryNav
         onSearch={setSearchKeyword}
         size={size}
@@ -149,53 +153,53 @@ function DocumentHistory() {
         onFilterByTime={setFilterByTime}
       />
       <hr />
-      <div className="table-responsive test-history-user">
-        <table className="table-document table-striped table-sm">
+      <div className={styles.tableContainer}>
+        <table className={styles.historyTable}>
           <thead>
             <tr>
-              <th scope="col" className="col-stt document text-center">
-                STT
-              </th>
-              <th scope="col" className="col-ten-bai-kiem-tra text-center">
-                Tên tài liệu
-              </th>
-              <th scope="col" className="col-diem text-center time-download">
-                Thời gian tải
-              </th>
-              <th scope="col" className="col-diem text-center re-download">
-                Tải lại
-              </th>
+              <th className={styles.columnStt}>STT</th>
+              <th>Tên tài liệu</th>
+              <th className={styles.columnTime}>Thời gian tải</th>
+              <th className={styles.columnDownload}>Tải lại</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="text-center">
-                  Đang tải dữ liệu...
+                <td colSpan={4}>
+                  <div className={styles.loadingContainer}>
+                    <div className={styles.loadingSpinner}></div>
+                    <span className={styles.loadingText}>
+                      Đang tải dữ liệu...
+                    </span>
+                  </div>
                 </td>
               </tr>
             ) : filteredDocuments.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center">
-                  Không có dữ liệu.
+                <td colSpan={4}>
+                  <div className={styles.noDataContainer}>
+                    <i className={`fas fa-inbox ${styles.noDataIcon}`}></i>
+                    <p className={styles.noDataText}>Không có dữ liệu</p>
+                  </div>
                 </td>
               </tr>
             ) : (
               filteredDocuments.map((document, index) => (
                 <tr key={document.documentId}>
-                  <th className="text-center" scope="row">
-                    {index + 1 + page * size}
-                  </th>
-                  <td onClick={() => clickNavigation(document.documentId)}>
+                  <td className={styles.columnStt}>{index + 1 + page * size}</td>
+                  <td 
+                    className={styles.documentTitle} 
+                    onClick={() => clickNavigation(document.documentId)}
+                  >
                     {document.title}
                   </td>
-
-                  <td className="text-center">
+                  <td className={styles.columnTime}>
                     {new Date(document.dateDownload).toLocaleString()}
                   </td>
-                  <td className="text-center">
+                  <td className={styles.columnDownload}>
                     <button
-                      className="btn btn-link"
+                      className={styles.downloadButton}
                       onClick={() => handleDownload(document.url)}
                     >
                       <i className="fas fa-download"></i>
@@ -207,33 +211,89 @@ function DocumentHistory() {
           </tbody>
         </table>
       </div>
-      <div className="pegi justify-content-center mt-60">
-        <a
-          href="#0"
-          onClick={() => handlePageChange(page - 1)}
-          className={`border-none ${page === 0 ? "disabled" : ""}`}
-        >
-          <i className="fa-regular fa-arrow-left primary-color transition"></i>
-        </a>
-        {[...Array(totalPages)].map((_, index) => (
+      {filteredDocuments.length > 0 && (
+        <div className={styles.pagination}>
           <a
-            key={index}
             href="#0"
-            onClick={() => handlePageChange(index)}
-            className={index === page ? "active" : ""}
+            onClick={(e) => { e.preventDefault(); handlePageChange(page - 1); }}
+            className={`${styles.paginationItem} ${styles.paginationArrow} ${page === 0 ? styles.paginationArrowDisabled : ''}`}
           >
-            {index + 1}
+            <i className="fa-regular fa-arrow-left"></i>
           </a>
-        ))}
-        <a
-          href="#0"
-          onClick={() => handlePageChange(page + 1)}
-          className={`border-none ${page === totalPages - 1 ? "disabled" : ""}`}
-        >
-          <i className="fa-regular fa-arrow-right primary-color transition"></i>
-        </a>
-      </div>
-    </div>
+          {totalPages <= 7 ? (
+            // Hiển thị tất cả trang khi có ít trang
+            [...Array(totalPages)].map((_, index) => (
+              <a
+                key={index}
+                href="#0"
+                onClick={(e) => { e.preventDefault(); handlePageChange(index); }}
+                className={`${styles.paginationItem} ${index === page ? styles.paginationItemActive : ''}`}
+              >
+                {index + 1}
+              </a>
+            ))
+          ) : (
+            // Logic phân trang cho nhiều trang
+            <>
+              {/* Luôn hiển thị trang đầu tiên */}
+              <a
+                href="#0"
+                onClick={(e) => { e.preventDefault(); handlePageChange(0); }}
+                className={`${styles.paginationItem} ${0 === page ? styles.paginationItemActive : ''}`}
+              >
+                1
+              </a>
+
+              {/* Hiển thị dấu "..." nếu trang hiện tại > 3 */}
+              {page > 3 && (
+                <span className={styles.paginationItem}>...</span>
+              )}
+
+              {/* Hiển thị các trang xung quanh trang hiện tại */}
+              {[...Array(totalPages)].map((_, index) => {
+                if (
+                  (index > 0 && index < totalPages - 1) && // Không phải trang đầu hoặc cuối
+                  (index >= page - 1 && index <= page + 1) // Trong phạm vi hiển thị
+                ) {
+                  return (
+                    <a
+                      key={index}
+                      href="#0"
+                      onClick={(e) => { e.preventDefault(); handlePageChange(index); }}
+                      className={`${styles.paginationItem} ${index === page ? styles.paginationItemActive : ''}`}
+                    >
+                      {index + 1}
+                    </a>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Hiển thị dấu "..." nếu trang hiện tại < totalPages - 4 */}
+              {page < totalPages - 4 && (
+                <span className={styles.paginationItem}>...</span>
+              )}
+
+              {/* Luôn hiển thị trang cuối cùng */}
+              <a
+                href="#0"
+                onClick={(e) => { e.preventDefault(); handlePageChange(totalPages - 1); }}
+                className={`${styles.paginationItem} ${totalPages - 1 === page ? styles.paginationItemActive : ''}`}
+              >
+                {totalPages}
+              </a>
+            </>
+          )}
+          <a
+            href="#0"
+            onClick={(e) => { e.preventDefault(); handlePageChange(page + 1); }}
+            className={`${styles.paginationItem} ${styles.paginationArrow} ${page === totalPages - 1 ? styles.paginationArrowDisabled : ''}`}
+          >
+            <i className="fa-regular fa-arrow-right"></i>
+          </a>
+        </div>
+      )}
+    </>
   );
 }
 
