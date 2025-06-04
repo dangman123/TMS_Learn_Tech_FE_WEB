@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { isTokenExpired, refreshToken } from "../../util/fucntion/auth";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 
@@ -68,7 +68,7 @@ function Profile() {
         }
 
         const response = await fetch(
-          `${process.env.REACT_APP_SERVER_HOST}/api/account/profile/${userId}`,
+          `${process.env.REACT_APP_SERVER_HOST}/api/account/user/${userId}`,
           {
             method: "GET",
             headers: {
@@ -78,15 +78,20 @@ function Profile() {
         );
 
         if (response.ok) {
-          const data = await response.json();
-          setProfileData(data);
+          const result = await response.json();
+          if (result.status === 200) {
+            const data = result.data;
+            setProfileData(data);
 
-          setFullname(data.fullname);
-          setEmail(data.email);
-          setPhone(data.phone);
-          setGender(data.gender);
-          setBirthday(data.birthday ? data.birthday.substring(0, 10) : "");
-          setSelectedImage(data.image);
+            setFullname(data.fullname || "");
+            setEmail(data.email || "");
+            setPhone(data.phone || "");
+            setGender(data.gender || "Nam");
+            setBirthday(data.birthday ? data.birthday.substring(0, 10) : "");
+            setSelectedImage(data.image);
+          } else {
+            toast.error(result.message || "Lỗi khi tải dữ liệu hồ sơ");
+          }
           setLoading(false);
         } else {
           console.error("Lỗi khi tải dữ liệu hồ sơ");
@@ -127,46 +132,54 @@ function Profile() {
   };
 
   const validatePassword = () => {
+    const errors = [];
+    
+    // Kiểm tra mật khẩu hiện tại
     if (!currentPassword) {
-      toast.error("Mật khẩu cũ không được để trống.");
-      return false;
+      errors.push("Mật khẩu hiện tại không được để trống");
+    } else {
+      // Validate current password format if provided
+      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]{8,}$/;
+      if (!passwordPattern.test(currentPassword)) {
+        errors.push("Mật khẩu hiện tại không đúng định dạng yêu cầu");
+      }
     }
 
-    const passwordPattern =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
-    if (!passwordPattern.test(currentPassword)) {
-      toast.error(
-        "Mật khẩu cũ phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
-      );
-      return false;
-    }
-
+    // Kiểm tra mật khẩu mới
     if (!newPassword) {
-      toast.error("Mật khẩu mới không được để trống.");
-      return false;
-    }
-    if (!passwordPattern.test(newPassword)) {
-      toast.error(
-        "Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
-      );
-      return false;
+      errors.push("Mật khẩu mới không được để trống");
+    } else {
+      // Kiểm tra từng điều kiện riêng lẻ để thông báo rõ ràng hơn
+      if (newPassword.length < 8) {
+        errors.push("Mật khẩu mới phải có ít nhất 8 ký tự");
+      }
+      if (!/[A-Z]/.test(newPassword)) {
+        errors.push("Mật khẩu mới phải chứa ít nhất 1 chữ hoa");
+      }
+      if (!/[a-z]/.test(newPassword)) {
+        errors.push("Mật khẩu mới phải chứa ít nhất 1 chữ thường");
+      }
+      if (!/[0-9]/.test(newPassword)) {
+        errors.push("Mật khẩu mới phải chứa ít nhất 1 chữ số");
+      }
+      if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
+        errors.push("Mật khẩu mới phải chứa ít nhất 1 ký tự đặc biệt");
+      }
     }
 
+    // Kiểm tra xác nhận mật khẩu
     if (!confirmPassword) {
-      toast.error("Mật khẩu xác nhận không được để trống.");
-      return false;
-    }
-    if (!passwordPattern.test(confirmPassword)) {
-      toast.error(
-        "Mật khẩu xác nhận phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
-      );
-      return false;
+      errors.push("Xác nhận mật khẩu không được để trống");
+    } else if (confirmPassword !== newPassword) {
+      errors.push("Mật khẩu mới và xác nhận không khớp");
     }
 
-    if (newPassword !== confirmPassword) {
-      toast.error("Mật khẩu mới và xác nhận không khớp!");
-      return;
+    // Hiển thị thông báo lỗi nếu có
+    if (errors.length > 0) {
+      errors.forEach(error => toast.error(error));
+      return false;
     }
+    
     return true;
   };
 
@@ -179,7 +192,7 @@ function Profile() {
       let token = localStorage.getItem("authToken");
 
       if (isTokenExpired(token)) {
-        token = await refreshToken();
+        token = await refresh();
         if (!token) {
           window.location.href = "/dang-nhap";
           return;
@@ -191,13 +204,22 @@ function Profile() {
 
       formData.append("fullname", fullname);
       formData.append("email", email);
-      formData.append("phone", phone);
+      formData.append("phone", phone || "");
       formData.append("gender", gender);
       formData.append("birthday", `${birthday}T00:00:00`);
 
-      if (selectedImage) {
+      if (selectedImage instanceof File) {
         formData.append("image", selectedImage);
       }
+
+      console.log("Sending update request with data:", {
+        fullname,
+        email,
+        phone,
+        gender,
+        birthday: `${birthday}T00:00:00`,
+        selectedImage: selectedImage instanceof File ? "File selected" : "No file"
+      });
 
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_HOST}/api/account/update/${userId}`,
@@ -210,28 +232,83 @@ function Profile() {
         }
       );
 
-      if (response.ok) {
-        toast.success("Cập nhật thành công !");
+      console.log("Response status:", response.status);
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
 
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+      if (response.ok) {
+        if (responseData.status === 200) {
+          toast.success(responseData.message || "Cập nhật thành công!");
+          
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          toast.error(responseData.message || "Lỗi khi cập nhật hồ sơ!");
+        }
       } else {
-        toast.error("Lỗi khi cập nhật hồ sơ !");
+        toast.error(responseData.message || "Lỗi khi cập nhật hồ sơ!");
       }
     } catch (error: any) {
-      toast.error("Lỗi: " + error);
+      console.error("Update profile error:", error);
+      toast.error("Lỗi: " + (error.message || "Không thể cập nhật hồ sơ"));
     }
   };
 
   const changePassword = async () => {
-    if (!validatePassword()) {
+    // Kiểm tra trước khi gọi API
+    if (!currentPassword) {
+      toast.error("Vui lòng nhập mật khẩu hiện tại");
       return;
     }
+    
+    if (!newPassword) {
+      toast.error("Vui lòng nhập mật khẩu mới");
+      return;
+    }
+    
+    if (!confirmPassword) {
+      toast.error("Vui lòng nhập xác nhận mật khẩu");
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast.error("Mật khẩu mới và xác nhận không khớp");
+      return;
+    }
+    
+    // Kiểm tra định dạng mật khẩu mới
+    if (newPassword.length < 8) {
+      toast.error("Mật khẩu mới phải có ít nhất 8 ký tự");
+      return;
+    }
+    
+    if (!/[A-Z]/.test(newPassword)) {
+      toast.error("Mật khẩu mới phải có ít nhất 1 chữ hoa");
+      return;
+    }
+    
+    if (!/[a-z]/.test(newPassword)) {
+      toast.error("Mật khẩu mới phải có ít nhất 1 chữ thường");
+      return;
+    }
+    
+    if (!/[0-9]/.test(newPassword)) {
+      toast.error("Mật khẩu mới phải có ít nhất 1 chữ số");
+      return;
+    }
+    
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
+      toast.error("Mật khẩu mới phải có ít nhất 1 ký tự đặc biệt");
+      return;
+    }
+    
+    // Tiếp tục gọi API nếu tất cả các điều kiện đều hợp lệ
+    console.log("Password validation passed, proceeding with API call");
     let token = localStorage.getItem("authToken");
 
     if (isTokenExpired(token)) {
-      token = await refreshToken();
+      token = await refresh();
       if (!token) {
         window.location.href = "/dang-nhap";
         return;
@@ -245,6 +322,7 @@ function Profile() {
     };
 
     try {
+      console.log("Sending change password request", { userId });
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_HOST}/api/account/change-password/${userId}`,
         {
@@ -257,14 +335,28 @@ function Profile() {
         }
       );
 
+      console.log("Response status:", response.status);
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
+
       if (response.ok) {
-        toast.success("Đổi mật khẩu thành công!");
+        if (responseData.status === 200) {
+          toast.success(responseData.message || "Đổi mật khẩu thành công!");
+          
+          // Reset form fields after successful password change
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        } else {
+          toast.error(responseData.message || "Lỗi khi đổi mật khẩu");
+        }
       } else {
-        const errorText = await response.text();
-        toast.error(`Lỗi: ${errorText}`);
+        // Xử lý khi response không ok (status code nằm ngoài khoảng 200-299)
+        toast.error(responseData.message || "Lỗi khi đổi mật khẩu. Vui lòng thử lại.");
       }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại sau.");
+    } catch (error: any) {
+      console.error("Change password error:", error);
+      toast.error("Có lỗi xảy ra: " + (error.message || "Không thể đổi mật khẩu"));
     }
   };
 
@@ -287,6 +379,7 @@ function Profile() {
   // ...existing code...
   return (
     <div className="profile-container">
+      <ToastContainer position="top-right" autoClose={3000} />
       {/* Sidebar Settings Menu */}
       <aside className="settings-menu">
         <h2 className="settings-title">
@@ -298,26 +391,26 @@ function Profile() {
           <ul className="settings-list">
             {[
               {
-                id: "profile",
+                id: "updateAccountForm",
                 icon: "far fa-id-card",
                 label: "Hồ sơ",
                 form: "updateAccountForm",
               },
               {
-                id: "password",
+                id: "changePasswordForm",
                 icon: "fas fa-key",
                 label: "Mật khẩu",
                 form: "changePasswordForm",
               },
               {
-                id: "private",
+                id: "privateFrom",
                 icon: "fas fa-exclamation-triangle",
                 label: "Cài đặt riêng tư",
                 form: "privateFrom",
               },
               {
-                id: "setting",
-                icon: "fas fa-cog", // Icon cài đặt
+                id: "settingForm",
+                icon: "fas fa-cog",
                 label: "Cài đặt thông báo",
                 form: "settingForm",
               },
@@ -326,9 +419,12 @@ function Profile() {
                 <a
                   href="#"
                   className={`settings-link ${
-                    activeTab === item.id ? "active" : ""
+                    activeTab === item.form ? "active" : ""
                   }`}
-                  onClick={() => handleTabClick(item.form)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleTabClick(item.form);
+                  }}
                 >
                   <i className={item.icon}></i> {item.label}
                 </a>

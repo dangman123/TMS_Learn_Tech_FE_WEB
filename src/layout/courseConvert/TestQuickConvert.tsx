@@ -1218,66 +1218,66 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
                   
                   {/* Các loại câu hỏi khác nhau */}
                   {question.type === "multiple-choice" && (
-                    <div className="row g-3">
-                      {["A", "B", "C", "D"].map((option) => {
+                  <div className="row g-3">
+                    {["A", "B", "C", "D"].map((option) => {
                         const optionValue = question[`option${option}` as keyof Question];
                         if (!optionValue) return null;
                         
-                        const isCorrect = checkAnswer(question.questionId);
+                      const isCorrect = checkAnswer(question.questionId);
                         const isSelected = answers[question.questionId] === option;
-                        const isSelectedCheck =
-                          userAnswerTest?.find(
-                            (pickme) => pickme.questionId == question.questionId
-                          )?.result == option;
+                      const isSelectedCheck =
+                        userAnswerTest?.find(
+                          (pickme) => pickme.questionId == question.questionId
+                        )?.result == option;
                         const isAnswerCorrect = question.resultCheck === option;
 
-                        const optionClass = isSubmitted
-                          ? isSelectedCheck
-                            ? isAnswerCorrect
-                              ? "correct"
-                              : "incorrect"
-                            : ""
-                          : "";
+                      const optionClass = isSubmitted
+                        ? isSelectedCheck
+                          ? isAnswerCorrect
+                            ? "correct"
+                            : "incorrect"
+                          : ""
+                        : "";
 
-                        return (
-                          <div className="col-lg-6" key={option}>
-                            <div className="rbt-form-check">
-                              <input
-                                type="radio"
-                                name={`question-${question.questionId}`}
-                                id={`question-${question.questionId}-${option}`}
-                                checked={answers[question.questionId] === option}
-                                onChange={() =>
-                                  handleAnswerChange(question.questionId, option)
-                                }
-                                disabled={isSubmitted} // Disable sau khi nộp bài
-                              />
-                              <label
-                                htmlFor={`question-${question.questionId}-${option}`}
-                                className={optionClass}
-                                style={{ width: "100%", height: "100%" }}
-                              >
-                                <strong style={{ marginRight: "2px" }}>
-                                  {option}.
-                                </strong>
+                      return (
+                        <div className="col-lg-6" key={option}>
+                          <div className="rbt-form-check">
+                            <input
+                              type="radio"
+                              name={`question-${question.questionId}`}
+                              id={`question-${question.questionId}-${option}`}
+                              checked={answers[question.questionId] === option}
+                              onChange={() =>
+                                handleAnswerChange(question.questionId, option)
+                              }
+                              disabled={isSubmitted} // Disable sau khi nộp bài
+                            />
+                            <label
+                              htmlFor={`question-${question.questionId}-${option}`}
+                              className={optionClass}
+                              style={{ width: "100%", height: "100%" }}
+                            >
+                              <strong style={{ marginRight: "2px" }}>
+                                {option}.
+                              </strong>
                                 {optionValue}{" "}
-                                {isSubmitted && (
-                                  <span
-                                    className="answer-status"
-                                    style={{
-                                      fontWeight: "900",
-                                      float: "right",
-                                      color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
-                                    }}
-                                  >
-                                    {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
-                                  </span>
-                                )}
-                              </label>
-                            </div>
+                              {isSubmitted && (
+                                <span
+                                  className="answer-status"
+                                  style={{
+                                    fontWeight: "900",
+                                    float: "right",
+                                    color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
+                                  }}
+                                >
+                                  {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
+                                </span>
+                              )}
+                            </label>
                           </div>
-                        );
-                      })}
+                        </div>
+                      );
+                    })}
                     </div>
                   )}
 
@@ -1442,12 +1442,12 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
 
                   {isSubmitted && question.instruction && (
                     <div className="answer-review" style={{ margin: "15px 0px 20px 0px" }}>
-                      <p>
-                        <b>Giải thích: </b>
+                              <p>
+                                <b>Giải thích: </b>
                         {question.instruction}
-                      </p>
-                    </div>
-                  )}
+                              </p>
+                            </div>
+                      )}
                 </div>
               ))}
 

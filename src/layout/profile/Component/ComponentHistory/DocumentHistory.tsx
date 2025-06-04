@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { isTokenExpired } from "../../../util/fucntion/auth";
 import useRefreshToken from "../../../util/fucntion/useRefreshToken";
 import DocumentHistoryNav from "./DocumentHistoryNav";
+import styles from "./documentHistory.module.css";
 
 interface DocumentDownload {
   id: number;
@@ -148,27 +149,27 @@ const DocumentHistory: React.FC = () => {
     }
   };
 
-  // Hàm để hiển thị icon phù hợp với loại file
-  const getFileIcon = (fileType: string) => {
+  // Hàm để hiển thị icon và css class phù hợp với loại file
+  const getFileIconAndClass = (fileType: string) => {
     switch (fileType.toLowerCase()) {
       case "pdf":
-        return "fas fa-file-pdf";
+        return { icon: "fas fa-file-pdf", className: styles.pdfIcon };
       case "doc":
       case "docx":
-        return "fas fa-file-word";
+        return { icon: "fas fa-file-word", className: styles.wordIcon };
       case "xls":
       case "xlsx":
-        return "fas fa-file-excel";
+        return { icon: "fas fa-file-excel", className: styles.excelIcon };
       case "ppt":
       case "pptx":
-        return "fas fa-file-powerpoint";
+        return { icon: "fas fa-file-powerpoint", className: styles.pptIcon };
       case "jpg":
       case "jpeg":
       case "png":
       case "gif":
-        return "fas fa-file-image";
+        return { icon: "fas fa-file-image", className: styles.imageIcon };
       default:
-        return "fas fa-file";
+        return { icon: "fas fa-file", className: styles.genericFileIcon };
     }
   };
 
@@ -225,36 +226,37 @@ const DocumentHistory: React.FC = () => {
   };
 
   return (
-    <div id="historyDocument">
-      <hr />
+    <div className={styles.historyDocumentContainer}>
+      <h2 className={styles.sectionTitle}>Lịch sử tài liệu đã tải</h2>
+      <hr className={styles.separator} />
+      
       <DocumentHistoryNav
         onSearch={setSearchKeyword}
         size={size}
         setSize={handleSizeChange}
         onFilterByTime={setFilterByTime}
       />
-      <hr />
-
-      <div className="table-responsive test-history-user">
-        <table className="table table-striped table-sm">
+      
+      <div className={styles.tableResponsive}>
+        <table className={styles.historyTable}>
           <thead>
             <tr>
-              <th scope="col" className="col-stt">
+              <th className={styles.columnStt}>
                 STT
               </th>
-              <th scope="col" className="col-ten-tai-lieu">
+              <th className={styles.columnDocumentName}>
                 Tên tài liệu
               </th>
-              <th scope="col" className="col-loai">
+              <th className={styles.columnType}>
                 Loại
               </th>
-              <th scope="col" className="col-kich-thuoc">
+              <th className={styles.columnSize}>
                 Kích thước
               </th>
-              <th scope="col" className="col-thoi-gian">
+              <th className={styles.columnTime}>
                 Thời gian tải
               </th>
-              <th scope="col" className="col-tai-lai">
+              <th className={styles.columnRedownload}>
                 Tải lại
               </th>
             </tr>
@@ -262,67 +264,132 @@ const DocumentHistory: React.FC = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="text-center">
+                <td colSpan={6} className={styles.loadingMessage}>
+                  <div className="spinner-border spinner-border-sm me-2" role="status">
+                    <span className="visually-hidden">Đang tải...</span>
+                  </div>
                   Đang tải dữ liệu...
                 </td>
               </tr>
             ) : filteredResults.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center">
-                  Không có dữ liệu.
+                <td colSpan={6} className={styles.emptyMessage}>
+                  <i className="fas fa-info-circle me-2"></i>
+                  Không có dữ liệu phù hợp với điều kiện tìm kiếm.
                 </td>
               </tr>
             ) : (
-              filteredResults.map((doc, index) => (
-                <tr key={doc.id}>
-                  <th scope="row">{index + 1 + page * size}</th>
-                  <td>{doc.documentName}</td>
-                  <td>
-                    <i className={getFileIcon(doc.fileType)}></i>{" "}
-                    {doc.fileType.toUpperCase()}
-                  </td>
-                  <td>{formatFileSize(doc.fileSize)}</td>
-                  <td>{new Date(doc.downloadedAt).toLocaleString()}</td>
-                  <td>
-                    <button
-                      className="btn btn-link text-primary"
-                      onClick={() => handleRedownload(doc.documentId)}
-                    >
-                      <i className="fas fa-download"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))
+              filteredResults.map((doc, index) => {
+                const { icon, className } = getFileIconAndClass(doc.fileType);
+                return (
+                  <tr key={doc.id}>
+                    <th scope="row">{index + 1 + page * size}</th>
+                    <td>{doc.documentName}</td>
+                    <td>
+                      <i className={`${icon} ${styles.fileIcon} ${className}`}></i>
+                      {doc.fileType.toUpperCase()}
+                    </td>
+                    <td>{formatFileSize(doc.fileSize)}</td>
+                    <td>{new Date(doc.downloadedAt).toLocaleString()}</td>
+                    <td>
+                      <button
+                        className={styles.downloadButton}
+                        onClick={() => handleRedownload(doc.documentId)}
+                        title="Tải lại tài liệu"
+                      >
+                        <i className="fas fa-download"></i>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
-      <div className="pegi justify-content-center mt-60">
-        <a
-          href="#0"
-          onClick={() => handlePageChange(page - 1)}
-          className={`border-none ${page === 0 ? "disabled" : ""}`}
-        >
-          <i className="fa-regular fa-arrow-left primary-color transition"></i>
-        </a>
-        {[...Array(totalPages)].map((_, index) => (
+      
+      {filteredResults.length > 0 && (
+        <div className={styles.pagination}>
           <a
-            key={index}
             href="#0"
-            onClick={() => handlePageChange(index)}
-            className={index === page ? "active" : ""}
+            onClick={(e) => { e.preventDefault(); handlePageChange(page - 1); }}
+            className={`${styles.paginationItem} ${styles.paginationArrow} ${page === 0 ? styles.paginationArrowDisabled : ''}`}
           >
-            {index + 1}
+            <i className="fa-regular fa-arrow-left"></i>
           </a>
-        ))}
-        <a
-          href="#0"
-          onClick={() => handlePageChange(page + 1)}
-          className={`border-none ${page === totalPages - 1 ? "disabled" : ""}`}
-        >
-          <i className="fa-regular fa-arrow-right primary-color transition"></i>
-        </a>
-      </div>
+          {totalPages <= 7 ? (
+            // Hiển thị tất cả trang khi có ít hơn 7 trang
+            [...Array(totalPages)].map((_, index) => (
+              <a
+                key={index}
+                href="#0"
+                onClick={(e) => { e.preventDefault(); handlePageChange(index); }}
+                className={`${styles.paginationItem} ${index === page ? styles.paginationItemActive : ''}`}
+              >
+                {index + 1}
+              </a>
+            ))
+          ) : (
+            // Logic phân trang cho nhiều trang
+            <>
+              {/* Luôn hiển thị trang đầu tiên */}
+              <a
+                href="#0"
+                onClick={(e) => { e.preventDefault(); handlePageChange(0); }}
+                className={`${styles.paginationItem} ${0 === page ? styles.paginationItemActive : ''}`}
+              >
+                1
+              </a>
+
+              {/* Hiển thị dấu "..." nếu trang hiện tại > 3 */}
+              {page > 3 && (
+                <span className={styles.paginationItem}>...</span>
+              )}
+
+              {/* Hiển thị các trang xung quanh trang hiện tại */}
+              {[...Array(totalPages)].map((_, index) => {
+                if (
+                  (index > 0 && index < totalPages - 1) && // Không phải trang đầu hoặc cuối
+                  (index >= page - 1 && index <= page + 1) // Trong phạm vi hiển thị
+                ) {
+                  return (
+                    <a
+                      key={index}
+                      href="#0"
+                      onClick={(e) => { e.preventDefault(); handlePageChange(index); }}
+                      className={`${styles.paginationItem} ${index === page ? styles.paginationItemActive : ''}`}
+                    >
+                      {index + 1}
+                    </a>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Hiển thị dấu "..." nếu trang hiện tại < totalPages - 4 */}
+              {page < totalPages - 4 && (
+                <span className={styles.paginationItem}>...</span>
+              )}
+
+              {/* Luôn hiển thị trang cuối cùng */}
+              <a
+                href="#0"
+                onClick={(e) => { e.preventDefault(); handlePageChange(totalPages - 1); }}
+                className={`${styles.paginationItem} ${totalPages - 1 === page ? styles.paginationItemActive : ''}`}
+              >
+                {totalPages}
+              </a>
+            </>
+          )}
+          <a
+            href="#0"
+            onClick={(e) => { e.preventDefault(); handlePageChange(page + 1); }}
+            className={`${styles.paginationItem} ${styles.paginationArrow} ${page === totalPages - 1 ? styles.paginationArrowDisabled : ''}`}
+          >
+            <i className="fa-regular fa-arrow-right"></i>
+          </a>
+        </div>
+      )}
     </div>
   );
 };

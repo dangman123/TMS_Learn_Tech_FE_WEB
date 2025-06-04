@@ -1,0 +1,43 @@
+/* Helper styles for sticky positioning */
+
+/* Ensure proper height for containers */
+.has-sticky-sidebar .col-xl-3,
+.has-sticky-sidebar .col-lg-4,
+.has-sticky-sidebar .col-md-12 {
+  min-height: 100vh;
+  position: relative !important;
+}
+
+/* Force sticky positioning */
+.has-sticky-sidebar [class*="relatedDocumentsContainer"] {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 120px !important;
+  z-index: 10 !important;
+  width: 100% !important;
+}
+
+/* Ensure parent creates proper positioning context */
+html, body {
+  height: 100%;
+}
+
+/* Add scrolling context */
+.has-sticky-sidebar {
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+/* Force relative positioning on container */
+.has-sticky-sidebar [class*="container"] {
+  position: relative !important;
+}
+
+/* Additional helper for Safari */
+@supports (-webkit-touch-callout: none) {
+  /* Safari specific */
+  .has-sticky-sidebar [class*="relatedDocumentsContainer"] {
+    position: -webkit-sticky !important;
+    top: 120px !important;
+  }
+} 

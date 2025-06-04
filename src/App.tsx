@@ -64,7 +64,7 @@ import { LoadingProvider } from "./layout/util/LoadingContext";
 import VerifyOTP from "./layout/login/VerifyOTP";
 import ChooseRegisterMethod from "./layout/login/ChooseRegisterMethod";
 import VerifyOTPSMS from "./layout/login/VerifyOTPSMS";
-
+import TakeTest from "./layout/take-test/take-test";
 import ContentExampleDetail from "./layout/example/ComponentDetail/ContentExampleDetail";
 import OverView from "./layout/profile/Component/OverView/OverView";
 const ProtectedAccountManagement = withAuth(AccountManagement);
@@ -235,7 +235,7 @@ function App() {
                 }
               />
               <Route
-                path="/khoa-hoc/thanh-toan"
+                path="/thanh-toan"
                 element={
                   <MainLayout>
                     {/* <Breadcum /> */}
@@ -270,8 +270,26 @@ function App() {
                   </MainLayout>
                 }
               />
+                 <Route
+                path="/take-test"
+                element={
+  
+     
+                    <TakeTest />
+   
+                }
+              />
               <Route
                 path="/bai-viet"
+                element={
+                  <MainLayout>
+                    {/* <Breadcum /> */}
+                    <Blogs />
+                  </MainLayout>
+                }
+              />
+                   <Route
+                path="/bai-viet/danh-muc/:categoryName"
                 element={
                   <MainLayout>
                     {/* <Breadcum /> */}

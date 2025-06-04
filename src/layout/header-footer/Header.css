@@ -102,10 +102,13 @@ a.gio-hang-icon {
   padding: 20px;
 }
 
-.offcanvas-menu li {
+.offcanvas-menu ul li {
   margin-bottom: 10px;
-}
 
+}
+.main-menu ul li a{
+  font-size: 16px;
+}
 .offcanvas-menu a {
   color: #333;
   text-decoration: none;

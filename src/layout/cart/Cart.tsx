@@ -397,6 +397,18 @@ function Cart() {
         return;
       }
 
+      // Get the selected cart items
+      const selectedCartItems = cart.filter(item => selectedItems.includes(item.cartItemId));
+      
+      // Save to sessionStorage
+      const checkoutData = {
+        items: selectedCartItems,
+        totalAmount: totalPrice,
+        discount: discount
+      };
+      
+      sessionStorage.setItem("cartcheckout", JSON.stringify(checkoutData));
+
       navigate("/thanh-toan", { 
         state: { 
           selectedItems,
@@ -587,54 +599,54 @@ function Cart() {
               {cart.map((item) => (
                 <React.Fragment key={item.cartItemId}>
                   <div className={`cart-item ${selectedItems.includes(item.cartItemId) ? 'selected' : ''}`}>
-                    <div className="item-checkbox">
-                      <label className="checkbox-container">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedItems.includes(item.cartItemId)}
-                          onChange={() => toggleSelectItem(item.cartItemId)}
-                        />
-                        <span className="checkmark"></span>
-                      </label>
-                    </div>
-                    <div className="item-image">
-                      <img src={item.image} alt={item.name} />
-                    </div>
-                    <div className="item-content">
-                      <div className="item-info">
-                        <h3 className="item-title">{item.name}</h3>
+                <div className="item-checkbox">
+                  <label className="checkbox-container">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedItems.includes(item.cartItemId)}
+                      onChange={() => toggleSelectItem(item.cartItemId)}
+                    />
+                    <span className="checkmark"></span>
+                  </label>
+                </div>
+                <div className="item-image">
+                  <img src={item.image} alt={item.name} />
+                </div>
+                <div className="item-content">
+                  <div className="item-info">
+                    <h3 className="item-title">{item.name}</h3>
                         <div className={`item-type-badge ${item.type.toLowerCase()}-badge`}>
-                          {item.type === "COURSE" ? "Khóa học" : item.type === "COMBO" ? "Combo" : "Đề thi"}
-                        </div>
-                        <div className="item-actions">
-                          <button
-                            onClick={() => handleRemoveItem(item.cartItemId)}
-                            className="remove-btn"
-                          >
-                            <FiTrash2 /> Xóa
-                          </button>
-                        </div>
+                      {item.type === "COURSE" ? "Khóa học" : item.type === "COMBO" ? "Combo" : "Đề thi"}
                       </div>
-                      <div className="item-price">
-                        {item.discount > 0 && (
-                          <div className="item-discount">
-                            <FiTag className="discount-icon" />
-                            <span>-{calculateDiscountPercent(item.cost, item.price)}%</span>
-                          </div>
-                        )}
-                        <div className="price-wrapper">
-                        <div className="current-price">
-                          {formatCurrency(item.price)}
-                        </div>
-                          {item.discount > 0 && (
-                        <div className="original-price">
-                              {formatCurrency(item.cost)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    <div className="item-actions">
+                      <button
+                        onClick={() => handleRemoveItem(item.cartItemId)}
+                        className="remove-btn"
+                      >
+                        <FiTrash2 /> Xóa
+                      </button>
                     </div>
                   </div>
+                  <div className="item-price">
+                    {item.discount > 0 && (
+                      <div className="item-discount">
+                        <FiTag className="discount-icon" />
+                        <span>-{calculateDiscountPercent(item.cost, item.price)}%</span>
+                      </div>
+                    )}
+                    <div className="price-wrapper">
+                    <div className="current-price">
+                      {formatCurrency(item.price)}
+                    </div>
+                      {item.discount > 0 && (
+                    <div className="original-price">
+                          {formatCurrency(item.cost)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
                   
                   {/* Combo Recommendation Section - Now rendered outside cart-item */}
                   {item.type === "COURSE" && selectedItems.includes(item.cartItemId) && item.combos && item.combos.length > 0 && (

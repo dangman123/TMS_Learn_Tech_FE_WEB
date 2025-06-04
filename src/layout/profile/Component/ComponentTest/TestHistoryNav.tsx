@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import styles from "./testHistoryNav.module.css";
 
 interface TestHistoryNavBottomProps {
   onSearch: (keyword: string) => void;
@@ -14,41 +15,47 @@ export const TestHistoryNav = ({
   onFilterByTime,
 }: TestHistoryNavBottomProps) => {
   const [searchInput, setSearchInput] = useState("");
+  const [selectedTime, setSelectedTime] = useState("year");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value;
     setSearchInput(keyword);
     onSearch(keyword);
   };
-  const [selectedTime, setSelectedTime] = useState("year");
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedTime(value);
     onFilterByTime(value); // Gửi giá trị thời gian lên component cha
   };
+  
   return (
-    <div className="row filter-row">
-      <div className="col-md-8">
-        <div className="row">
-          <div className="col-md-8 test-history-search">
-            <div className="input-group">
-              <input
-                type="text"
-                className="form-control search-bar"
-                placeholder="Tìm kiếm"
-                value={searchInput}
-                onChange={handleInputChange}
-              />
-            </div>
+    <div className={styles.filterContainer}>
+      <div className={styles.filterRow}>
+        <div className={styles.filterCol}>
+          <label className={styles.filterLabel}>Tìm kiếm bài kiểm tra</label>
+          <div className={styles.searchContainer}>
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Nhập tên bài kiểm tra cần tìm..."
+              value={searchInput}
+              onChange={handleInputChange}
+            />
+            <button className={styles.searchButton} title="Tìm kiếm">
+              <i className="fas fa-search"></i>
+            </button>
           </div>
-          <div className="col-md-4 test-history-filter">
-            <div className="form-group timing-test">
+        </div>
+        
+        <div className={styles.filterCol}>
+          <div className={styles.filterControls}>
+            <div className="w-100">
+              <label className={styles.filterLabel}>Khoảng thời gian</label>
               <select
-                className="form-control"
-                id="filterByTime"
+                className={styles.selectControl}
                 value={selectedTime}
-                onChange={handleTimeChange} // Lắng nghe sự thay đổi
+                onChange={handleTimeChange}
               >
                 <option value="today">Hôm nay</option>
                 <option value="lastday">Hôm qua</option>
@@ -57,25 +64,21 @@ export const TestHistoryNav = ({
                 <option value="year">Năm nay</option>
               </select>
             </div>
+            
+            <div className="w-100">
+              <label className={styles.filterLabel}>Hiển thị</label>
+              <select
+                className={styles.selectControl}
+                value={size}
+                onChange={(e) => setSize(Number(e.target.value))}
+              >
+                <option value={10}>10 kết quả / trang</option>
+                <option value={20}>20 kết quả / trang</option>
+                <option value={30}>30 kết quả / trang</option>
+                <option value={50}>50 kết quả / trang</option>
+              </select>
+            </div>
           </div>
-        </div>
-      </div>
-
-     
-
-      <div className="col-md-4">
-        <div className="form-group">
-          <label htmlFor="filterByTime">Hiển thị:</label>
-          <select
-            className="form-control"
-            value={size}
-            onChange={(e) => setSize(Number(e.target.value))}
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={30}>30</option>
-            <option value={50}>50</option>
-          </select>
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import React, { useState, useRef, useEffect } from "react";
 import {
   FileText,
   Search,
@@ -39,21 +38,25 @@ interface BlogModel {
   deleted: boolean;
 }
 
-const NavBlog = () => {
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  
+interface NavBlogProps {
+  categories: BlogCategory[];
+  selectedCategoryId: number | null;
+  onCategorySelect: (categoryId: number | null, categoryName: string | null) => void;
+  onSearch: (term: string) => void;
+  allBlogs: BlogModel[];
+}
+
+const NavBlog: React.FC<NavBlogProps> = ({ categories, selectedCategoryId, onCategorySelect, onSearch, allBlogs }) => {
   // State cho chức năng tìm kiếm
-  const [blogsSearch, setBlogsSearch] = useState<BlogModel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBlogs, setFilteredBlogs] = useState<BlogModel[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLDivElement>(null);
   const [searchPosition, setSearchPosition] = useState({ top: 0, left: 0, width: 0 });
 
+  // Hàm chuyển chuỗi thành slug
   const removeVietnameseTones = (str: string) => {
     return str
       .normalize("NFD")
@@ -65,141 +68,40 @@ const NavBlog = () => {
       .toLowerCase();
   };
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_SERVER_HOST}/api/categories/level3/blog`
-        );
-
-        if (response.data.status === 200) {
-          setCategories(response.data.data);
-        } else {
-          console.error("Error fetching blog categories:", response.data.message);
-        }
-
-        // Kiểm tra xem có danh mục blog nào đã được chọn trước đó không
-        const currentCategoryId = localStorage.getItem("iddanhmucblog");
-        if (currentCategoryId) {
-          setSelectedCategory(parseInt(currentCategoryId, 10));
-        }
-      } catch (error) {
-        console.error("Error fetching blog categories:", error);
-      }
-    };
-
-    // Tải dữ liệu tìm kiếm blog cho tìm kiếm offline
-    const fetchSearchData = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_SERVER_HOST}/api/blogs/search-data`
-        );
-        
-        if (response.data.status === 200) {
-          setBlogsSearch(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching blog search data:", error);
-      }
-    };
-
-    fetchCategories();
-    fetchSearchData();
-  }, []);
-
-  // Xử lý tìm kiếm với debounce
-  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
+  // Xử lý tìm kiếm cục bộ
+  const handleLocalSearch = (value: string) => {
     if (value.trim() === "") {
       setShowResults(false);
       setFilteredBlogs([]);
       return;
     }
-
-    setIsSearching(true);
     
-    try {
-      // Gọi API tìm kiếm theo tên tác giả và tên bài viết
-      if (value.trim().length > 1) {
-        const params: any = { search: value.trim() };
-        
-        // Thêm categoryId nếu có danh mục được chọn
-        if (selectedCategory) {
-          params.categoryId = selectedCategory;
-        }
-        
-        const response = await axios.get(
-          `${process.env.REACT_APP_SERVER_HOST}/api/blogs/public`, 
-          { params }
-        );
-        
-        if (response.data.status === 200) {
-          const apiResults = response.data.data?.content || [];
-          
-          // Tìm kiếm thêm trong dữ liệu cục bộ theo tiêu đề
-          const localResults = blogsSearch.filter(
-            blog => blog.title.toLowerCase().includes(value.toLowerCase())
-          );
-          
-          // Kết hợp và loại bỏ trùng lặp bằng Set
-          const combinedResultsMap = new Map();
-          
-          // Thêm kết quả từ API
-          apiResults.forEach((blog: BlogModel) => {
-            combinedResultsMap.set(blog.id, blog);
-          });
-          
-          // Thêm kết quả cục bộ nếu chưa có trong map
-          localResults.forEach(blog => {
-            if (!combinedResultsMap.has(blog.id)) {
-              combinedResultsMap.set(blog.id, blog);
-            }
-          });
-          
-          // Chuyển Map thành Array
-          const combinedResults = Array.from(combinedResultsMap.values());
-          
-          // Giới hạn kết quả và hiển thị
-          setFilteredBlogs(combinedResults.slice(0, 5));
-          setShowResults(true);
-        }
-      } else {
-        // Tìm kiếm cục bộ cho các từ ngắn
-        const results = blogsSearch.filter(blog => 
-          blog.title.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredBlogs(results.slice(0, 5));
-        setShowResults(true);
-      }
-    } catch (error) {
-      console.error("Error searching blogs:", error);
-      // Fallback tìm kiếm cục bộ nếu API lỗi
-      const results = blogsSearch.filter(blog => 
-        blog.title.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredBlogs(results.slice(0, 5));
-      setShowResults(true);
-    } finally {
-      setIsSearching(false);
-    }
+    // Tìm kiếm trong dữ liệu hiện có
+    const searchLower = value.toLowerCase();
+    const results = allBlogs.filter(blog => 
+      blog.title.toLowerCase().includes(searchLower) || 
+      blog.authorName.toLowerCase().includes(searchLower)
+    );
+    
+    // Giới hạn kết quả hiển thị
+    setFilteredBlogs(results.slice(0, 5));
+    setShowResults(true);
   };
 
-  // Thêm debounce để tránh gọi API quá nhiều
+  // Sử dụng useEffect để tìm kiếm với debounce
   useEffect(() => {
     const delaySearch = setTimeout(() => {
-      if (searchTerm.trim().length > 1) {
-        handleSearch({ target: { value: searchTerm } } as React.ChangeEvent<HTMLInputElement>);
+      if (searchTerm.trim()) {
+        handleLocalSearch(searchTerm);
       }
-    }, 300); // Đợi 300ms sau khi ngừng gõ
-
+    }, 300);
+    
     return () => clearTimeout(delaySearch);
-  }, [searchTerm]);
+  }, [searchTerm, allBlogs]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchTerm.trim() !== "") {
-      navigate(`/tim-kiem-blog?keyword=${searchTerm}`);
+      onSearch(searchTerm);
       setShowResults(false);
     }
   };
@@ -247,19 +149,21 @@ const NavBlog = () => {
   };
 
   const handleCategoryClick = (id: number, name: string) => {
-    setSelectedCategory(id);
-    localStorage.setItem("iddanhmucblog", id.toString());
-    localStorage.setItem("danhmucblog", removeVietnameseTones(name));
-    navigate(`/danh-muc-blog/${removeVietnameseTones(name)}`);
+    onCategorySelect(id, name);
+  };
+
+  const handleAllCategoriesClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onCategorySelect(null, null);
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    if (e.target.value.trim() === "") {
+    const value = e.target.value;
+    setSearchTerm(value);
+    if (value.trim() === "") {
       setShowResults(false);
       setFilteredBlogs([]);
-    } else {
-      setShowResults(true);
+      onSearch("");
     }
   };
 
@@ -283,7 +187,10 @@ const NavBlog = () => {
               className="blog-search-input"
             />
             <button 
-              onClick={() => navigate(`/tim-kiem-blog?keyword=${searchTerm}`)}
+              onClick={() => {
+                onSearch(searchTerm);
+                setShowResults(false);
+              }}
               className="blog-search-button"
             >
               <Search />
@@ -293,10 +200,24 @@ const NavBlog = () => {
         
         <div className="blog-body">
           <ul className="category-list">
+            {/* Thêm "Tất cả bài viết" vào đầu danh sách */}
+            <li className={`category-item ${selectedCategoryId === null ? "active" : ""}`}>
+              <div className="category-row">
+                <a
+                  href="#"
+                  className="category-name"
+                  onClick={handleAllCategoriesClick}
+                >
+                  <FileText className="category-icon" />
+                  <span>Tất cả bài viết</span>
+                </a>
+              </div>
+            </li>
+
             {categories.map((category) => (
               <li
                 key={category.id}
-                className={`category-item ${selectedCategory === category.id ? "active" : ""}`}
+                className={`category-item ${selectedCategoryId === category.id ? "active" : ""}`}
               >
                 <div className="category-row">
                   <a
@@ -329,12 +250,7 @@ const NavBlog = () => {
           width: `${searchPosition.width}px`,
           zIndex: 9999
         }}>
-          {isSearching ? (
-            <div className="blog-search-loading">
-              <div className="spinner-small"></div>
-              <span>Đang tìm kiếm...</span>
-            </div>
-          ) : filteredBlogs.length > 0 ? (
+          {filteredBlogs.length > 0 ? (
             <>
               {filteredBlogs.map((blog) => (
                 <div className="blog-search-result-item" key={blog.id}>
@@ -363,7 +279,11 @@ const NavBlog = () => {
               ))}
               
               <div className="blog-search-view-all">
-                <a href={`/tim-kiem-blog?keyword=${searchTerm}`}>
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  onSearch(searchTerm);
+                  setShowResults(false);
+                }}>
                   Xem tất cả kết quả
                 </a>
               </div>

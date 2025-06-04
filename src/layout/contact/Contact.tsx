@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import "./Contact.css";
+import styles from "./Contact.module.css";
 // Thêm các interfaces
 interface FAQItem {
   question: string;
@@ -114,56 +114,31 @@ function Contacts() {
   ];
 
   return (
-    <section className="contact-area pt-120 pb-120">
+    <section className={styles.contactArea}>
       <div className="container">
         {/* Support Banner */}
-        <div className="support-banner">
+        <div className={styles.supportBanner}>
           <div className="row align-items-center">
-            <div className="col-md-8">
-              <div className="support-banner-content">
-                <div className="support-banner-icon">
+            <div className="col-md-12">
+              <div className={styles.supportBannerContent}>
+                <div className={styles.supportBannerIcon}>
                   <i className="fas fa-headset"></i>
                 </div>
-                <div className="support-banner-text">
+                <div className={styles.supportBannerText}>
                   <h4>Chúng tôi luôn sẵn sàng giúp đỡ bạn</h4>
                   <p>Đội ngũ hỗ trợ sẵn sàng giải đáp mọi thắc mắc</p>
                 </div>
               </div>
             </div>
-            <div className="col-md-4 d-flex justify-content-md-end mt-3 mt-md-0">
-              <div className="support-banner-buttons">
-                <button
-                  className="btn btn-light me-2"
-                  onClick={() => (window.location.href = "tel:0348740942")}
-                >
-                  <i className="fas fa-phone me-1"></i> Gọi ngay
-                </button>
-                <button className="btn btn-outline-light">
-                  <i className="fas fa-comment me-1"></i> Chat
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Search Box */}
-        <div className="search-container">
-          <div className="search-box">
-            <i className="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Tìm kiếm câu hỏi, hướng dẫn..."
-            />
           </div>
         </div>
 
         {/* Contact Info */}
-        <div className="contact__info pb-60">
-          <h4 className="section-title">Thông tin liên hệ</h4>
+        <div className={styles.contactInfo}>
+          <h4 className={styles.sectionTitle}>Thông tin liên hệ</h4>
           <div className="row g-4">
             <div className="col-lg-4">
-              <div className="contact-support" style={{ height: "100%" }}>
+              <div className={styles.contactSupport} style={{ height: "100%" }}>
                 <svg
                   width="70"
                   height="70"
@@ -187,14 +162,14 @@ function Contacts() {
               </div>
             </div>
             <div className="col-lg-4">
-              <div className="contact-support" style={{ height: "100%" }}>
+              <div className={styles.contactSupport} style={{ height: "100%" }}>
                 <i className="fas fa-envelope fa-3x"></i>
                 <h3>Email</h3>
                 <p>tms.huit@gmail.com</p>
               </div>
             </div>
             <div className="col-lg-4">
-              <div className="contact-support" style={{ height: "100%" }}>
+              <div className={styles.contactSupport} style={{ height: "100%" }}>
                 <i className="fas fa-phone-alt fa-3x"></i>
                 <h3>Hotline</h3>
                 <p>0348 740 942</p>
@@ -204,18 +179,17 @@ function Contacts() {
         </div>
 
         {/* FAQ Section */}
-        <div className="faq-section mb-5">
-          <h4 className="section-title">Câu hỏi thường gặp</h4>
+        <div className={styles.faqSection}>
+          <h4 className={styles.sectionTitle}>Câu hỏi thường gặp</h4>
           <div className="accordion" id="faqAccordion">
             {faqItems.map((faq, index) => (
-              <div className="accordion-item mb-2" key={index}>
+              <div className={styles.accordionItem} key={index} onClick={() => toggleFaq(index)}>
                 <h2 className="accordion-header">
                   <button
-                    className={`accordion-button ${
+                    className={`${styles.accordionButton} ${
                       !faq.isExpanded ? "collapsed" : ""
                     }`}
                     type="button"
-                    onClick={() => toggleFaq(index)}
                   >
                     {faq.question}
                   </button>
@@ -225,7 +199,7 @@ function Contacts() {
                     faq.isExpanded ? "show" : ""
                   }`}
                 >
-                  <div className="accordion-body">{faq.answer}</div>
+                  <div className={styles.accordionBody}>{faq.answer}</div>
                 </div>
               </div>
             ))}
@@ -233,41 +207,41 @@ function Contacts() {
         </div>
 
         {/* Guides Section */}
-        <div className="guides-section mb-5">
-          <h4 className="section-title">Hướng dẫn sử dụng</h4>
+        <div className={styles.guidesSection}>
+          <h4 className={styles.sectionTitle}>Hướng dẫn sử dụng</h4>
           <div className="row">
             {guideCategories.map((category, catIndex) => (
               <div className="col-md-6 mb-4" key={catIndex}>
-                <div className="guide-category-card">
-                  <div className="guide-category-header">
-                    <div className="category-iconn">
+                <div className={styles.guideCategoryCard}>
+                  <div className={styles.guideCategoryHeader}>
+                    <div className={styles.categoryIcon}>
                       <i className={catIndex === 0 ? "fas fa-book-open" : "fas fa-graduation-cap"}></i>
                     </div>
                     <h5>{category.title}</h5>
                   </div>
-                  <div className="guide-items-container">
+                  <div className={styles.guideItemsContainer}>
                     {category.guides.map((guide, guideIndex) => (
                       <div 
-                        className="guide-item" 
+                        className={styles.guideItem} 
                         key={guideIndex}
                         onClick={openGuideModal}
                       >
-                        <div className="guide-item-content">
-                          <div className="guide-item-icon">
+                        <div className={styles.guideItemContent}>
+                          <div className={styles.guideItemIcon}>
                             <i className={
                               guide.title.includes("đăng ký") ? "fas fa-user-plus" :
                               guide.title.includes("hồ sơ") ? "fas fa-user-edit" :
                               guide.title.includes("khóa học") ? "fas fa-laptop-code" : "fas fa-book"
                             }></i>
                           </div>
-                          <div className="guide-item-text">
+                          <div className={styles.guideItemText}>
                             <h6>{guide.title}</h6>
-                            <p className="guide-item-description">
+                            <p className={styles.guideItemDescription}>
                               {guide.content.split('\n')[2]?.substring(0, 60)}...
                             </p>
                           </div>
                         </div>
-                        <div className="guide-item-arrow">
+                        <div className={styles.guideItemArrow}>
                           <i className="fas fa-chevron-right"></i>
                         </div>
                       </div>
@@ -282,97 +256,97 @@ function Contacts() {
         {/* Unified Guide Modal - Replace the previous modal that showed specific content */}
         {showGuideModal && (
           <div 
-            className="tms-modal-overlay" 
+            className={styles.tmsModalOverlay} 
             onClick={handleBackdropClick}
           >
-            <div className="tms-modal-dialog" onClick={e => e.stopPropagation()}>
-              <div className="tms-modal-content">
-                <div className="tms-modal-header">
-                  <div className="tms-modal-title-container">
-                    <div className="tms-modal-icon">
+            <div className={styles.tmsModalDialog} onClick={e => e.stopPropagation()}>
+              <div className={styles.tmsModalContent}>
+                <div className={styles.tmsModalHeader}>
+                  <div className={styles.tmsModalTitleContainer}>
+                    <div className={styles.tmsModalIcon}>
                       <i className="fas fa-info-circle"></i>
                     </div>
-                    <h5 className="tms-modal-title">Hướng dẫn sử dụng TMS Learn Tech</h5>
+                    <h5 className={styles.tmsModalTitle}>Hướng dẫn sử dụng TMS Learn Tech</h5>
                   </div>
                   <button
                     type="button"
-                    className="tms-btn-close"
+                    className={styles.tmsBtnClose}
                     onClick={closeGuideModal}
                     aria-label="Đóng"
                   >
                     <i className="fas fa-times"></i>
                   </button>
                 </div>
-                <div className="tms-modal-body">
-                  <h2 className="guide-heading-1">Tổng quan về TMS Learn Tech</h2>
-                  <p className="guide-paragraph">
+                <div className={styles.tmsModalBody}>
+                  <h2 className={styles.guideHeading1}>Tổng quan về TMS Learn Tech</h2>
+                  <p className={styles.guideParagraph}>
                     TMS Learn Tech là nền tảng học trực tuyến cung cấp nhiều khóa học đa dạng giúp bạn phát triển kỹ năng và nâng cao kiến thức trong nhiều lĩnh vực. 
                   </p>
                   
-                  <div className="guide-heading-2-container">
-                    <i className="fas fa-angle-right guide-step-icon"></i>
-                    <h3 className="guide-heading-2">Bắt đầu</h3>
+                  <div className={styles.guideHeading2Container}>
+                    <i className={`fas fa-angle-right ${styles.guideStepIcon}`}></i>
+                    <h3 className={styles.guideHeading2}>Bắt đầu</h3>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Đăng ký tài khoản hoặc đăng nhập nếu bạn đã có tài khoản</span>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Khám phá các khóa học có sẵn trên nền tảng</span>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Đăng ký các khóa học phù hợp với nhu cầu của bạn</span>
                   </div>
                   
-                  <div className="guide-heading-2-container">
-                    <i className="fas fa-angle-right guide-step-icon"></i>
-                    <h3 className="guide-heading-2">Tính năng chính</h3>
+                  <div className={styles.guideHeading2Container}>
+                    <i className={`fas fa-angle-right ${styles.guideStepIcon}`}></i>
+                    <h3 className={styles.guideHeading2}>Tính năng chính</h3>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Học theo cách riêng của bạn với các bài giảng video chất lượng cao</span>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Hoàn thành bài tập và nhận đánh giá từ giảng viên</span>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Tương tác với cộng đồng học viên và giảng viên</span>
                   </div>
-                  <div className="guide-bullet">
-                    <span className="guide-bullet-dot">
+                  <div className={styles.guideBullet}>
+                    <span className={styles.guideBulletDot}>
                       <i className="fas fa-circle-check"></i>
                     </span>
                     <span>Nhận chứng chỉ sau khi hoàn thành khóa học</span>
                   </div>
                   
-                  <div className="guide-heading-2-container">
-                    <i className="fas fa-angle-right guide-step-icon"></i>
-                    <h3 className="guide-heading-2">Hỗ trợ</h3>
+                  <div className={styles.guideHeading2Container}>
+                    <i className={`fas fa-angle-right ${styles.guideStepIcon}`}></i>
+                    <h3 className={styles.guideHeading2}>Hỗ trợ</h3>
                   </div>
-                  <p className="guide-paragraph">
+                  <p className={styles.guideParagraph}>
                     Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi qua email tms.huit@gmail.com hoặc gọi số hotline 0348 740 942. Chúng tôi luôn sẵn sàng giúp đỡ bạn!
                   </p>
                 </div>
-                <div className="tms-modal-footer">
+                <div className={styles.tmsModalFooter}>
                   <button
                     type="button"
-                    className="btn tms-btn-primary"
+                    className={`btn ${styles.tmsBtnPrimary}`}
                     onClick={closeGuideModal}
                   >
                     <i className="fas fa-check me-2"></i>
@@ -385,8 +359,8 @@ function Contacts() {
         )}
 
         {/* Feedback Section */}
-        <div className="feedback-section mb-5">
-          <div className="card">
+        <div className={styles.feedbackSection}>
+          <div className={styles.card}>
             <div className="card-body">
               <div className="d-flex align-items-center mb-3">
                 <i className="fas fa-comment-dots text-primary fs-4 me-2"></i>
@@ -407,7 +381,7 @@ function Contacts() {
         {/* Map Section */}
         <div className="row g-5">
           <div className="col-lg-12">
-            <div className="contact__map">
+            <div className={styles.contactMap}>
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3109.391238815206!2d106.6283625444954!3d10.806707065784899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752be27d8b4f4d%3A0x92dcba2950430867!2sHCMC%20University%20of%20Industry%20and%20Trade!5e1!3m2!1sen!2sus!4v1721345411064!5m2!1sen!2sus"
                 width="600"

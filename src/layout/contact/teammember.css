@@ -1,71 +1,148 @@
 .team-members {
-  margin-bottom: 80px;
-  position: relative;
+  padding: 50px 0;
+  background-color: #f8f9fa;
 }
 
-.scroll-container {
-  display: flex;
-  gap: 20px;
-  transition: transform 0.3s ease;
-  padding: 10px 0;
-}
-
-.team-member {
-  min-width: calc(33.333% - 14px);
+.section-header {
   text-align: center;
+  margin-bottom: 40px;
 }
 
-.member-img {
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-
-.member-img img {
-  width: 100%;
-  height: auto;
-}
-
-.team-member h4 {
-  margin-bottom: 8px;
-}
-
-.text-muted {
-  color: #6c757d;
+.section-header h2 {
+  font-size: 2rem;
+  color: #333;
 }
 
 .team-slider-container {
   position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
   overflow: hidden;
-  margin: 0 40px;
+  padding: 0 40px;
+}
+
+.scroll-container {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.team-member {
+  min-width: calc(100% / 3);
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.team-member:hover {
+  transform: translateY(-10px);
+}
+
+.member-img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.member-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-member h4 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.team-member .text-muted {
+  color: #6c757d;
+  margin-bottom: 15px;
+}
+
+.member-stats {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 20px;
+}
+
+.rating, .students {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.rating i {
+  color: #ffc107;
+  margin-right: 5px;
+}
+
+.students i {
+  color: #4a6cf7;
+  margin-right: 5px;
 }
 
 .nav-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  background: white;
   border: none;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  cursor: pointer;
-  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  transition: all 0.3s;
 }
 
 .nav-button:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background-color: #4a6cf7;
+  color: white;
 }
 
-.nav-button.prev {
+.prev {
   left: 0;
 }
 
-.nav-button.next {
+.next {
   right: 0;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error-message {
+  text-align: center;
+  padding: 20px;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border-radius: 5px;
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+@media (max-width: 768px) {
+  .team-member {
+    min-width: 100%;
+  }
+  
+  .member-img {
+    width: 150px;
+    height: 150px;
+  }
 }
