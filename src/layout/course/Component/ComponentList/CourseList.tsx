@@ -266,7 +266,7 @@ function CourseList({ courses }: CourseListProps) {
               to="#"
               onClick={(e) => {
                 e.preventDefault();
-                handleCourseClick(course.id!, course.id_danhmuc!, course.title);
+                handleCourseClick(course.id!, Number((course as any).courseCategoryId), course.title);
               }}
             >
               <img
@@ -319,7 +319,7 @@ function CourseList({ courses }: CourseListProps) {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleCourseClick(course.id!, course.id_danhmuc!, course.title);
+                  handleCourseClick(course.id!, Number((course as any).courseCategoryId), course.title);
                 }}
                 className="primary-hover"
                 title={course.title}
@@ -348,7 +348,7 @@ function CourseList({ courses }: CourseListProps) {
                   />
                 </svg>
                 <a className="primary-hover fs-14" href="#0">
-                  {course.numberOfStudents} Học viên
+                  {(course as any).studentCount} Học viên
                 </a>
               </li>
 
@@ -380,7 +380,7 @@ function CourseList({ courses }: CourseListProps) {
                   />
                 </svg>
                 <a className="primary-hover fs-14" href="#0">
-                  {course.totalLessons} Bài học
+                  {(course as any).lessonCount} Bài học
                 </a>
               </li>
             </ul>
@@ -395,7 +395,7 @@ function CourseList({ courses }: CourseListProps) {
                   <i
                     key={index}
                     className={`fa-sharp fa-solid fa-star ${
-                      index < Math.floor(course.averageRating) ? "" : "disabled"
+                      index < Math.floor((course as any).rating) ? "" : "disabled"
                     }`}
                     style={{ fontSize: "14px" }}
                   ></i>

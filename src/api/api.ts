@@ -258,7 +258,7 @@ export const GET_USER_DOCUMENT_BY_CATEGORY_ID = (
 
 // COURSE
 export const GET_USER_COURSE = (page: number, size: number) =>
-  `${process.env.REACT_APP_SERVER_HOST}/api/courses?page=${page}&size=${size}`;
+  `${process.env.REACT_APP_SERVER_HOST}/api/courses/public/filter?page=${page}&size=${size}`;
 export const GET_USER_COURSE_BY_CATEGORY_ID = (
   id: number,
   page: number,

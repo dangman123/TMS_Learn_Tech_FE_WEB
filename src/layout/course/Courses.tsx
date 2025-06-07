@@ -84,8 +84,10 @@ function Courses() {
           }
         } else {
           // Cấu trúc API cho GET_USER_COURSE
-          coursesData = responseData.content || [];
-          totalPagesCount = responseData.totalPages || 0;
+          if (responseData.status === 200 && responseData.data) {
+            coursesData = responseData.data.content || [];
+            totalPagesCount = responseData.data.totalPages || 0;
+          }
         }
         
         setCourses(coursesData);

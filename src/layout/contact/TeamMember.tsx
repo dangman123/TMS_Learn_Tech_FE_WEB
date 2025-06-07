@@ -73,7 +73,7 @@ const TeamMembers: React.FC = () => {
   if (loading) {
     return (
       <div className="team-members">
-        <div className="section-header">
+        <div className="section-headerr">
           <h2>Đội ngũ của chúng tôi</h2>
         </div>
         <div className="loading-spinner">Đang tải thông tin giảng viên...</div>

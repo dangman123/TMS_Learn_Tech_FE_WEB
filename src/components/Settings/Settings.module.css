@@ -1,0 +1,94 @@
+.settingsContainer {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settingsSection {
+  margin-bottom: 30px;
+}
+
+.settingsSection h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.settingsOption {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 0;
+}
+
+/* Toggle Switch */
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.toggleSwitch input:checked + .toggleSlider {
+  background-color: #2196f3;
+}
+
+.toggleSwitch input:checked + .toggleSlider:before {
+  transform: translateX(26px);
+}
+
+/* Language Buttons */
+.languageOptions {
+  display: flex;
+  gap: 10px;
+}
+
+.languageBtn {
+  padding: 10px 20px;
+  border: 2px solid #ddd;
+  background: var(--bg-color);
+  color: var(--text-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.languageBtn:hover {
+  border-color: #2196f3;
+}
+
+.languageBtn.active {
+  background-color: #2196f3;
+  color: white;
+  border-color: #2196f3;
+}
