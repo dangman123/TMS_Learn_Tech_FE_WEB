@@ -4,7 +4,7 @@ import { TestHistoryNav } from "./ComponentTest/TestHistoryNav";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../../util/fucntion/auth";
 import saveAs from "file-saver";
-import { Document, Packer, Paragraph, Table, TableCell, TextRun, TableRow, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, Table, TableCell, TextRun, TableRow, BorderStyle, Header, Footer, ImageRun, TextWrappingType, TextWrappingSide, AlignmentType, HeadingLevel, UnderlineType, ShadingType, WidthType } from "docx";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 
@@ -25,6 +25,9 @@ export interface TestResult {
   deleted: boolean;
   isChapterTest?: boolean;
   testTitle: string;
+  user?: {
+    fullname: string;
+  };
 }
 
 interface TestResultDownload {
@@ -281,7 +284,61 @@ const TestHistory = () => {
     const doc = new Document({
       sections: [
         {
+          properties: {
+            page: {
+              margin: {
+                top: 1440, // 1 inch
+                right: 1440, // 1 inch
+                bottom: 1440, // 1 inch
+                left: 1440, // 1 inch
+              },
+            },
+          },
+          // headers: {
+          //   default: new Header({
+          //     children: [
+          //       new Paragraph({
+          //         children: [
+          //           new TextRun({
+          //             text: "TMS LEARN TECH",
+          //             color: "DDDDDD", // Màu xám nhạt
+          //             size: 100, // Kích thước lớn
+          //             bold: true,
+          //           }),
+          //         ],
+          //         alignment: AlignmentType.CENTER,
+          //       }),
+          //     ],
+          //   }),
+          // },
+
+          headers: {
+            default: new Header({
+              children: [
+                // Chèn watermark text vào header
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "TMS LEARN TECH", // Thay watermark text ở đây
+                      bold: true,
+                      color: "DDDDDD", // Đặt màu cho watermark
+                      size: 50, // Kích thước của watermark
+                      font: "Arial", // Font chữ cho watermark
+                      // transform: "uppercase", // Chuyển đổi sang chữ hoa
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 500 },
+                  //verticalAlign: "center", // Canh giữa theo chiều dọc
+                  //rotation: 45, // Xoay watermark 45 độ
+                }),
+              ],
+            }),
+          },
+
           children: [
+
+
             // Tiêu đề chính
             new Paragraph({
               children: [
@@ -291,7 +348,7 @@ const TestHistory = () => {
                   size: 32,
                 }),
               ],
-              alignment: "center",
+              alignment: AlignmentType.CENTER,
               spacing: { after: 300 },
             }),
 
@@ -299,9 +356,9 @@ const TestHistory = () => {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Học viên: ${user.fullname}`,
+                  text: `Họ và tên: ${testResult.user?.fullname || ""}`,
+                  bold: true,
                   size: 24,
-                  bold: true
                 }),
               ],
               spacing: { after: 200 },
@@ -346,60 +403,6 @@ const TestHistory = () => {
               ],
               spacing: { after: 400 },
             }),
-
-            // // Dãy ô kết quả
-            // new Paragraph({
-            //   children: [
-            //     new TextRun({
-            //       text: "BẢNG ĐÁP ÁN",
-            //       bold: true,
-            //       size: 28,
-            //     }),
-            //   ],
-            //   alignment: "center",
-            //   spacing: { after: 300 },
-            // }),
-
-            // // Dãy ô đáp án đúng
-            // new Paragraph({
-            //   children: [
-            //     new TextRun({
-            //       text: "Đáp án đúng:   ",
-            //       bold: true,
-            //       size: 24,
-            //     }),
-            //     ...data.map((q, index) =>
-            //       new TextRun({
-            //         text: `${index + 1}: ${q.correctAnswer}   `,
-            //         bold: true,
-            //         size: 24,
-            //         color: "008000",
-            //       })
-            //     ),
-            //   ],
-            //   spacing: { after: 200 },
-            // }),
-
-            // // Dãy ô đáp án của học viên
-            // new Paragraph({
-            //   children: [
-            //     new TextRun({
-            //       text: "Đáp án của bạn: ",
-            //       bold: true,
-            //       size: 24,
-            //     }),
-            //     ...data.map((q, index) => {
-            //       const isCorrect = q.userAnswer === q.correctAnswer;
-            //       return new TextRun({
-            //         text: `${index + 1}: ${q.userAnswer || "_"}   `,
-            //         bold: true,
-            //         size: 24,
-            //         color: q.userAnswer ? (isCorrect ? "008000" : "FF0000") : "000000",
-            //       });
-            //     }),
-            //   ],
-            //   spacing: { after: 500 },
-            // }),
 
             // Tiêu đề danh sách câu hỏi
             new Paragraph({
@@ -636,11 +639,91 @@ const TestHistory = () => {
       return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
     };
 
+    const imageToUint8Array = async (imageUrl: string): Promise<Uint8Array> => {
+      const response = await fetch(imageUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
+    };
+
+    // Hàm chuyển đổi hình ảnh sang base64
+    const imageToBase64 = async (imageUrl: string): Promise<string> => {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    };
+
+    const watermarkImageData = await imageToBase64('https://ik.imagekit.io/kbxte3uo1/watermask.jpg');
+    console.log(watermarkImageData);
     // Tạo đối tượng Document
     const doc = new Document({
       sections: [
         {
+          properties: {
+            page: {
+              margin: {
+                top: 1440,
+                right: 1440,
+                bottom: 1440,
+                left: 1440,
+              },
+            },
+          },
+          // headers: {
+          //   default: new Header({
+          //     children: [
+          //       // Chèn watermark hình ảnh với base64
+          //       new Paragraph({
+          //         children: [
+          //           new ImageRun({
+          //             data: watermarkImageData,
+          //             type: "jpg",
+          //             transformation: {
+          //               width: 1000,
+          //               height: 1000,
+          //             },
+          //           }),
+
+          //         ],
+          //         alignment: AlignmentType.CENTER,
+          //         spacing: { after: 500 },
+          //       }),
+          //     ],
+          //   }),
+          // },
+
+          headers: {
+            default: new Header({
+              children: [
+                // Chèn watermark text vào header
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "TMS LEARN TECH", // Thay watermark text ở đây
+                      bold: true,
+                      color: "DDDDDD", // Đặt màu cho watermark
+                      size: 50, // Kích thước của watermark
+                      font: "Arial", // Font chữ cho watermark
+                      // transform: "uppercase", // Chuyển đổi sang chữ hoa
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 500 },
+                  //verticalAlign: "center", // Canh giữa theo chiều dọc
+                  //rotation: 45, // Xoay watermark 45 độ
+                }),
+              ],
+            }),
+          },
           children: [
+
+
             // Tiêu đề đề thi
             new Paragraph({
               children: [
@@ -650,7 +733,7 @@ const TestHistory = () => {
                   size: 32,
                 }),
               ],
-              alignment: "center",
+              alignment: AlignmentType.CENTER,
               spacing: { after: 200 },
             }),
 
@@ -897,6 +980,8 @@ const TestHistory = () => {
     saveAs(blob, `DeThi_${testData.testTitle}.docx`);
   };
 
+
+
   // Format thời gian
   const formatDateTime = (dateTimeStr: string) => {
     const date = new Date(dateTimeStr);
@@ -966,7 +1051,7 @@ const TestHistory = () => {
                     <th className={styles.columnResult}>Kết quả</th>
                     <th className={styles.columnTime}>Thời gian</th>
                     <th className={styles.columnDownload}>Tải xuống</th>
-                    <th className={styles.columnDownload}>In đề thi</th>
+                    <th className={styles.columnPrint}>In đề thi</th>
                   </tr>
                 </thead>
                 <tbody>

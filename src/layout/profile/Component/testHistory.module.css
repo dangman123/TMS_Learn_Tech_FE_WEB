@@ -247,7 +247,7 @@
     padding: 14px;
   }
 
-  .columnStt, .columnScore, .columnCorrect, .columnTime, .columnDownload {
+  .columnStt, .columnScore, .columnCorrect, .columnTime, .columnDownload, .columnPrint {
     width: auto;
   }
 }
