@@ -17,7 +17,7 @@ body {
 .upgrade-container {
   max-width: 100%;
   margin: 0 auto;
-  padding-bottom: 24px;
+  padding-bottom: 30px;
 }
 
 /* Header */
@@ -247,18 +247,18 @@ body {
 /* Thêm container để chứa các card */
 .plans-container {
   display: flex;
-  gap: 16px;
-  margin: 16px;
+  gap: 20px;
+  margin: 20px;
 }
 
 /* Điều chỉnh plan-card để chúng có thể nằm ngang */
 .plan-card {
   flex: 1;
   margin: 0; /* Bỏ margin của từng card riêng lẻ */
-  padding: 16px;
+  padding: 24px;
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   display: flex;
@@ -269,8 +269,8 @@ body {
 .plan-button-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: auto; /* Đẩy nút xuống dưới cùng của card */
+  gap: 15px;
+  margin-top: 25px;
 }
 
 /* Điều chỉnh responsive */
@@ -286,7 +286,7 @@ body {
 
 .plan-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
   border-color: #d0d7e2;
 }
 
@@ -302,47 +302,42 @@ body {
 .plan-button-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+  margin-top: 25px;
 }
 
 .plan-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .plan-name {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .plan-price {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-}
-
-.price-period {
-  font-size: 12px;
-  color: #666;
-  font-weight: normal;
-  margin-left: 2px;
 }
 
 .plan-features {
   list-style-type: none;
-  margin-bottom: 16px;
+  margin-bottom: 25px;
+  padding: 0;
 }
 
 .plan-features li {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .check-icon {
   color: #4154f1;
-  margin-right: 10px;
+  margin-right: 12px;
   flex-shrink: 0;
 }
 
@@ -352,7 +347,8 @@ body {
 
 .feature-text {
   flex: 1;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .feature-highlight {
@@ -362,20 +358,20 @@ body {
 .highlight-tag {
   background-color: #fff3e0;
   color: #ff9800;
-  font-size: 10px;
-  padding: 2px 6px;
+  font-size: 11px;
+  padding: 3px 8px;
   border-radius: 4px;
   margin-left: 8px;
 }
 
 .plan-button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background-color: white;
   border: 1px solid #4154f1;
   border-radius: 50px;
   color: #4154f1;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -392,6 +388,24 @@ body {
 
 .premium-button:hover {
   background-color: #3a4ad9;
+}
+
+.plan-switch-button {
+  width: 100%;
+  padding: 12px;
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-switch-button:hover {
+  background-color: #f8f9fa;
+  border-color: #cbd5e0;
 }
 
 /* So sánh các gói */
@@ -511,4 +525,1030 @@ body {
   .upgrade-container {
     max-width: 850px;
   }
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  padding: 30px 20px; /* Increased vertical padding */
+}
+
+.modal-container {
+  background-color: white;
+  border-radius: 16px;
+  width: 85%;
+  max-width: 450px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  padding-top: 15px; /* Add top padding to the entire container */
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 25px 16px 25px; /* Increased horizontal padding */
+  border-bottom: 1px solid #eaecef;
+  margin-top: 20px; /* Add top margin to push header down */
+  position: relative; /* For better positioning */
+}
+
+.modal-header h3 {
+  font-size: 20px; /* Slightly larger font */
+  font-weight: 600;
+  margin: 0;
+  color: #0d1243;
+  /* Center the header text */
+  width: 100%;
+  text-align: center;
+}
+.modal-header.wallet-confirm-modal-header {
+  padding-bottom: 10px;
+}
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid #eaecef;
+  gap: 12px;
+}
+
+.cancel-button {
+  background-color: #f1f1f1;
+  color: #333;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #e1e1e1;
+}
+
+.confirm-button {
+  background-color: #4154f1;
+  color: white;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.confirm-button:hover {
+  background-color: #3243c0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Plans loading container */
+.plans-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  background-color: white;
+  border-radius: 12px;
+  margin: 0 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plans-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(65, 84, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: #4154f1;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.plans-loading-container p {
+  color: #666;
+  font-size: 14px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Payment Modal - Professional Redesign */
+.payment-modal {
+  max-width: 460px;
+  width: 85%;
+}
+
+.payment-modal .modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9e9f2;
+  position: relative;
+  display: block;
+}
+
+.payment-modal .modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0d1243;
+  text-align: center;
+  margin: 0;
+}
+
+.payment-modal .close-button {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  color: #888da8;
+  padding: 5px;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+}
+
+.payment-modal .close-button:hover {
+  background-color: #f1f3f5;
+  color: #0d1243;
+}
+
+.payment-modal .modal-body {
+  padding: 20px 25px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.payment-summary {
+  background-color: #f7f7f9;
+  border: 1px solid #e9e9f2;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.payment-summary h4 {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888da8;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.payment-plan-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.payment-plan-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #0d1243;
+}
+
+.payment-plan-price {
+  font-weight: 700;
+  color: #4154f1;
+  font-size: 15px;
+}
+
+.payment-plan-duration {
+  font-size: 13px;
+  color: #5a6182;
+}
+
+.payment-methods h4 {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888da8;
+  margin-bottom: 14px;
+  margin-top: 6px;
+}
+
+.payment-method-item {
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  border: 2px solid #e9e9f2;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+.payment-method-item:hover {
+  border-color: #a9b3ff;
+  background-color: #f7f9ff;
+}
+
+.payment-method-item.selected {
+  border-color: #4154f1;
+  background-color: #f7f9ff;
+  box-shadow: 0 2px 8px rgba(65, 84, 241, 0.1);
+}
+
+.payment-method-icon {
+  width: 36px;
+  height: 36px;
+  background-color: #e9ecf2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: #4154f1;
+  flex-shrink: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.payment-method-item.selected .payment-method-icon {
+  background-color: #4154f1;
+  color: white;
+}
+
+.payment-method-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+  color: #0d1243;
+}
+
+.payment-method-description {
+  font-size: 12px;
+  color: #5a6182;
+}
+
+.payment-method-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 18px;
+  height: 18px;
+  color: #4154f1;
+  background-color: white;
+  border: 1px solid #e9e9f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease-in-out;
+}
+
+.payment-method-item.selected .payment-method-check {
+  opacity: 1;
+  transform: scale(1);
+  border-color: #4154f1;
+}
+
+.payment-wallet-balance {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #5a6182;
+  font-weight: 500;
+  padding: 8px;
+  background-color: #f7f9ff;
+  border-radius: 6px;
+  border: 1px solid #e9e9f2;
+}
+
+.payment-wallet-owner {
+  font-size: 12px;
+  color: #5a6182;
+  margin-top: 4px;
+}
+
+.payment-wallet-code {
+  font-size: 12px;
+  color: #888da8;
+  margin-top: 2px;
+  font-family: monospace;
+}
+
+.payment-wallet-warning {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 4px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.payment-wallet-warning:before {
+  content: "⚠️";
+  font-size: 14px;
+}
+
+.payment-error {
+  background-color: rgba(255, 235, 238, 0.7);
+  border: 1px solid #ffcdd2;
+  color: #c62828;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.payment-modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9e9f2;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 0;
+}
+
+.payment-modal-footer button {
+  flex: 0 0 auto;
+  min-width: 100px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin: 0 4px;
+}
+
+.payment-modal-footer .cancel-button {
+  background-color: #f8f9fa;
+  color: #5a6182;
+  border: 1px solid #e2e8f0;
+}
+
+.payment-modal-footer .cancel-button:hover {
+  background-color: #f1f3f5;
+  border-color: #cbd5e0;
+}
+
+.payment-modal-footer .confirm-button {
+  background: linear-gradient(135deg, #4154f1, #3243c0);
+  color: white;
+}
+
+.payment-modal-footer .confirm-button:hover {
+  background: linear-gradient(135deg, #3243c0, #2a379d);
+  box-shadow: 0 4px 8px rgba(65, 84, 241, 0.2);
+  transform: translateY(-1px);
+}
+
+.payment-modal-footer button:disabled {
+  background: #e2e8f0 !important;
+  color: #a0aec0 !important;
+  border: 1px solid #e2e8f0 !important;
+  cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none;
+  transform: none !important;
+}
+
+/* Success and failure modals */
+.payment-success-modal, .payment-failure-modal {
+  max-width: 420px;
+  width: 85%;
+}
+
+.success-icon, .failure-icon {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+/* Feature toggle button */
+.feature-toggle {
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 0;
+  margin-top: 6px;
+  border-top: 1px dashed #e9e9f2;
+}
+
+.feature-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4154f1;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.feature-toggle-button:hover {
+  color: #3243c0;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* Animation for features */
+.plan-features li {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.payment-method-item.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+  background-color: #f8f9fa;
+}
+
+.payment-method-item.disabled:hover {
+  border-color: #e2e8f0;
+  background-color: #f8f9fa;
+  box-shadow: none;
+}
+
+/* Subscribed button */
+.subscribed-button {
+  background-color: #28a745 !important;
+  color: white !important;
+  border-color: #28a745 !important;
+}
+
+.subscribed-button:hover {
+  background-color: #218838 !important;
+  border-color: #1e7e34 !important;
+}
+
+/* Subscription details modal */
+.subscription-details-modal {
+  max-width: 580px;
+  width: 90%;
+}
+
+.subscription-details {
+  padding: 15px 25px;
+}
+
+.subscription-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9e9f2;
+}
+
+.subscription-plan-name {
+  font-size: 26px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.subscription-plan-badge {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.subscription-status {
+  display: flex;
+  align-items: center;
+  background-color: #e8f5e9;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.subscription-status-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #28a745;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  color: white;
+}
+
+.subscription-status-text {
+  font-weight: 500;
+  font-size: 17px;
+  color: #28a745;
+}
+
+.subscription-info-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
+
+.subscription-info-label {
+  font-weight: 500;
+  font-size: 16px;
+  color: #666;
+}
+
+.subscription-info-value {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.subscription-auto-renew {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border: 1px dashed #e9e9f2;
+  border-radius: 12px;
+  margin: 30px 0;
+}
+
+.auto-renew-checkbox {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auto-renew-checkbox.checked {
+  background-color: #28a745;
+  color: white;
+}
+
+.auto-renew-text {
+  font-size: 16px;
+  color: #666;
+}
+
+.subscription-features-title {
+  font-weight: 600;
+  font-size: 18px;
+  margin: 30px 0 20px;
+  color: #333;
+}
+
+.subscription-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.subscription-feature-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-left: 15px;
+  font-size: 16px;
+}
+
+.feature-check {
+  color: #28a745;
+  margin-right: 15px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.subscription-details-modal .modal-footer {
+  padding: 20px 30px;
+}
+
+.subscription-details-modal .modal-footer button {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* Wallet Confirmation Modal - Update spacing */
+.wallet-confirm-modal {
+  max-width: 420px;
+  width: 85%;
+  margin: 20px 0; /* Add vertical margins */
+}
+
+.wallet-confirm-modal .modal-body {
+  padding: 30px 20px; /* Increase padding for better spacing */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.wallet-confirm-icon {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 30px; /* Add more bottom margin */
+}
+
+.wallet-confirm-title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 30px; /* Increase bottom margin */
+  color: #333;
+}
+
+.wallet-confirm-details {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 10px; /* Add vertical margins */
+  border: 1px solid #e2e8f0;
+}
+
+.wallet-confirm-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0; /* Increase padding */
+  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 5px;
+}
+
+.wallet-confirm-item:last-child {
+  border-bottom: none;
+}
+
+.wallet-confirm-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
+}
+
+.wallet-confirm-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.wallet-confirm-value.highlight {
+  color: #4154f1;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.wallet-confirm-notice {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #856404;
+  margin: 30px 10px 20px; /* Increase top margin */
+}
+
+/* Payment Processing Spinner */
+.processing-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Improved Success Modal */
+.payment-success-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 25px;
+}
+
+.success-animation {
+  margin: 15px 0;
+}
+
+.success-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #28a745;
+  text-align: center;
+}
+
+.success-message {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.success-message p {
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #4a5568;
+}
+
+.success-details {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.success-detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.success-detail-item:last-child {
+  border-bottom: none;
+}
+
+.success-detail-label {
+  font-weight: 500;
+  color: #718096;
+  font-size: 14px;
+}
+
+.success-detail-value {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.success-button {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.success-button:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Checkmark Animation */
+.checkmark-circle {
+  width: 70px;
+  height: 70px;
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  background-color: #28a745;
+  border-radius: 50%;
+}
+
+.checkmark {
+  border-radius: 5px;
+}
+
+.checkmark.draw:after {
+  content: '';
+  width: 35px;
+  height: 18px;
+  position: absolute;
+  border-right: 7px solid #ffffff;
+  border-top: 7px solid #ffffff;
+  transform: scaleX(-1) rotate(135deg);
+  left: 15px;
+  top: 25px;
+  animation: checkmarkDraw 0.5s ease-in-out forwards;
+  transform-origin: left top;
+  opacity: 0;
+}
+
+@keyframes checkmarkDraw {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 35px;
+    height: 18px;
+    opacity: 1;
+  }
+}
+
+/* Enhanced Payment Modal Styles */
+.payment-modal {
+  max-width: 540px;
+}
+
+.payment-method-item {
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  border: 2px solid #e9e9f2;
+}
+
+.payment-method-item:hover {
+  transform: translateY(-3px);
+}
+
+.payment-method-item.selected {
+  border-color: #4154f1;
+  box-shadow: 0 5px 15px rgba(65, 84, 241, 0.15);
+}
+
+.payment-modal-footer {
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+}
+
+.payment-modal-footer .confirm-button {
+  padding: 12px 30px;
+  font-weight: 600;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(65, 84, 241, 0.2);
+}
+
+.payment-modal-footer .confirm-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(65, 84, 241, 0.3);
+}
+
+/* Loading Container Enhanced */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.9);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(65, 84, 241, 0.2);
+  border-radius: 50%;
+  border-top: 6px solid #4154f1;
+  animation: spin 1s linear infinite;
+  margin-bottom: 24px;
+}
+
+.loading-container p {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin-top: 16px;
+}
+
+/* Improve modal body spacing for wallet confirmation */
+.wallet-confirm-modal .modal-body {
+  padding: 30px 20px; /* Increase padding for better spacing */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Add vertical space between wallet confirmation items */
+.wallet-confirm-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0; /* Increase padding */
+  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 5px;
+}
+
+/* Adjust the buttons in wallet confirmation footer */
+.wallet-confirm-modal .modal-footer {
+  padding: 18px 20px;
+  border-top: 1px solid #eaecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Specifically for wallet confirmation modal header */
+.wallet-confirm-modal .modal-header {
+  margin-top: 25px; /* Add even more top margin for confirmation modal */
+  padding-top: 20px; /* Add more padding at the top */
+  border-bottom: 1px solid #e9e9f2;
+}
+
+/* Adjust close button position */
+.wallet-confirm-modal .close-button {
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
 }

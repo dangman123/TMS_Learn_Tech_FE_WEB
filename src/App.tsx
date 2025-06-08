@@ -396,10 +396,9 @@ function App() {
                 <Route
                   path="/thanh-toan/logic"
                   element={
-                    //   <MainLayout>
-
-                    <LogicPayment />
-                    // </MainLayout>
+                    <MainLayout>
+                      <LogicPayment />
+                    </MainLayout>
                   }
                 />
               </Routes>

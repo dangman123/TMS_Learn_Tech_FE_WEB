@@ -112,7 +112,7 @@ interface FormData {
     gender: 0;
     preferredLearningStyle: number;
     useOfEducationalTech: boolean;
-    selfReportedStressLevel: number;
+     selfReportedStressLevel: number;
 }
 
 interface FormErrors {

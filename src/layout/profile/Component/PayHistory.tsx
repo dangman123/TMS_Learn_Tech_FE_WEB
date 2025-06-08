@@ -2,12 +2,21 @@ import React, { useEffect, useState } from "react";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../../util/fucntion/auth";
 import "./payment-history.css";
+export interface PaymentDetailItem {
+  paymentDetailId: number;
+  title: string;
+  price: number;
+  type: string;
+}
+
 export interface PaymentHistory {
   paymentId: number;
+  transactionId: string | null;
   paymentDate: string;
   totalPayment: number;
-  courseCount: number;
   paymentMethod: string;
+  paymentType: string;
+  paymentDetails: PaymentDetailItem[];
 }
 interface PaymentDetailHistory {
   courseId: number;
@@ -23,6 +32,8 @@ interface DepositHistory {
   amount: number;
   method: string;
   status: string;
+  description?: string;
+  transactionType?: string;
 }
 
 // Thêm interface cho lịch sử mua bài thi
@@ -33,6 +44,17 @@ interface ExamPurchaseHistory {
   examType: string;
   price: number;
   status: string;
+}
+
+// Thêm interface cho giao dịch
+interface TransactionHistory {
+  depositId: number;
+  depositDate: string;
+  amount: number;
+  method: string;
+  status: string;
+  description: string;
+  transactionType: string;
 }
 
 function PayHistory() {
@@ -62,7 +84,7 @@ function PayHistory() {
   // Thêm state mới
   const [activeTab, setActiveTab] = useState("payment"); // "payment", "deposit" hoặc "exam"
   const [walletBalance, setWalletBalance] = useState(0);
-  const [depositHistory, setDepositHistory] = useState<DepositHistory[]>([]);
+  const [depositHistory, setDepositHistory] = useState<TransactionHistory[]>([]);
   const [depositPage, setDepositPage] = useState(0);
   const [totalDeposits, setTotalDeposits] = useState(0);
   const [totalDepositAmount, setTotalDepositAmount] = useState(0);
@@ -89,7 +111,7 @@ function PayHistory() {
     }
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/payments/summary?accountId=${user.id}&page=${page}&size=${size}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/payments/history/${user.id}?page=${page}&size=${size}`,
         {
           method: "GET",
           headers: {
@@ -100,20 +122,46 @@ function PayHistory() {
       );
 
       if (response.ok) {
-        const data = await response.json();
-        setPaymentHistory(data.content || []);
-        setTotalTransactions(data.totalElements || 0);
-        setTotalAmount(
-          data.content.reduce(
-            (sum: number, item: PaymentHistory) => sum + item.totalPayment,
-            0
-          )
-        ); // Tính tổng số tiền
+        const responseData = await response.json();
+        console.log("Payment history response:", responseData);
+
+        // Kiểm tra cấu trúc dữ liệu trả về
+        if (responseData.status === 200 && Array.isArray(responseData.data)) {
+          setPaymentHistory(responseData.data);
+          setTotalTransactions(responseData.data.length);
+          setTotalAmount(
+            responseData.data.reduce(
+              (sum: number, item: PaymentHistory) => sum + item.totalPayment,
+              0
+            )
+          );
+        } else if (responseData.data && responseData.data.content) {
+          // Trường hợp API trả về dạng phân trang
+          setPaymentHistory(responseData.data.content || []);
+          setTotalTransactions(responseData.data.totalElements || 0);
+          setTotalAmount(
+            responseData.data.content.reduce(
+              (sum: number, item: PaymentHistory) => sum + item.totalPayment,
+              0
+            )
+          );
+        } else {
+          console.error("Unexpected data structure:", responseData);
+          setPaymentHistory([]);
+          setTotalTransactions(0);
+          setTotalAmount(0);
+        }
       } else {
         console.error("Failed to fetch payment history:", response.statusText);
+        setPaymentHistory([]);
+        setTotalTransactions(0);
+        setTotalAmount(0);
       }
     } catch (error) {
       console.error("Error fetching payment history:", error);
+      setPaymentHistory([]);
+      setTotalTransactions(0);
+      setTotalAmount(0);
     } finally {
       setLoading(false);
     }
@@ -133,7 +181,7 @@ function PayHistory() {
     }
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/wallet/balance?accountId=${user.id}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/wallet/info-simple/${user.id}`,
         {
           method: "GET",
           headers: {
@@ -168,8 +216,9 @@ function PayHistory() {
       localStorage.setItem("authToken", token);
     }
     try {
+      // Use the new API endpoint for transaction history
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/wallet/deposits?accountId=${user.id}&page=${depositPage}&size=${size}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/transactions/history/${user.id}`,
         {
           method: "GET",
           headers: {
@@ -181,19 +230,42 @@ function PayHistory() {
 
       if (response.ok) {
         const data = await response.json();
-        setDepositHistory(data.content || []);
-        setTotalDeposits(data.totalElements || 0);
-        setTotalDepositAmount(
-          data.content.reduce(
-            (sum: number, item: DepositHistory) => sum + item.amount,
-            0
-          )
-        );
+        if (data.status === 200) {
+          // Map the transaction data to the TransactionHistory format
+          const mappedDeposits: TransactionHistory[] = (data.data.content || []).map((transaction: any) => ({
+            depositId: transaction.transactionId,
+            depositDate: transaction.transactionDate,
+            amount: transaction.amount,
+            method: transaction.walletName || "Ví điện tử",
+            status: transaction.transactionStatus === "SUCCESS" ? "Thành công" : "Thất bại",
+            description: transaction.description,
+            transactionType: transaction.transactionType
+          }));
+
+          setDepositHistory(mappedDeposits);
+          setTotalDeposits(mappedDeposits.length);
+          setTotalDepositAmount(
+            mappedDeposits.reduce(
+              (sum: number, item: any) => sum + item.amount,
+              0
+            )
+          );
+        } else {
+          setDepositHistory([]);
+          setTotalDeposits(0);
+          setTotalDepositAmount(0);
+        }
       } else {
         console.error("Failed to fetch deposit history:", response.statusText);
+        setDepositHistory([]);
+        setTotalDeposits(0);
+        setTotalDepositAmount(0);
       }
     } catch (error) {
       console.error("Error fetching deposit history:", error);
+      setDepositHistory([]);
+      setTotalDeposits(0);
+      setTotalDepositAmount(0);
     } finally {
       setLoading(false);
     }
@@ -275,43 +347,35 @@ function PayHistory() {
     }
   };
 
-  const fetchPaymentDetailHistory = async (paymentId: number) => {
+  const fetchPaymentDetailHistory = async (payment: PaymentHistory) => {
     setLoading(true);
-    let token = localStorage.getItem("authToken");
-
-    if (isTokenExpired(token)) {
-      token = await refresh();
-      if (!token) {
-        window.location.href = "/dang-nhap";
-        return;
-      }
-      localStorage.setItem("authToken", token);
-    }
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/payments/course-detail/${paymentId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      console.log("Payment details:", payment);
 
-      if (response.ok) {
-        const data = await response.json();
-        setPaymentDetailHistory(data);
+      if (payment && payment.paymentDetails && Array.isArray(payment.paymentDetails)) {
+        // Map paymentDetails to PaymentDetailHistory format
+        const details: PaymentDetailHistory[] = payment.paymentDetails.map(detail => ({
+          courseId: detail.paymentDetailId,
+          courseTitle: detail.title,
+          imageUrl: "", // The API doesn't provide images for each item
+          price: detail.price
+        }));
+
+        setPaymentDetailHistory(details);
+      } else {
+        console.error("Invalid payment details structure:", payment);
+        setPaymentDetailHistory([]);
       }
     } catch (error) {
-      console.error("Error fetching payment history:", error);
+      console.error("Error processing payment details:", error);
+      setPaymentDetailHistory([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handlePaymentClick = (payment: PaymentHistory) => {
-    fetchPaymentDetailHistory(payment.paymentId);
+    fetchPaymentDetailHistory(payment);
     setSelectedPayment(payment);
     setIsModalOpen(true);
   };
@@ -399,9 +463,8 @@ function PayHistory() {
               <ul className="nav nav-tabs border-0" role="tablist">
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${
-                      activeTab === "payment" ? "active fw-semibold" : ""
-                    }`}
+                    className={`nav-link ${activeTab === "payment" ? "active fw-semibold" : ""
+                      }`}
                     onClick={() => handleTabChange("payment")}
                   >
                     <i className="bi bi-credit-card me-2"></i>
@@ -410,20 +473,18 @@ function PayHistory() {
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${
-                      activeTab === "deposit" ? "active fw-semibold" : ""
-                    }`}
+                    className={`nav-link ${activeTab === "deposit" ? "active fw-semibold" : ""
+                      }`}
                     onClick={() => handleTabChange("deposit")}
                   >
                     <i className="bi bi-wallet-fill me-2"></i>
-                    Lịch sử nạp tiền
+                    Lịch sử giao dịch
                   </button>
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${
-                      activeTab === "exam" ? "active fw-semibold" : ""
-                    }`}
+                    className={`nav-link ${activeTab === "exam" ? "active fw-semibold" : ""
+                      }`}
                     onClick={() => handleTabChange("exam")}
                   >
                     <i className="bi bi-file-earmark-text me-2"></i>
@@ -444,10 +505,11 @@ function PayHistory() {
                         <thead className="bg-light">
                           <tr>
                             <th className="py-3 text-center">#</th>
+                            <th className="py-3">Mã giao dịch</th>
                             <th className="py-3">Ngày thanh toán</th>
                             <th className="py-3">Số tiền</th>
                             <th className="py-3 text-center">
-                              Số lượng khóa học
+                              Số lượng mục
                             </th>
                             <th className="py-3">Phương thức thanh toán</th>
                           </tr>
@@ -482,6 +544,11 @@ function PayHistory() {
                                   {index + 1 + page * size}
                                 </td>
                                 <td>
+                                  <span className="badge bg-light text-dark">
+                                    {payment.transactionId || "N/A"}
+                                  </span>
+                                </td>
+                                <td>
                                   <div className="d-flex align-items-center">
                                     <div className="icon-wrapper bg-light rounded-circle p-2 me-3">
                                       <i className="bi bi-bag-check text-primary"></i>
@@ -499,32 +566,38 @@ function PayHistory() {
                                         })}
                                       </p>
                                       <small className="text-muted">
-                                        Thanh toán khóa học
+                                        {payment.paymentType === "PRODUCT"
+                                          ? "Thanh toán sản phẩm"
+                                          : payment.paymentType === "COURSE"
+                                            ? "Thanh toán khóa học"
+                                            : payment.paymentType === "EXAM"
+                                              ? "Thanh toán bài thi"
+                                              : payment.paymentType}
                                       </small>
                                     </div>
                                   </div>
                                 </td>
                                 <td className="fw-medium text-danger">
-                                  -{payment.totalPayment.toLocaleString()} VND
+                                  {payment.totalPayment.toLocaleString()} VND
                                 </td>
                                 <td className="text-center">
                                   <span className="badge bg-primary-light text-primary rounded-pill">
-                                    {payment.courseCount} khóa học
+                                    {payment.paymentDetails.length} mục
                                   </span>
                                 </td>
                                 <td>
                                   <div className="d-flex align-items-center">
                                     {payment.paymentMethod ===
                                       "Visa/Mastercard" && (
-                                      <i className="bi bi-credit-card-2-front text-info me-2"></i>
-                                    )}
+                                        <i className="bi bi-credit-card-2-front text-info me-2"></i>
+                                      )}
                                     {payment.paymentMethod === "Ví điện tử" && (
                                       <i className="bi bi-wallet2 text-success me-2"></i>
                                     )}
                                     {payment.paymentMethod ===
                                       "Chuyển khoản" && (
-                                      <i className="bi bi-bank text-warning me-2"></i>
-                                    )}
+                                        <i className="bi bi-bank text-warning me-2"></i>
+                                      )}
                                     {payment.paymentMethod}
                                   </div>
                                 </td>
@@ -573,16 +646,18 @@ function PayHistory() {
                         <thead className="bg-light">
                           <tr>
                             <th className="py-3 text-center">#</th>
-                            <th className="py-3">Ngày nạp tiền</th>
+                            <th className="py-3">Ngày giao dịch</th>
+                            <th className="py-3">Loại giao dịch</th>
                             <th className="py-3">Số tiền</th>
-                            <th className="py-3">Phương thức nạp</th>
+                            <th className="py-3">Ví</th>
                             <th className="py-3 text-center">Trạng thái</th>
+                            <th className="py-3">Mô tả</th>
                           </tr>
                         </thead>
                         <tbody>
                           {loading ? (
                             <tr>
-                              <td colSpan={5} className="text-center py-5">
+                              <td colSpan={7} className="text-center py-5">
                                 <div className="spinner-border text-primary mb-2"></div>
                                 <p className="text-muted mb-0">
                                   Đang tải dữ liệu...
@@ -591,10 +666,10 @@ function PayHistory() {
                             </tr>
                           ) : depositHistory.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className="text-center py-5">
+                              <td colSpan={7} className="text-center py-5">
                                 <i className="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
                                 <p className="text-muted mb-0">
-                                  Không có dữ liệu nạp tiền
+                                  Không có dữ liệu giao dịch
                                 </p>
                               </td>
                             </tr>
@@ -624,50 +699,42 @@ function PayHistory() {
                                           minute: "2-digit",
                                         })}
                                       </p>
-                                      <small className="text-muted">
-                                        Nạp tiền vào ví
-                                      </small>
                                     </div>
                                   </div>
+                                </td>
+                                <td>
+                                  <span className="badge bg-info-light text-info rounded-pill">
+                                    {deposit.transactionType === "TOP_UP" ? "Nạp tiền" : deposit.transactionType}
+                                  </span>
                                 </td>
                                 <td className="fw-medium text-success">
                                   +{deposit.amount.toLocaleString()} VND
                                 </td>
                                 <td>
                                   <div className="d-flex align-items-center">
-                                    {deposit.method === "Visa/Mastercard" && (
-                                      <i className="bi bi-credit-card-2-front text-info me-2"></i>
-                                    )}
-                                    {deposit.method === "Ví điện tử" && (
-                                      <i className="bi bi-wallet2 text-success me-2"></i>
-                                    )}
-                                    {deposit.method === "Chuyển khoản" && (
-                                      <i className="bi bi-bank text-warning me-2"></i>
-                                    )}
+                                    <i className="bi bi-wallet2 text-success me-2"></i>
                                     {deposit.method}
                                   </div>
                                 </td>
                                 <td className="text-center">
                                   <span
-                                    className={`badge rounded-pill ${
-                                      deposit.status === "Thành công"
-                                        ? "bg-success-light text-success"
-                                        : deposit.status === "Đang xử lý"
-                                        ? "bg-warning-light text-warning"
-                                        : "bg-danger-light text-danger"
-                                    }`}
+                                    className={`badge rounded-pill ${deposit.status === "Thành công"
+                                      ? "bg-success-light text-success"
+                                      : "bg-danger-light text-danger"
+                                      }`}
                                   >
                                     {deposit.status === "Thành công" && (
                                       <i className="bi bi-check-circle me-1"></i>
                                     )}
-                                    {deposit.status === "Đang xử lý" && (
-                                      <i className="bi bi-clock-history me-1"></i>
+                                    {deposit.status !== "Thành công" && (
+                                      <i className="bi bi-x-circle me-1"></i>
                                     )}
-                                    {deposit.status !== "Thành công" &&
-                                      deposit.status !== "Đang xử lý" && (
-                                        <i className="bi bi-x-circle me-1"></i>
-                                      )}
                                     {deposit.status}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span className="text-muted">
+                                    {deposit.description || "Không có mô tả"}
                                   </span>
                                 </td>
                               </tr>
@@ -784,15 +851,14 @@ function PayHistory() {
                                 </td>
                                 <td className="text-center">
                                   <span
-                                    className={`badge rounded-pill ${
-                                      exam.status === "Đã hoàn thành"
-                                        ? "bg-success-light text-success"
-                                        : exam.status === "Đang làm bài"
+                                    className={`badge rounded-pill ${exam.status === "Đã hoàn thành"
+                                      ? "bg-success-light text-success"
+                                      : exam.status === "Đang làm bài"
                                         ? "bg-warning-light text-warning"
                                         : exam.status === "Chưa làm"
-                                        ? "bg-info-light text-info"
-                                        : "bg-danger-light text-danger"
-                                    }`}
+                                          ? "bg-info-light text-info"
+                                          : "bg-danger-light text-danger"
+                                      }`}
                                   >
                                     {exam.status === "Đã hoàn thành" && (
                                       <i className="bi bi-check-circle me-1"></i>
@@ -889,10 +955,10 @@ function PayHistory() {
                     <div className="col-lg-3 col-md-6 mb-3 mb-lg-0">
                       <div className="detail-item">
                         <small className="text-muted d-block mb-1">
-                          Số lượng khóa học
+                          Số lượng mục
                         </small>
                         <span className="fw-medium d-block">
-                          {selectedPayment.courseCount}
+                          {selectedPayment.paymentDetails.length}
                         </span>
                       </div>
                     </div>
@@ -922,8 +988,8 @@ function PayHistory() {
                         <span className="fw-medium d-block d-flex align-items-center">
                           {selectedPayment.paymentMethod ===
                             "Visa/Mastercard" && (
-                            <i className="bi bi-credit-card-2-front text-info me-2"></i>
-                          )}
+                              <i className="bi bi-credit-card-2-front text-info me-2"></i>
+                            )}
                           {selectedPayment.paymentMethod === "Ví điện tử" && (
                             <i className="bi bi-wallet2 text-success me-2"></i>
                           )}
@@ -939,7 +1005,7 @@ function PayHistory() {
 
                 <h6 className="fw-bold mb-3 d-flex align-items-center">
                   <i className="bi bi-list-ul me-2"></i>
-                  Danh sách khóa học
+                  Chi tiết đơn hàng {selectedPayment.transactionId ? `#${selectedPayment.transactionId}` : ''}
                 </h6>
 
                 <div className="table-responsive">
@@ -952,8 +1018,11 @@ function PayHistory() {
                         >
                           #
                         </th>
-                        <th className="py-3" style={{ width: "65%" }}>
-                          Khóa học
+                        <th className="py-3" style={{ width: "55%" }}>
+                          Sản phẩm
+                        </th>
+                        <th className="py-3" style={{ width: "10%" }}>
+                          Loại
                         </th>
                         <th className="py-3 text-end" style={{ width: "30%" }}>
                           Giá
@@ -973,21 +1042,36 @@ function PayHistory() {
                             <td className="text-center">{index + 1}</td>
                             <td>
                               <div className="d-flex align-items-center">
-                                <div className="course-image me-3 rounded overflow-hidden">
-                                  <img
-                                    src={item.imageUrl}
-                                    alt=""
-                                    width={80}
-                                    height={50}
-                                    style={{ objectFit: "cover" }}
-                                  />
-                                </div>
+                                {item.imageUrl ? (
+                                  <div className="course-image me-3 rounded overflow-hidden">
+                                    <img
+                                      src={item.imageUrl}
+                                      alt=""
+                                      width={80}
+                                      height={50}
+                                      style={{ objectFit: "cover" }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="me-3 rounded overflow-hidden d-flex align-items-center justify-content-center bg-light" style={{ width: 80, height: 50 }}>
+                                    <i className={`bi ${item.courseTitle.toLowerCase().includes('thi') ? 'bi-file-earmark-text' : 'bi-book'} fs-4 text-primary`}></i>
+                                  </div>
+                                )}
                                 <div className="course-info">
                                   <p className="mb-0 fw-medium">
                                     {item.courseTitle}
                                   </p>
                                 </div>
                               </div>
+                            </td>
+                            <td>
+                              {selectedPayment?.paymentDetails[index]?.type === "COURSE" ? (
+                                <span className="badge bg-primary-light text-primary rounded-pill">Khóa học</span>
+                              ) : selectedPayment?.paymentDetails[index]?.type === "EXAM" ? (
+                                <span className="badge bg-purple-light text-purple rounded-pill">Bài thi</span>
+                              ) : (
+                                <span className="badge bg-secondary-light text-secondary rounded-pill">Khác</span>
+                              )}
                             </td>
                             <td className="text-end fw-medium">
                               {item.price.toLocaleString()} VND

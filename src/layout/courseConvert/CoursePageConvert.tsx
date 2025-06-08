@@ -16,33 +16,28 @@ import { start } from "repl";
 import { Client, Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import DocumentCourse from "./component/DocumentCourse";
-
-interface Progress {
-  accountId: number;
-  courseId: number;
-  chapterId: number;
-  lessonId: number;
-  videoStatus: boolean;
-  testStatus: boolean;
-  testScore: number | null;
-  chapterTest: boolean;
-}
+import { CourseDataCourse } from "./TestQuickConvert";
 
 interface Lesson {
   lesson_id: number;
   lesson_title: string;
   lesson_duration: number;
+  completedLesson: boolean;
   video: {
     video_id: number;
     video_title: string;
     video_url: string;
-    document_short: string;
-    document_url: string;
+    document_short: string | null;
+    document_url: string | null;
+    videoCompleted: boolean;
   } | null;
   lesson_test: {
     test_id: number;
     test_title: string;
     test_type: string;
+    durationTest: number;
+    completedTestChapter: boolean | null;
+    completedTest: boolean;
   } | null;
   isRequired?: boolean;
   learningTip?: string | null;
@@ -58,6 +53,9 @@ interface Chapter {
     test_id: number;
     test_title: string;
     test_type: string;
+    durationTest: number;
+    completedTestChapter: boolean;
+    completedTest: boolean | null;
     isRequired?: boolean;
   } | null;
 }
@@ -93,6 +91,17 @@ export interface VideoContent {
   documentShort?: string;
 }
 
+interface Progress {
+  accountId: number;
+  courseId: number;
+  chapterId: number;
+  lessonId: number;
+  videoStatus: boolean;
+  testStatus: boolean;
+  testScore: number | null;
+  chapterTest: boolean;
+}
+
 export const CoursePageConvert = () => {
   const [courseId, setCourseId] = useState("");
   const [videoId, setVideoId] = useState("");
@@ -113,6 +122,8 @@ export const CoursePageConvert = () => {
     {}
   );
   const [isDocumentPopupVisible, setIsDocumentPopupVisible] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
+  const [shouldFetchQuestions, setShouldFetchQuestions] = useState(false);
 
   const handleOpenDocumentPopup = () => {
     setIsDocumentPopupVisible(true);
@@ -135,6 +146,259 @@ export const CoursePageConvert = () => {
     useState<Test_Chapter | null>(null);
 
   const refreshToken = localStorage.getItem("refreshToken");
+
+  // Functions for handling video and test clicks
+  const handleVideoClick = async (
+    videoId: string,
+    lessonId: string,
+    chapterId: string,
+    lessonIDText: string,
+    chapterIndex: number,
+    lessonIndex: number,
+    lesson: Lesson
+  ) => {
+    listenAndSendVideoClick(accountId, parseInt(videoId));
+
+    // If the lesson doesn't have a test, call the unlock-next API
+    if (lesson.lesson_test === null) {
+      try {
+        let token = localStorage.getItem("authToken");
+        if (isTokenExpired(token)) {
+          token = await refresh();
+          if (!token) {
+            window.location.href = "/dang-nhap";
+            return;
+          }
+          localStorage.setItem("authToken", token);
+        }
+
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_HOST}/api/progress/unlock-next?accountId=${accountId}&courseId=${courseId}&chapterId=${chapterId}&lessonId=${lessonId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          console.log("Successfully unlocked next lesson");
+          // Refresh progress data to update UI
+          fetchProgressData();
+        } else {
+          console.error("Failed to unlock next lesson");
+        }
+      } catch (error) {
+        console.error("Error unlocking next lesson:", error);
+      }
+    }
+
+    setSelectedTestContent(null);
+    setSelectedTestChapterContent(null);
+    setVideoId(videoId);
+
+    localStorage.setItem("currentChapterId", chapterId.toString());
+    localStorage.setItem("currentLessonId", lessonId.toString());
+
+    setSelectedVideoContent({
+      id: parseInt(videoId),
+      type: "video",
+      title: "",
+      url: "",
+      documentUrl: "",
+      documentShort: "",
+    });
+    setCurrentContent("video");
+
+    const encryptedVideoId = encryptData(videoId);
+    localStorage.setItem("encryptedVideoId", encryptedVideoId);
+    localStorage.removeItem("encryptedTestId");
+    localStorage.removeItem("encryptedTestChapterId");
+
+    const encryptedChapterId = encryptData(chapterId);
+    const encryptedLessonId = encryptData(lessonId);
+    localStorage.setItem("encryptedChapterId", encryptedChapterId);
+    localStorage.setItem("encryptedLessonId", encryptedLessonId);
+
+    localStorage.setItem("activeLesson", lessonIDText);
+  };
+
+  const handleTestClick = (
+    testId: string,
+    lessonId: string,
+    chapterId: string,
+    lessonIDText: string,
+    chapterIndex: number,
+    lessonIndex: number,
+    lesson: Lesson
+  ) => {
+    listenAndSendTestClick(accountId, parseInt(testId));
+    let testIDStore = localStorage.getItem("testIDSTORE");
+    if (testId !== testIDStore) {
+      localStorage.removeItem("testIDSTORE");
+      setIsStarted(false);
+    }
+
+    localStorage.removeItem("encryptedVideoId");
+    setSelectedVideoContent(null);
+    setVideoId("");
+    setSelectedTestChapterContent(null);
+    setTestId(testId);
+    setCurrentContent("test");
+    setSelectedTestContent({
+      test_id: Number(testId),
+      type: "test",
+      title: "",
+    });
+    const encryptedTestId = encryptData(testId);
+    localStorage.setItem("encryptedTestId", encryptedTestId);
+
+    localStorage.setItem("currentChapterId", chapterId.toString());
+    localStorage.setItem("currentLessonId", lessonId.toString());
+
+    localStorage.removeItem("encryptedTestChapterId");
+    const encryptedChapterId = encryptData(chapterId);
+    const encryptedLessonId = encryptData(lessonId);
+    localStorage.setItem("encryptedChapterId", encryptedChapterId);
+    localStorage.setItem("encryptedLessonId", encryptedLessonId);
+
+    localStorage.setItem("activeLesson", lessonIDText);
+  };
+
+  const handleTestChapClick = (
+    testChapId: string,
+    chapterId: string,
+    chapterIDText: string
+  ) => {
+    setTestChapterId(testChapId);
+    setCurrentContent("test_chapter");
+
+    const encryptedTestChapterId = encryptData(testChapId);
+    localStorage.setItem("encryptedTestChapterId", encryptedTestChapterId);
+    localStorage.removeItem("encryptedVideoId");
+    localStorage.removeItem("encryptedTestId");
+    const encryptedChapterId = encryptData(chapterId);
+    localStorage.setItem("encryptedChapterId", encryptedChapterId);
+
+    setSelectedVideoContent(null);
+    setSelectedTestContent(null);
+
+    setSelectedTestChapterContent({
+      test_id: Number(testChapId),
+      type: "test_chapter",
+      title: "",
+    });
+
+    localStorage.setItem("activeChapter", chapterIDText);
+    localStorage.removeItem("activeLesson");
+  };
+
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Completion checking functions
+  const isVideoCompleted = (chapterId: number, lessonId: number) => {
+    // Check if this is the first lesson in the first chapter
+    const isFirstLesson = courseData && courseData.chapters && courseData.chapters.length > 0 &&
+      courseData.chapters[0].chapter_id === chapterId &&
+      courseData.chapters[0].lessons.length > 0 &&
+      courseData.chapters[0].lessons[0].lesson_id === lessonId;
+
+    // First lesson is always accessible
+    if (isFirstLesson) {
+      return true;
+    }
+
+    // Find the chapter and lesson
+    const chapter = courseData?.chapters.find(ch => ch.chapter_id === chapterId);
+    const lesson = chapter?.lessons.find(l => l.lesson_id === lessonId);
+
+    // Check if lesson is not required
+    if (lesson?.isRequired === false) {
+      return true;
+    }
+
+    // Check if this lesson has a progress entry (if it does, it should be accessible)
+    const lessonProgress = progressData?.find(
+      (p) => p.chapterId === chapterId && p.lessonId === lessonId
+    );
+    if (lessonProgress) {
+      return true;
+    }
+
+    // Check if the previous lesson in the same chapter has been completed
+    if (chapter) {
+      const lessonIndex = chapter.lessons.findIndex(l => l.lesson_id === lessonId);
+      if (lessonIndex > 0) {
+        const previousLesson = chapter.lessons[lessonIndex - 1];
+        const previousLessonProgress = progressData?.find(
+          (p) => p.chapterId === chapterId && p.lessonId === previousLesson.lesson_id
+        );
+
+        // If the previous lesson has both video and test completed, or it doesn't have a test
+        if (previousLessonProgress?.videoStatus &&
+          (previousLessonProgress?.testStatus || previousLesson.lesson_test === null)) {
+          return true;
+        }
+      } else if (lessonIndex === 0 && chapterId > 1) {
+        // If this is the first lesson of a chapter that's not the first chapter,
+        // check if the last lesson of the previous chapter is completed
+        const previousChapter = courseData?.chapters.find(ch => ch.chapter_id === chapterId - 1);
+        if (previousChapter && previousChapter.lessons.length > 0) {
+          const lastLessonOfPreviousChapter = previousChapter.lessons[previousChapter.lessons.length - 1];
+          const lastLessonProgress = progressData?.find(
+            (p) => p.chapterId === previousChapter.chapter_id &&
+              p.lessonId === lastLessonOfPreviousChapter.lesson_id
+          );
+
+          // If the last lesson of previous chapter has both video and test completed, or it doesn't have a test
+          if (lastLessonProgress?.videoStatus &&
+            (lastLessonProgress?.testStatus || lastLessonOfPreviousChapter.lesson_test === null)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  };
+
+  const isTestChapterCompleted = (chapterId: number) => {
+    // Find the chapter
+    const chapter = courseData?.chapters.find(ch => ch.chapter_id === chapterId);
+
+    // Check if chapter test is not required
+    if (chapter?.chapter_test?.isRequired === false) {
+      return true;
+    }
+
+    // Check the progress data (old API)
+    const chapterTestProgress = progressData?.find(
+      (p) => p.chapterId === chapterId && p.lessonId === null
+    );
+    return chapterTestProgress?.chapterTest || false;
+  };
+
+  const isTestCompleted = (chapterId: number, lessonId: number) => {
+    // Find the chapter and lesson
+    const chapter = courseData?.chapters.find(ch => ch.chapter_id === chapterId);
+    const lesson = chapter?.lessons.find(l => l.lesson_id === lessonId);
+
+    // Check if lesson is not required
+    if (lesson?.isRequired === false) {
+      return true;
+    }
+
+    // Check the progress data (old API)
+    const lessonProgress = progressData?.find(
+      (p) => p.chapterId === chapterId && p.lessonId === lessonId
+    );
+    return lessonProgress?.testStatus || false;
+  };
+
   // # Lắng nghe web socket để ghi nhận hành động của người dùng
   const listenAndSendVideoClick = (accountId: number, videoId: number) => {
     const socket = new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`); // URL to your WebSocket server
@@ -183,9 +447,9 @@ export const CoursePageConvert = () => {
     const storedEncryptedTestChapterId = localStorage.getItem(
       "encryptedTestChapterId"
     );
-
     const storedChapterId = localStorage.getItem("encryptedChapterId");
     const storedLessonId = localStorage.getItem("encryptedLessonId");
+
     if (storedEncryptedCourseId) {
       const decryptedCourseId = decryptData(storedEncryptedCourseId);
       setCourseId(decryptedCourseId);
@@ -193,7 +457,6 @@ export const CoursePageConvert = () => {
 
     if (storedEncryptedVideoId) {
       const decryptedVideoId = decryptData(storedEncryptedVideoId);
-      // console.log("Xin chao hi");
       setVideoId(decryptedVideoId);
     }
 
@@ -206,11 +469,13 @@ export const CoursePageConvert = () => {
       const decryptedTestChapterId = decryptData(storedEncryptedTestChapterId);
       setTestChapterId(decryptedTestChapterId);
     }
+
     if (storedChapterId) {
       setActiveChapter(`chapter${storedChapterId}`);
     }
+
     if (storedLessonId) {
-      setActiveChapter(`lesson${storedLessonId}`);
+      setActiveLesson(`lesson${storedLessonId}`);
     }
   }, []);
 
@@ -247,7 +512,7 @@ export const CoursePageConvert = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/courses/take-course/${courseId}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/courses/take-course/${courseId}?accountId=${accountId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -263,7 +528,34 @@ export const CoursePageConvert = () => {
       }
 
       const data = await response.json();
-      setCourseData(data);
+      // Ignore the completion status fields in the course data
+      const processedData = {
+        ...data,
+        chapters: data.chapters.map((chapter: any) => ({
+          ...chapter,
+          lessons: chapter.lessons.map((lesson: any) => ({
+            ...lesson,
+            video: lesson.video ? {
+              ...lesson.video,
+              // Remove videoCompleted field
+              videoCompleted: undefined
+            } : null,
+            lesson_test: lesson.lesson_test ? {
+              ...lesson.lesson_test,
+              // Remove completedTest field
+              completedTest: undefined
+            } : null
+          })),
+          chapter_test: chapter.chapter_test ? {
+            ...chapter.chapter_test,
+            // Remove completedTestChapter field
+            completedTestChapter: undefined
+          } : null
+        }))
+      };
+
+      setCourseData(processedData);
+      console.log("Course data loaded:", processedData);
 
       setIsLoading(false);
     } catch (error) {
@@ -295,407 +587,10 @@ export const CoursePageConvert = () => {
     }
   }, [courseData]);
 
-  // # Khi có videoId, set lại các state
+  // Update UI based on loaded course data
   useEffect(() => {
-    if (videoId) {
-      setSelectedTestContent(null);
-      setSelectedTestChapterContent(null);
-      setSelectedVideoContent({
-        id: parseInt(videoId),
-        type: "video",
-        title: "",
-        url: "",
-        documentUrl: "",
-        documentShort: "",
-      });
-      setCurrentContent("video");
-    } else if (testId) {
-      setSelectedVideoContent(null);
-      setSelectedTestChapterContent(null);
-      setSelectedTestContent({
-        test_id: Number(testId),
-        type: "test",
-        title: "",
-      });
-      setCurrentContent("test");
-    } else if (testChapterId) {
-      setCurrentContent("test_chapter");
-      setSelectedVideoContent(null);
-      setSelectedTestContent(null);
-
-      setSelectedTestChapterContent({
-        test_id: Number(testChapterId),
-        type: "test_chapter",
-        title: "",
-      });
-    }
-  }, [videoId, testId, testChapterId, courseId]);
-
-  useEffect(() => {
-    const fetchProgressData = async () => {
-      let token = localStorage.getItem("authToken");
-
-      if (isTokenExpired(token)) {
-        token = await refresh();
-        if (!token) {
-          window.location.href = "/dang-nhap";
-          return;
-        }
-        localStorage.setItem("authToken", token);
-      }
-
-      if (courseData) {
-        const courseId = courseData.course_id;
-        const response = await fetch(
-          `${process.env.REACT_APP_SERVER_HOST}/api/progress/${courseId}/progress/${accountId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setProgressData(data);
-        } else {
-          console.error("Failed to fetch progress data");
-        }
-      }
-    };
-
-    fetchProgressData();
-  }, [courseData, accountId]);
-
-  useEffect(() => {
-    const storedChapterId = localStorage.getItem("currentChapterId");
-    const storedLessonId = localStorage.getItem("currentLessonId");
-
-    if (storedChapterId && storedLessonId && courseData) {
-      const chapterIndex = courseData.chapters.findIndex(
-        (chapter) => chapter.chapter_id === parseInt(storedChapterId)
-      );
-
-      if (chapterIndex !== -1) {
-        setOpenChapters((prev) => {
-          const newOpenChapters = [...prev];
-          newOpenChapters[chapterIndex] = true;
-          return newOpenChapters;
-        });
-
-        const lessonIndex = courseData.chapters[chapterIndex].lessons.findIndex(
-          (lesson) => lesson.lesson_id === parseInt(storedLessonId)
-        );
-
-        if (lessonIndex !== -1) {
-          setOpenLessons((prev) => {
-            const newOpenLessons = { ...prev };
-            newOpenLessons[chapterIndex] = newOpenLessons[chapterIndex] || [];
-            newOpenLessons[chapterIndex][lessonIndex] = true;
-            return newOpenLessons;
-          });
-        }
-      }
-    }
-  }, [courseData]);
-
-  // Hàm gọi cập nhật tiến trình nếu k có bài test của bài đó
-  const updateProgressNoTest = async (lessonId: string, chapterId: string) => {
-    // const chapter = courseData?.chapters[chapterIndex];
-    // const lesson = chapter?.lessons[lessonIndex];
-    const token = await authTokenLogin(refreshToken, refresh, navigate);
-    console.log("Đang cập nhật tiến trình cho bài học không có test:", lessonId, chapterId);
-
-    const requestData = {
-      accountId: accountId, // ID của người dùng
-      courseId: courseId, // ID khóa học
-      chapterId: chapterId, // ID chương
-      lessonId: lessonId, // ID bài học
-      videoStatus: true,
-      testStatus: true,
-      isChapterTest: false, // Bài kiểm tra chương không có
-    };
-
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/user-answers/submit-progress-no-test`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit progress");
-      }
-
-      console.log("Cập nhật tiến trình thành công!");
-      // Refresh progressData sau khi cập nhật
-      await fetchProgressData();
-
-      return true;
-    } catch (error) {
-      console.error("Error updating progress:", error);
-      return false;
-    }
-  };
-
-  // Hàm để fetch progress data riêng
-  const fetchProgressData = async () => {
-    let token = localStorage.getItem("authToken");
-
-    if (isTokenExpired(token)) {
-      token = await refresh();
-      if (!token) {
-        window.location.href = "/dang-nhap";
-        return;
-      }
-      localStorage.setItem("authToken", token);
-    }
-
     if (courseData) {
-      const courseId = courseData.course_id;
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/progress/${courseId}/progress/${accountId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setProgressData(data);
-        return data;
-      } else {
-        console.error("Failed to fetch progress data");
-      }
-    }
-  };
-
-  const handleVideoClick = (
-    videoId: string,
-    lessonId: string,
-    chapterId: string,
-    lessonIDText: string,
-    chapterIndex: number,
-    lessonIndex: number,
-    lesson: Lesson
-  ) => {
-    if (lesson.lesson_test === null) {
-      updateProgressNoTest(lessonId, chapterId).then(() => {
-        // Kiểm tra xem đây có phải là bài đầu tiên không
-        const isFirstLesson = courseData && courseData.chapters && courseData.chapters.length > 0 &&
-          courseData.chapters[0].chapter_id === Number(chapterId) &&
-          courseData.chapters[0].lessons.length > 0 &&
-          courseData.chapters[0].lessons[0].lesson_id === Number(lessonId);
-
-        // Nếu là bài đầu tiên, tự động cập nhật tiến trình
-        if (isFirstLesson) {
-          console.log("Đây là bài học đầu tiên, đang cập nhật tiến trình...");
-          showToast("Bài học đầu tiên đã được đánh dấu hoàn thành!");
-        }
-      });
-    }
-
-    listenAndSendVideoClick(accountId, selectedVideoContent?.id!);
-    setSelectedTestContent(null);
-    setSelectedTestChapterContent(null);
-    setVideoId(videoId);
-
-    // const encryptedVideoId = encryptData(videoId.toString());
-    // localStorage.setItem("encryptedVideoId", encryptedVideoId);
-    localStorage.setItem("currentChapterId", chapterId.toString());
-    localStorage.setItem("currentLessonId", lessonId.toString());
-
-    console.log(lessonIDText);
-    setSelectedVideoContent({
-      id: parseInt(videoId),
-      type: "video",
-      title: "",
-      url: "",
-      documentUrl: "",
-      documentShort: "",
-    });
-    setCurrentContent("video");
-
-    const encryptedVideoId = encryptData(videoId);
-    localStorage.setItem("encryptedVideoId", encryptedVideoId);
-    localStorage.removeItem("encryptedTestId");
-    localStorage.removeItem("encryptedTestChapterId");
-
-    const encryptedChapterId = encryptData(chapterId);
-    const encryptedLessonId = encryptData(lessonId);
-    localStorage.setItem("encryptedChapterId", encryptedChapterId);
-    localStorage.setItem("encryptedLessonId", encryptedLessonId);
-
-    // localStorage.setItem("activeChapter", chapterId);
-    // localStorage.setItem("activeLesson", lessonId);
-    localStorage.setItem("activeLesson", lessonIDText);
-    // window.location.reload();
-  };
-
-  const handleTestClick = (
-    testId: string,
-    lessonId: string,
-    chapterId: string,
-    lessonIDText: string,
-    chapterIndex: number,
-    lessonIndex: number,
-    lesson: Lesson
-  ) => {
-    if (lesson.lesson_test === null) {
-      updateProgressNoTest(lessonId, chapterId);
-      window.location.reload();
-    }
-    listenAndSendTestClick(accountId, selectedTestContent?.test_id!);
-    let testIDStore = localStorage.getItem("testIDSTORE");
-    if (testId !== testIDStore) {
-      localStorage.removeItem("testIDSTORE");
-      setIsStarted(false);
-    }
-
-    localStorage.removeItem("encryptedVideoId");
-    setSelectedVideoContent(null);
-    setVideoId("");
-    setSelectedTestChapterContent(null);
-    setTestId(testId);
-    setCurrentContent("test");
-    setSelectedTestContent({
-      test_id: Number(testId),
-      type: "test",
-      title: "",
-    });
-    const encryptedTestId = encryptData(testId);
-    localStorage.setItem("encryptedTestId", encryptedTestId);
-
-    localStorage.setItem("currentChapterId", chapterId.toString());
-    localStorage.setItem("currentLessonId", lessonId.toString());
-
-    localStorage.removeItem("encryptedTestChapterId");
-    const encryptedChapterId = encryptData(chapterId);
-    const encryptedLessonId = encryptData(lessonId);
-    localStorage.setItem("encryptedChapterId", encryptedChapterId);
-    localStorage.setItem("encryptedLessonId", encryptedLessonId);
-
-    localStorage.setItem("activeLesson", lessonIDText);
-  };
-  const handleTestChapClick = (
-    testChapId: string,
-    chapterId: string,
-    chapterIDText: string
-  ) => {
-    setTestChapterId(testChapId);
-    setCurrentContent("test_chapter");
-
-    const encryptedTestChapterId = encryptData(testChapId);
-    localStorage.setItem("encryptedTestChapterId", encryptedTestChapterId);
-    localStorage.removeItem("encryptedVideoId");
-    localStorage.removeItem("encryptedTestId");
-    const encryptedChapterId = encryptData(chapterId);
-    localStorage.setItem("encryptedChapterId", encryptedChapterId);
-
-    setSelectedVideoContent(null);
-    setSelectedTestContent(null);
-
-    setSelectedTestChapterContent({
-      test_id: Number(testChapId),
-      type: "test_chapter",
-      title: "",
-    });
-
-    localStorage.setItem("activeChapter", chapterIDText);
-    localStorage.removeItem("activeLesson");
-    // window.location.reload();
-  };
-
-  useEffect(() => {
-    const storedEncryptedCourseId = localStorage.getItem("encryptedCourseId");
-    const storedEncryptedVideoId = localStorage.getItem("encryptedVideoId");
-    const storedEncryptedTestId = localStorage.getItem("encryptedTestId");
-    const storedEncryptedTestChapterId = localStorage.getItem(
-      "encryptedTestChapterId"
-    );
-    if (storedEncryptedCourseId) {
-      const decryptedCourseId = decryptData(storedEncryptedCourseId);
-      setCourseId(decryptedCourseId);
-    }
-
-    if (storedEncryptedVideoId) {
-      const decryptedVideoId = decryptData(storedEncryptedVideoId);
-      setVideoId(decryptedVideoId);
-    }
-
-    if (storedEncryptedTestId) {
-      const decryptedTestId = decryptData(storedEncryptedTestId);
-      setTestId(decryptedTestId);
-    }
-
-    if (storedEncryptedTestChapterId) {
-      const decryptedTestChapterId = decryptData(storedEncryptedTestChapterId);
-      setTestChapterId(decryptedTestChapterId);
-    }
-  }, [courseId, testId, testChapterId, videoId]);
-
-  const handleToggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const isVideoCompleted = (chapterId: number, lessonId: number) => {
-    // Kiểm tra xem đây có phải là bài học đầu tiên trong chương đầu tiên không
-    const isFirstLesson = courseData && courseData.chapters && courseData.chapters.length > 0 &&
-      courseData.chapters[0].chapter_id === chapterId &&
-      courseData.chapters[0].lessons.length > 0 &&
-      courseData.chapters[0].lessons[0].lesson_id === lessonId;
-
-    // Bài đầu tiên luôn có thể truy cập
-    if (isFirstLesson) {
-      return true;
-    }
-
-    // Logic cũ cho các bài khác
-    const lessonProgress = progressData?.find(
-      (p) => p.chapterId === chapterId && p.lessonId === lessonId
-    );
-    return lessonProgress?.videoStatus || false;
-  };
-
-  const isTestChapterCompleted = (chapterId: number) => {
-    // Kiểm tra xem chapter test có bắt buộc không
-    const chapter = courseData?.chapters.find(ch => ch.chapter_id === chapterId);
-    if (chapter?.chapter_test?.isRequired === false) {
-      return true; // Không bắt buộc, luôn cho phép truy cập
-    }
-
-    const chapterTestProgress = progressData?.find(
-      (p) => p.chapterId === chapterId && p.lessonId === null
-    );
-    return chapterTestProgress?.chapterTest || false;
-  };
-
-  const isTestCompleted = (chapterId: number, lessonId: number) => {
-    const lessonProgress = progressData?.find(
-      (p) => p.chapterId === chapterId && p.lessonId === lessonId
-    );
-    return lessonProgress?.testStatus || false;
-  };
-
-  useEffect(() => {
-    if (courseData && progressData) {
-      let targetChapterId: number | null = null;
-      let targetLessonId: number | null = null;
-      let targetVideoId: number | null = null;
-      let targetTestId: number | null = null;
-      let targetChapterTestId: number | null = null;
-
-      // Ưu tiên xác định vị trí dựa trên `videoId`, `testId`, hoặc `chapterTestId`
+      // If we have videoId, testId, or testChapterId, find the corresponding content
       if (videoId) {
         const videoLesson = courseData.chapters
           .flatMap((chapter) =>
@@ -703,14 +598,52 @@ export const CoursePageConvert = () => {
               chapterId: chapter.chapter_id,
               lessonId: lesson.lesson_id,
               videoId: lesson.video?.video_id,
+              videoTitle: lesson.video?.video_title,
+              videoUrl: lesson.video?.video_url,
+              documentUrl: lesson.video?.document_url,
+              documentShort: lesson.video?.document_short,
             }))
           )
           .find((item) => item.videoId === Number(videoId));
 
         if (videoLesson) {
-          targetChapterId = videoLesson.chapterId;
-          targetLessonId = videoLesson.lessonId;
-          targetVideoId = videoLesson.videoId!;
+          setSelectedVideoContent({
+            id: videoLesson.videoId!,
+            type: "video",
+            title: videoLesson.videoTitle || "",
+            url: videoLesson.videoUrl || "",
+            documentUrl: videoLesson.documentUrl || "",
+            documentShort: videoLesson.documentShort || "",
+          });
+          setCurrentContent("video");
+
+          // Set active chapter and lesson
+          localStorage.setItem("activeChapter", `chapter${videoLesson.chapterId}`);
+          localStorage.setItem("activeLesson", `lesson${videoLesson.lessonId}`);
+          setActiveChapter(`chapter${videoLesson.chapterId}`);
+          setActiveLesson(`lesson${videoLesson.lessonId}`);
+
+          // Open the chapter and lesson in the sidebar
+          const chapterIndex = courseData.chapters.findIndex(
+            (ch) => ch.chapter_id === videoLesson.chapterId
+          );
+
+          if (chapterIndex !== -1) {
+            const newOpenChapters = Array(courseData.chapters.length).fill(false);
+            newOpenChapters[chapterIndex] = true;
+            setOpenChapters(newOpenChapters);
+
+            const lessonIndex = courseData.chapters[chapterIndex].lessons.findIndex(
+              (les) => les.lesson_id === videoLesson.lessonId
+            );
+
+            if (lessonIndex !== -1) {
+              const newOpenLessons = { ...openLessons };
+              newOpenLessons[chapterIndex] = Array(courseData.chapters[chapterIndex].lessons.length).fill(false);
+              newOpenLessons[chapterIndex][lessonIndex] = true;
+              setOpenLessons(newOpenLessons);
+            }
+          }
         }
       } else if (testId) {
         const testLesson = courseData.chapters
@@ -719,127 +652,113 @@ export const CoursePageConvert = () => {
               chapterId: chapter.chapter_id,
               lessonId: lesson.lesson_id,
               testId: lesson.lesson_test?.test_id,
+              testTitle: lesson.lesson_test?.test_title,
             }))
           )
           .find((item) => item.testId === Number(testId));
 
         if (testLesson) {
-          targetChapterId = testLesson.chapterId;
-          targetLessonId = testLesson.lessonId;
-          targetTestId = testLesson.testId!;
+          setSelectedTestContent({
+            test_id: testLesson.testId!,
+            type: "test",
+            title: testLesson.testTitle || "",
+          });
+          setCurrentContent("test");
+
+          // Set active chapter and lesson
+          localStorage.setItem("activeChapter", `chapter${testLesson.chapterId}`);
+          localStorage.setItem("activeLesson", `lesson${testLesson.lessonId}`);
+          setActiveChapter(`chapter${testLesson.chapterId}`);
+          setActiveLesson(`lesson${testLesson.lessonId}`);
+
+          // Open the chapter and lesson in the sidebar
+          const chapterIndex = courseData.chapters.findIndex(
+            (ch) => ch.chapter_id === testLesson.chapterId
+          );
+
+          if (chapterIndex !== -1) {
+            const newOpenChapters = Array(courseData.chapters.length).fill(false);
+            newOpenChapters[chapterIndex] = true;
+            setOpenChapters(newOpenChapters);
+
+            const lessonIndex = courseData.chapters[chapterIndex].lessons.findIndex(
+              (les) => les.lesson_id === testLesson.lessonId
+            );
+
+            if (lessonIndex !== -1) {
+              const newOpenLessons = { ...openLessons };
+              newOpenLessons[chapterIndex] = Array(courseData.chapters[chapterIndex].lessons.length).fill(false);
+              newOpenLessons[chapterIndex][lessonIndex] = true;
+              setOpenLessons(newOpenLessons);
+            }
+          }
         }
       } else if (testChapterId) {
         const testChapter = courseData.chapters.find(
           (chapter) => chapter.chapter_test?.test_id === Number(testChapterId)
         );
+
         if (testChapter) {
-          targetChapterId = testChapter.chapter_id;
-          targetChapterTestId = testChapter.chapter_test?.test_id!;
-        }
-      }
+          setSelectedTestChapterContent({
+            test_id: testChapter.chapter_test!.test_id,
+            type: "test_chapter",
+            title: testChapter.chapter_test!.test_title || "",
+          });
+          setCurrentContent("test_chapter");
 
-      // Nếu không tìm thấy target từ các ID, sử dụng `progressData` để xác định vị trí gần nhất
-      if (!targetChapterId && !targetLessonId) {
-        const latestProgress = progressData.find(
-          (progress) =>
-            (!progress.videoStatus ||
-              !progress.testStatus ||
-              !progress.chapterTest) &&
-            (progress.testScore === 0 || progress.testScore === null)
-        );
+          // Set active chapter
+          localStorage.setItem("activeChapter", `chapter${testChapter.chapter_id}`);
+          setActiveChapter(`chapter${testChapter.chapter_id}`);
+          localStorage.removeItem("activeLesson");
+          setActiveLesson(null);
 
-        console.log(latestProgress);
-
-        if (latestProgress) {
-          targetChapterId = latestProgress.chapterId;
-          targetLessonId = latestProgress.lessonId;
-
-          // Lấy ra video hoặc bài test từ tiến trình này
-          const chapter = courseData.chapters.find(
-            (ch) => ch.chapter_id === latestProgress.chapterId
+          // Open the chapter in the sidebar
+          const chapterIndex = courseData.chapters.findIndex(
+            (ch) => ch.chapter_id === testChapter.chapter_id
           );
-          if (chapter) {
-            const lesson = chapter.lessons.find(
-              (ls) => ls.lesson_id === latestProgress.lessonId
-            );
-            if (lesson) {
-              // Kiểm tra trạng thái của bài kiểm tra trong bài học (lesson)
-              if (
-                lesson.lesson_test && // Bài học có bài kiểm tra
-                (latestProgress.testScore === 0 ||
-                  latestProgress.testScore === null) // testScore = 0 hoặc null
-              ) {
-                targetTestId = lesson.lesson_test.test_id; // Gán test_id của bài kiểm tra vào targetTestId
-              }
-            }
 
-            if (!latestProgress.chapterTest && chapter.chapter_test) {
-              targetChapterTestId = chapter.chapter_test.test_id;
-            }
+          if (chapterIndex !== -1) {
+            const newOpenChapters = Array(courseData.chapters.length).fill(false);
+            newOpenChapters[chapterIndex] = true;
+            setOpenChapters(newOpenChapters);
+          }
+        }
+      } else {
+        // If no specific content is selected, show the first available lesson
+        const firstChapter = courseData.chapters[0];
+        if (firstChapter && firstChapter.lessons.length > 0) {
+          const firstLesson = firstChapter.lessons[0];
+          if (firstLesson.video) {
+            setSelectedVideoContent({
+              id: firstLesson.video.video_id,
+              type: "video",
+              title: firstLesson.video.video_title,
+              url: firstLesson.video.video_url,
+              documentUrl: firstLesson.video.document_url || "",
+              documentShort: firstLesson.video.document_short || "",
+            });
+            setCurrentContent("video");
+
+            // Set active chapter and lesson
+            localStorage.setItem("activeChapter", `chapter${firstChapter.chapter_id}`);
+            localStorage.setItem("activeLesson", `lesson${firstLesson.lesson_id}`);
+            setActiveChapter(`chapter${firstChapter.chapter_id}`);
+            setActiveLesson(`lesson${firstLesson.lesson_id}`);
+
+            // Open the first chapter and lesson in the sidebar
+            const newOpenChapters = Array(courseData.chapters.length).fill(false);
+            newOpenChapters[0] = true;
+            setOpenChapters(newOpenChapters);
+
+            const newOpenLessons = { ...openLessons };
+            newOpenLessons[0] = Array(courseData.chapters[0].lessons.length).fill(false);
+            newOpenLessons[0][0] = true;
+            setOpenLessons(newOpenLessons);
           }
         }
       }
-
-      // Nếu tìm thấy vị trí (chapterId và lessonId hoặc chỉ chapterId)
-      if (targetChapterId !== null) {
-        const newOpenChapters = courseData.chapters.map((chapter) => {
-          return chapter.chapter_id === targetChapterId;
-        });
-
-        const newOpenLessons = courseData.chapters.reduce(
-          (acc, chapter, chapterIndex) => {
-            if (chapter.chapter_id === targetChapterId) {
-              acc[chapterIndex] = chapter.lessons.map((lesson) => {
-                return lesson.lesson_id === targetLessonId;
-              });
-            } else {
-              acc[chapterIndex] = Array(chapter.lessons.length).fill(false);
-            }
-            return acc;
-          },
-          {} as { [key: number]: boolean[] }
-        );
-
-        setOpenChapters(newOpenChapters);
-        setOpenLessons(newOpenLessons);
-
-        // Lưu trữ trạng thái để hiển thị
-        if (targetVideoId) {
-          // setVideoId(targetVideoId.toString());
-          setSelectedVideoContent({
-            id: targetVideoId,
-            type: "video",
-            title: "",
-            url: "",
-            documentUrl: "",
-            documentShort: "",
-          });
-          localStorage.setItem("activeChapter", `chapter${targetChapterId}`);
-          localStorage.setItem("activeLesson", `lesson${targetLessonId}`);
-        }
-        if (targetTestId) {
-          // setTestId(targetTestId.toString());
-          setSelectedTestContent({
-            test_id: targetTestId,
-            type: "test",
-            title: "",
-          });
-          localStorage.setItem("activeChapter", `chapter${targetChapterId}`);
-          localStorage.setItem("activeLesson", `lesson${targetLessonId}`);
-        }
-        if (targetChapterTestId) {
-          // setTestChapterId(targetChapterTestId.toString());
-          setSelectedTestChapterContent({
-            test_id: targetChapterTestId,
-            type: "test_chapter",
-            title: "",
-          });
-          localStorage.setItem("activeChapter", `chapter${targetChapterId}`);
-          localStorage.setItem("activeLesson", `lesson${targetLessonId}`);
-        }
-      }
     }
-  }, [progressData, courseData, videoId, testId, testChapterId]);
+  }, [courseData, videoId, testId, testChapterId]);
 
   useEffect(() => {
     const storedActiveChapter = localStorage.getItem("activeChapter");
@@ -878,8 +797,7 @@ export const CoursePageConvert = () => {
     setOpenLessons((prev) => {
       const newOpenLessons = { ...prev };
       newOpenLessons[chapterIndex] = newOpenLessons[chapterIndex] || [];
-      newOpenLessons[chapterIndex][lessonIndex] =
-        !newOpenLessons[chapterIndex][lessonIndex];
+      newOpenLessons[chapterIndex][lessonIndex] = !newOpenLessons[chapterIndex][lessonIndex];
       return newOpenLessons;
     });
   };
@@ -888,14 +806,8 @@ export const CoursePageConvert = () => {
     console.log(`Chapter test clicked with ID: ${testId}`);
   };
   const handleChapterClick = (chapterId: string, chapterIndex: number) => {
-    const newActiveChapter = activeChapter === chapterId ? null : chapterId;
-    setActiveChapter(newActiveChapter);
-    localStorage.setItem("activeChapter", newActiveChapter || "");
-    setOpenChapters((prev) => {
-      const newOpenChapters = [...prev];
-      newOpenChapters[chapterIndex] = !newOpenChapters[chapterIndex];
-      return newOpenChapters;
-    });
+    setActiveChapter(chapterId);
+    toggleChapter(chapterIndex);
   };
 
   const handleLessonClick = (
@@ -903,46 +815,63 @@ export const CoursePageConvert = () => {
     lessonIndex: number,
     chapterIndex: number
   ) => {
-    const newActiveLesson = activeLesson === lessonId ? null : lessonId;
-    setActiveLesson(newActiveLesson);
-    localStorage.setItem("activeLesson", newActiveLesson || "");
-
-    // Nếu bài học không có lesson_test, cho phép qua bài học mà không cần kiểm tra
-    const chapter = courseData?.chapters[chapterIndex];
-    const lesson = chapter?.lessons[lessonIndex];
-
-    // setOpenLessons((prev) => {
-    //   const newOpenLessons = { ...prev };
-    //   newOpenLessons[chapterIndex] = newOpenLessons[chapterIndex] || [];
-    //   newOpenLessons[chapterIndex][lessonIndex] =
-    //     !newOpenLessons[chapterIndex][lessonIndex];
-    //   return newOpenLessons;
-    // });
-    if (lesson?.lesson_test === null) {
-      // Bỏ qua bài kiểm tra, qua bài học tiếp theo
-      setOpenLessons((prev) => {
-        const newOpenLessons = { ...prev };
-        newOpenLessons[chapterIndex] = newOpenLessons[chapterIndex] || [];
-        newOpenLessons[chapterIndex][lessonIndex] = true; // Mở bài học tiếp theo
-        return newOpenLessons;
-      });
-    } else {
-      setOpenLessons((prev) => {
-        const newOpenLessons = { ...prev };
-        newOpenLessons[chapterIndex] = newOpenLessons[chapterIndex] || [];
-        newOpenLessons[chapterIndex][lessonIndex] =
-          !newOpenLessons[chapterIndex][lessonIndex];
-        return newOpenLessons;
-      });
-    }
+    setActiveLesson(lessonId);
+    toggleLesson(chapterIndex, lessonIndex);
   };
-  const [isStarted, setIsStarted] = useState(false);
-  const [shouldFetchQuestions, setShouldFetchQuestions] = useState(false);
 
   const handleStart = () => {
     setIsStarted(true);
-    setShouldFetchQuestions(true);
+    // Only set shouldFetchQuestions to true if it's not already true
+    if (!shouldFetchQuestions) {
+      setShouldFetchQuestions(true);
+    }
   };
+
+  // Add the fetchProgressData function
+  const fetchProgressData = async () => {
+    let token = localStorage.getItem("authToken");
+
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        window.location.href = "/dang-nhap";
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+
+    if (courseData) {
+      const courseId = courseData.course_id;
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_HOST}/api/progress/${courseId}/progress/${accountId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setProgressData(data);
+          console.log("Progress data loaded:", data);
+        } else {
+          console.error("Failed to fetch progress data");
+        }
+      } catch (error) {
+        console.error("Error fetching progress data:", error);
+      }
+    }
+  };
+
+  // Add useEffect to fetch progress data when courseData changes
+  useEffect(() => {
+    if (courseData && accountId) {
+      fetchProgressData();
+    }
+  }, [courseData, accountId]);
 
   return (
     <div className="rbt-header-sticky vaohoc">
@@ -1085,10 +1014,7 @@ export const CoursePageConvert = () => {
                                                 const isNotRequired = lesson.isRequired === false;
 
                                                 if (lesson.video?.video_id &&
-                                                  (isFirstLessonCheck || isNotRequired || isVideoCompleted(
-                                                    chapter.chapter_id,
-                                                    lesson.lesson_id
-                                                  ))
+                                                  (isFirstLessonCheck || isNotRequired || isVideoCompleted(chapter.chapter_id, lesson.lesson_id))
                                                 ) {
                                                   handleVideoClick(
                                                     lesson.video.video_id.toString(),
@@ -1100,10 +1026,7 @@ export const CoursePageConvert = () => {
                                                     lesson
                                                   );
                                                 } else if (
-                                                  !isVideoCompleted(
-                                                    chapter.chapter_id,
-                                                    lesson.lesson_id
-                                                  ) && !isFirstLessonCheck && !isNotRequired
+                                                  lesson.video && !isVideoCompleted(chapter.chapter_id, lesson.lesson_id) && !isFirstLessonCheck && !isNotRequired
                                                 ) {
                                                   showToast(
                                                     "Hoàn thành bài học trước để mở khóa!"
@@ -1117,10 +1040,7 @@ export const CoursePageConvert = () => {
                                                   courseData.chapters[0].lessons.length > 0 &&
                                                   courseData.chapters[0].lessons[0].lesson_id === lesson.lesson_id) ||
                                                   lesson.isRequired === false ||
-                                                  isVideoCompleted(
-                                                    chapter.chapter_id,
-                                                    lesson.lesson_id
-                                                  )
+                                                  isVideoCompleted(chapter.chapter_id, lesson.lesson_id)
                                                   ? "completed"
                                                   : "locked"
                                                 }`}
@@ -1160,24 +1080,27 @@ export const CoursePageConvert = () => {
                                           <li>
                                             <a
                                               href="#"
-                                              className={`content-item test-item ${isTestCompleted(
-                                                chapter.chapter_id,
-                                                lesson.lesson_id
-                                              )
+                                              className={`content-item test-item ${isTestCompleted(chapter.chapter_id, lesson.lesson_id) ||
+                                                lesson.isRequired === false ||
+                                                progressData?.find(p => p.chapterId === chapter.chapter_id && p.lessonId === lesson.lesson_id) ||
+                                                isVideoCompleted(chapter.chapter_id, lesson.lesson_id)
                                                 ? " completed"
-                                                : lesson.isRequired === false ? " completed" : " locked"
+                                                : " locked"
                                                 }`}
                                               onClick={(e) => {
-                                                // e.preventDefault();
+                                                e.preventDefault();
                                                 // Kiểm tra xem bài học có bắt buộc không
                                                 const isNotRequired = lesson.isRequired === false;
 
+                                                // Check if this lesson is already in progress data
+                                                const lessonInProgress = progressData?.find(
+                                                  (p) => p.chapterId === chapter.chapter_id && p.lessonId === lesson.lesson_id
+                                                );
+
                                                 if (
                                                   lesson.lesson_test?.test_id &&
-                                                  (isNotRequired || isTestCompleted(
-                                                    chapter.chapter_id,
-                                                    lesson.lesson_id
-                                                  ))
+                                                  (isNotRequired || isTestCompleted(chapter.chapter_id, lesson.lesson_id) ||
+                                                    lessonInProgress || isVideoCompleted(chapter.chapter_id, lesson.lesson_id))
                                                 ) {
                                                   handleTestClick(
                                                     lesson.lesson_test.test_id.toString(),
@@ -1188,6 +1111,8 @@ export const CoursePageConvert = () => {
                                                     lessonIndex,
                                                     lesson
                                                   );
+                                                } else {
+                                                  showToast("Hoàn thành bài học trước để mở khóa!");
                                                 }
                                               }}
                                             >
@@ -1231,9 +1156,19 @@ export const CoursePageConvert = () => {
                             {chapter.chapter_test && (
                               <div className="accordion-item card vaohoc">
                                 <h2
-                                  className={`accordion-header card-header vaohoc content-item test-item ${isTestChapterCompleted(chapter.chapter_id)
+                                  className={`accordion-header card-header vaohoc content-item test-item ${isTestChapterCompleted(chapter.chapter_id) ||
+                                    chapter.chapter_test?.isRequired === false ||
+                                    // Check if all lessons in the chapter are completed
+                                    chapter.lessons.every(lesson =>
+                                      progressData?.find(p =>
+                                        p.chapterId === chapter.chapter_id &&
+                                        p.lessonId === lesson.lesson_id &&
+                                        p.videoStatus === true &&
+                                        (p.testStatus === true || lesson.lesson_test === null)
+                                      )
+                                    )
                                     ? " completed"
-                                    : chapter.chapter_test?.isRequired === false ? " completed" : " locked"
+                                    : " locked"
                                     }`}
                                   style={{
                                     border: "1px solid #ccc",
@@ -1244,20 +1179,30 @@ export const CoursePageConvert = () => {
                                   <button
                                     type="button"
                                     onClick={(e) => {
-                                      // e.preventDefault();
+                                      e.preventDefault();
                                       const isNotRequired = chapter.chapter_test?.isRequired === false;
+
+                                      // Check if all lessons in the chapter are completed
+                                      const allLessonsCompleted = chapter.lessons.every(lesson =>
+                                        progressData?.find(p =>
+                                          p.chapterId === chapter.chapter_id &&
+                                          p.lessonId === lesson.lesson_id &&
+                                          p.videoStatus === true &&
+                                          (p.testStatus === true || lesson.lesson_test === null)
+                                        )
+                                      );
 
                                       if (
                                         chapter.chapter_test?.test_id &&
-                                        (isNotRequired || isTestChapterCompleted(
-                                          chapter.chapter_id
-                                        ))
+                                        (isNotRequired || isTestChapterCompleted(chapter.chapter_id) || allLessonsCompleted)
                                       ) {
                                         handleTestChapClick(
                                           chapter.chapter_test?.test_id.toString(),
                                           chapter.chapter_id.toString(),
                                           `chapter${chapter.chapter_id}`
                                         );
+                                      } else {
+                                        showToast("Hoàn thành tất cả bài học trong chương để mở khóa!");
                                       }
                                     }}
                                   >
@@ -1277,17 +1222,14 @@ export const CoursePageConvert = () => {
           )}
           {(() => {
             if (selectedTestContent) {
-              const validCourseData = Array.isArray(courseData)
-                ? courseData
-                : [];
               const courseDataArray = courseData ? [courseData] : [];
               return (
                 <CoverTest
                   isSidebarOpen={isSidebarOpen}
                   handleToggleSidebar={handleToggleSidebar}
                   content={selectedTestContent}
-                  progressCheck={progressData}
-                  courseData={courseDataArray}
+                  progressCheck={progressData as any}
+                  courseData={courseDataArray as any}
                   setStartTest={setIsStarted}
                   isStarted={isStarted}
                   selectedTestContent={selectedTestContent}
@@ -1296,21 +1238,13 @@ export const CoursePageConvert = () => {
                 />
               );
             } else if (selectedVideoContent) {
-              // <TestQuickConvert
-              //   isSidebarOpen={isSidebarOpen}
-              //   handleToggleSidebar={handleToggleSidebar}
-              //   content={selectedTestContent}
-              //   progressCheck={progressData}
-              //   courseData={validCourseData! || []}
-              // />
-
               return (
                 <LessonVideoRight
                   isSidebarOpen={isSidebarOpen}
                   handleToggleSidebar={handleToggleSidebar}
                   content={selectedVideoContent}
-                  progressData={progressData}
                   coursesData={courseData}
+                  progressData={progressData}
                 />
               );
             } else if (selectedTestChapterContent) {
@@ -1319,7 +1253,7 @@ export const CoursePageConvert = () => {
                   isSidebarOpen={isSidebarOpen}
                   handleToggleSidebar={handleToggleSidebar}
                   content={selectedTestChapterContent}
-                  progressCheck={progressData}
+                  progressCheck={progressData as any}
                 />
               );
             }

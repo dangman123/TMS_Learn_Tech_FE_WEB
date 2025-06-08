@@ -60,7 +60,13 @@ interface AuthData {
   email: string;
   roleId: number;
 }
-
+interface WalletInfo {
+  fullname: string;
+  accountId: number;
+  balance: number;
+  code: string;
+  walletId: number;
+}
 function Cart() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -70,6 +76,7 @@ function Cart() {
   const [discount, setDiscount] = useState(0);
   const [userId, setUserId] = useState<number | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [walletInfo, setWalletInfo] = useState<WalletInfo | null>(null);
   const [selectAll, setSelectAll] = useState(false);
   const navigate = useNavigate();
 
@@ -79,6 +86,7 @@ function Cart() {
       setUserId(userData.id);
     }
     fetchCart();
+    handleWalletPayment();
   }, []);
 
   useEffect(() => {
@@ -92,15 +100,15 @@ function Cart() {
   // Check for combo recommendations when cart or selected items change
   useEffect(() => {
     const selectedCourseItems = cart.filter(
-      item => item.type === "COURSE" && 
-      selectedItems.includes(item.cartItemId) && 
-      item.courseId !== null
+      item => item.type === "COURSE" &&
+        selectedItems.includes(item.cartItemId) &&
+        item.courseId !== null
     );
-    
+
     if (selectedCourseItems.length > 0) {
       fetchComboRecommendations(selectedCourseItems);
-      
-     
+
+
     }
   }, [selectedItems, cart]);
 
@@ -113,7 +121,7 @@ function Cart() {
   const getUserData = (): AuthData | null => {
     const authData = localStorage.getItem("authData");
     if (!authData) return null;
-    
+
     try {
       return JSON.parse(authData) as AuthData;
     } catch (error) {
@@ -122,10 +130,33 @@ function Cart() {
     }
   };
 
+  const handleWalletPayment = () => {
+    const token = localStorage.getItem("authToken");
+    const userData = getUserData();
+    const paymentEndpoint = `${process.env.REACT_APP_SERVER_HOST}/api/wallet/info-simple/${userData?.id}`;
+
+    fetch(paymentEndpoint, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setWalletInfo(data.data);
+        console.log(data);
+        sessionStorage.setItem("walletId", data.data.walletId)
+      })
+      .catch((error) => {
+        console.error("Lỗi thanh toán:", error);
+      });
+  }
+
   const getToken = (): string | null => {
     const token = localStorage.getItem("authToken");
     if (!token) return null;
-    
+
     return token;
   };
 
@@ -134,7 +165,7 @@ function Cart() {
       setLoading(true);
       const userData = getUserData();
       const token = getToken();
-      
+
       if (!userData || !token) {
         setError("Bạn cần đăng nhập để xem giỏ hàng");
         setLoading(false);
@@ -152,7 +183,7 @@ function Cart() {
       }
 
       const responseData = await response.json();
-      
+
       if (responseData.status === 200 && responseData.data) {
         setCart(responseData.data);
         setSelectedItems([]);
@@ -172,7 +203,7 @@ function Cart() {
   const handleRemoveItem = async (cartItemId: number) => {
     try {
       const token = getToken();
-      
+
       if (!token) {
         toast.error("Bạn cần đăng nhập để xóa sản phẩm");
         return;
@@ -190,10 +221,10 @@ function Cart() {
       }
 
       toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
-      
+
       // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
       window.dispatchEvent(new Event('cart-updated'));
-      
+
       // Cập nhật lại giỏ hàng
       fetchCart();
     } catch (err) {
@@ -210,7 +241,7 @@ function Cart() {
 
     try {
       const token = getToken();
-      
+
       if (!token) {
         toast.error("Bạn cần đăng nhập để xóa sản phẩm");
         return;
@@ -218,7 +249,7 @@ function Cart() {
 
       // Sử dụng Promise.all để xóa song song nhiều sản phẩm
       await Promise.all(
-        selectedItems.map(cartItemId => 
+        selectedItems.map(cartItemId =>
           fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${cartItemId}/remove`, {
             method: 'DELETE',
             headers: {
@@ -229,10 +260,10 @@ function Cart() {
       );
 
       toast.success(`Đã xóa ${selectedItems.length} sản phẩm khỏi giỏ hàng`);
-      
+
       // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
       window.dispatchEvent(new Event('cart-updated'));
-      
+
       fetchCart();
     } catch (err) {
       toast.error("Có lỗi xảy ra khi xóa các sản phẩm đã chọn");
@@ -286,7 +317,7 @@ function Cart() {
       }
 
       const token = getToken();
-      
+
       if (!token) {
         toast.error("Bạn cần đăng nhập để áp dụng mã giảm giá");
         return;
@@ -308,19 +339,19 @@ function Cart() {
       }
 
       const responseData = await response.json();
-      
+
       if (responseData.status === 200) {
         const discountPercent = responseData.data.discountPercent || 0;
         setDiscount(discountPercent);
-        
+
         // Recalculate with new discount
         const selectedCarts = cart.filter(item => selectedItems.includes(item.cartItemId));
         const subtotal = selectedCarts.reduce((acc, item) => acc + item.price, 0);
         const discountedTotal = subtotal * (1 - discountPercent / 100);
-      setTotalPrice(discountedTotal);
-        
+        setTotalPrice(discountedTotal);
+
         toast.success(`Áp dụng mã giảm giá thành công: Giảm ${discountPercent}%`);
-    } else {
+      } else {
         toast.error(responseData.message || "Mã giảm giá không hợp lệ");
       }
     } catch (err) {
@@ -333,7 +364,7 @@ function Cart() {
   const addComboToCart = async (comboId: number, comboPrice: number) => {
     try {
       const token = getToken();
-      
+
       if (!token) {
         toast.error("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng");
         return;
@@ -348,7 +379,7 @@ function Cart() {
         courseBundleId: comboId,
         cartItemId: ""
       };
-      
+
       // Gọi API để thêm combo vào giỏ hàng
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_HOST}/api/cart/${userId}/add-item`,
@@ -361,15 +392,15 @@ function Cart() {
           body: JSON.stringify(cartData)
         }
       );
-      
+
       const responseData = await response.json();
-      
+
       if (responseData.status === 200) {
         toast.success("Đã thêm combo vào giỏ hàng");
-        
+
         // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
         window.dispatchEvent(new Event('cart-updated'));
-        
+
         // Cập nhật lại giỏ hàng
         fetchCart();
       } else if (responseData.status === 409) {
@@ -385,13 +416,21 @@ function Cart() {
 
   const handleCheckout = async () => {
     try {
+      if (walletInfo?.walletId) {
+
+        sessionStorage.setItem("walletId", walletInfo.walletId.toString());
+      } else {
+        sessionStorage.setItem("walletId", "0");
+      }
+
+
       if (selectedItems.length === 0) {
         toast.warning("Vui lòng chọn sản phẩm để thanh toán");
         return;
       }
 
       const token = getToken();
-      
+
       if (!token) {
         toast.error("Bạn cần đăng nhập để thanh toán");
         return;
@@ -399,22 +438,22 @@ function Cart() {
 
       // Get the selected cart items
       const selectedCartItems = cart.filter(item => selectedItems.includes(item.cartItemId));
-      
+
       // Save to sessionStorage
       const checkoutData = {
         items: selectedCartItems,
         totalAmount: totalPrice,
         discount: discount
       };
-      
+
       sessionStorage.setItem("cartcheckout", JSON.stringify(checkoutData));
 
-      navigate("/thanh-toan", { 
-        state: { 
+      navigate("/thanh-toan", {
+        state: {
           selectedItems,
           totalAmount: totalPrice,
-          discount 
-        } 
+          discount
+        }
       });
     } catch (err) {
       toast.error("Có lỗi xảy ra khi chuyển đến trang thanh toán");
@@ -436,18 +475,18 @@ function Cart() {
     try {
       const token = getToken();
       if (!token) return;
-      
+
       // We'll call the API for each course item to get its bundle recommendations
       const promises = courseItems.map(async (item) => {
         if (!item.courseId) return null;
-        
+
         const courseId = item.courseId;
         console.log(`Fetching combo recommendations for course ID: ${courseId}`);
-        
+
         // Use the correct API endpoint as provided
         const apiUrl = `${process.env.REACT_APP_SERVER_HOST}/api/cart/course/${courseId}/bundles`;
         console.log("Calling API:", apiUrl);
-        
+
         try {
           const response = await fetch(apiUrl, {
             method: 'GET',
@@ -455,15 +494,15 @@ function Cart() {
               'Authorization': `Bearer ${token}`
             }
           });
-          
+
           if (!response.ok) {
             console.error(`Error fetching recommendations for course ${courseId}:`, response.status);
             return null;
           }
-          
+
           const data = await response.json();
           console.log(`Recommendations for course ${courseId}:`, data);
-          
+
           if (data.status === 200 && data.data && data.data.length > 0) {
             // Map the API response to match our ComboRecommendation interface
             const combos = data.data.map((bundle: CourseBundleResponse) => ({
@@ -476,7 +515,7 @@ function Cart() {
               courses: bundle.courses,
               courseIds: bundle.courses ? bundle.courses.map((c: BundleCourse) => c.id) : []
             }));
-            
+
             return { courseId, combos };
           }
           return null;
@@ -485,24 +524,24 @@ function Cart() {
           return null;
         }
       });
-      
+
       const results = await Promise.all(promises);
       const validResults = results.filter(result => result !== null);
-      
+
       if (validResults.length === 0) {
         console.log("No combo recommendations found for any courses");
         return;
       }
-      
+
       // Update cart items with combo recommendations
       const updatedCart = [...cart];
       validResults.forEach(result => {
         if (!result) return;
-        
+
         const cartItemIndex = updatedCart.findIndex(
           cartItem => cartItem.courseId === result.courseId
         );
-        
+
         if (cartItemIndex !== -1) {
           updatedCart[cartItemIndex] = {
             ...updatedCart[cartItemIndex],
@@ -511,7 +550,7 @@ function Cart() {
           console.log("Updated cart item with combos:", updatedCart[cartItemIndex]);
         }
       });
-      
+
       setCart(updatedCart);
     } catch (error) {
       console.error("Error in fetchComboRecommendations:", error);
@@ -557,18 +596,18 @@ function Cart() {
             <>
               <div className="select-all-control">
                 <label className="checkbox-container">
-                  <input 
-                    type="checkbox" 
-                    checked={selectAll} 
-                    onChange={toggleSelectAll} 
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={toggleSelectAll}
                   />
                   <span className="checkmark"></span>
                   <span className="select-all-text">Chọn tất cả</span>
                 </label>
               </div>
               {selectedItems.length > 0 && (
-                <button 
-                  className="btn-delete-selected" 
+                <button
+                  className="btn-delete-selected"
                   onClick={handleRemoveSelectedItems}
                 >
                   <FiTrash2 /> Xóa đã chọn ({selectedItems.length})
@@ -599,55 +638,55 @@ function Cart() {
               {cart.map((item) => (
                 <React.Fragment key={item.cartItemId}>
                   <div className={`cart-item ${selectedItems.includes(item.cartItemId) ? 'selected' : ''}`}>
-                <div className="item-checkbox">
-                  <label className="checkbox-container">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedItems.includes(item.cartItemId)}
-                      onChange={() => toggleSelectItem(item.cartItemId)}
-                    />
-                    <span className="checkmark"></span>
-                  </label>
-                </div>
-                <div className="item-image">
-                  <img src={item.image} alt={item.name} />
-                </div>
-                <div className="item-content">
-                  <div className="item-info">
-                    <h3 className="item-title">{item.name}</h3>
+                    <div className="item-checkbox">
+                      <label className="checkbox-container">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.includes(item.cartItemId)}
+                          onChange={() => toggleSelectItem(item.cartItemId)}
+                        />
+                        <span className="checkmark"></span>
+                      </label>
+                    </div>
+                    <div className="item-image">
+                      <img src={item.image} alt={item.name} />
+                    </div>
+                    <div className="item-content">
+                      <div className="item-info">
+                        <h3 className="item-title">{item.name}</h3>
                         <div className={`item-type-badge ${item.type.toLowerCase()}-badge`}>
-                      {item.type === "COURSE" ? "Khóa học" : item.type === "COMBO" ? "Combo" : "Đề thi"}
-                      </div>
-                    <div className="item-actions">
-                      <button
-                        onClick={() => handleRemoveItem(item.cartItemId)}
-                        className="remove-btn"
-                      >
-                        <FiTrash2 /> Xóa
-                      </button>
-                    </div>
-                  </div>
-                  <div className="item-price">
-                    {item.discount > 0 && (
-                      <div className="item-discount">
-                        <FiTag className="discount-icon" />
-                        <span>-{calculateDiscountPercent(item.cost, item.price)}%</span>
-                      </div>
-                    )}
-                    <div className="price-wrapper">
-                    <div className="current-price">
-                      {formatCurrency(item.price)}
-                    </div>
-                      {item.discount > 0 && (
-                    <div className="original-price">
-                          {formatCurrency(item.cost)}
+                          {item.type === "COURSE" ? "Khóa học" : item.type === "COMBO" ? "Combo" : "Đề thi"}
                         </div>
-                      )}
+                        <div className="item-actions">
+                          <button
+                            onClick={() => handleRemoveItem(item.cartItemId)}
+                            className="remove-btn"
+                          >
+                            <FiTrash2 /> Xóa
+                          </button>
+                        </div>
+                      </div>
+                      <div className="item-price">
+                        {item.discount > 0 && (
+                          <div className="item-discount">
+                            <FiTag className="discount-icon" />
+                            <span>-{calculateDiscountPercent(item.cost, item.price)}%</span>
+                          </div>
+                        )}
+                        <div className="price-wrapper">
+                          <div className="current-price">
+                            {formatCurrency(item.price)}
+                          </div>
+                          {item.discount > 0 && (
+                            <div className="original-price">
+                              {formatCurrency(item.cost)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-                  
+
                   {/* Combo Recommendation Section - Now rendered outside cart-item */}
                   {item.type === "COURSE" && selectedItems.includes(item.cartItemId) && item.combos && item.combos.length > 0 && (
                     <div className="combo-recommendation-wrapper">
@@ -656,22 +695,22 @@ function Cart() {
                           <FiPackage className="combo-icon" />
                           <h4>Tiết kiệm hơn với combo</h4>
                         </div>
-                        
+
                         {item.combos.map(combo => {
                           // Get the current course price
                           const currentItemPrice = item.price;
-                          
+
                           // Calculate the savings
-                          const combinedPrice = combo.courses ? 
-                            combo.courses.reduce((sum, course) => sum + course.price, 0) : 
+                          const combinedPrice = combo.courses ?
+                            combo.courses.reduce((sum, course) => sum + course.price, 0) :
                             combo.courseIds.reduce((sum, id) => {
                               const cartItem = cart.find(item => item.courseId === id);
                               return sum + (cartItem ? cartItem.price : 0);
                             }, 0);
-                          
+
                           const savings = combinedPrice - combo.price;
                           const savingsPercent = combinedPrice > 0 ? Math.round((savings / combinedPrice) * 100) : combo.discount;
-                          
+
                           return (
                             <div key={combo.id} className="combo-recommendation-item">
                               <div className="combo-recommendation-container">
@@ -688,7 +727,7 @@ function Cart() {
                                     <div className="combo-original-price">{formatCurrency(combinedPrice)}</div>
                                   </div>
                                 </div>
-                                
+
                                 <div className="combo-recommendation-right">
                                   <div className="combo-footer">
                                     <div className="combo-savings">
@@ -698,8 +737,8 @@ function Cart() {
                                         <span className="savings-amount">({formatCurrency(savings)})</span>
                                       </div>
                                     </div>
-                                    
-                                    <button 
+
+                                    <button
                                       className="combo-view-btn"
                                       onClick={() => navigate(`/combo/${combo.id}`)}
                                     >
@@ -730,61 +769,61 @@ function Cart() {
               <div className="selection-info">
                 <FiShoppingCart className="cart-icon" />
                 <div className="selected-count">
-                  <span>Đã chọn:</span> 
+                  <span>Đã chọn:</span>
                   <strong>{selectedItems.length}</strong> / {cart.length} sản phẩm
                 </div>
               </div>
             </div>
-            
+
             <div className="summary-row">
               <span>Tổng tiền:</span>
               <span className="summary-amount">
-                {selectedItems.length > 0 
+                {selectedItems.length > 0
                   ? formatCurrency(cart
-                      .filter(item => selectedItems.includes(item.cartItemId))
-                      .reduce((sum, item) => sum + item.price, 0)
-                    )
+                    .filter(item => selectedItems.includes(item.cartItemId))
+                    .reduce((sum, item) => sum + item.price, 0)
+                  )
                   : "0 ₫"}
               </span>
             </div>
-            
+
             <div className="promo-section">
               <h3>Mã giảm giá</h3>
-            <div className="promo-input">
-              <input
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                placeholder="Nhập mã giảm giá"
-              />
+              <div className="promo-input">
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  placeholder="Nhập mã giảm giá"
+                />
                 <button onClick={applyPromoCode} className="promo-apply-btn">Áp dụng</button>
               </div>
             </div>
-            
+
             {discount > 0 && selectedItems.length > 0 && (
               <div className="summary-row discount">
                 <span>Giảm giá:</span>
                 <span>-{discount}%</span>
-          </div>
+              </div>
             )}
 
             <div className="summary-row total">
               <span>Tổng thanh toán:</span>
               <span>{selectedItems.length > 0 ? formatCurrency(totalPrice) : "0 ₫"}</span>
             </div>
-            
-            <button 
-              className={`checkout-btn ${selectedItems.length === 0 ? 'disabled' : ''}`} 
+
+            <button
+              className={`checkout-btn ${selectedItems.length === 0 ? 'disabled' : ''}`}
               onClick={handleCheckout}
               disabled={selectedItems.length === 0}
             >
               Thanh toán ngay
             </button>
-            
+
             {selectedItems.length === 0 && (
               <div className="checkout-note">Vui lòng chọn ít nhất một sản phẩm để thanh toán</div>
             )}
-            
+
             <div className="secure-checkout">
               <small>
                 <FiCheck className="secure-icon" /> Thanh toán an toàn và bảo mật

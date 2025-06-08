@@ -12,6 +12,7 @@ import {
   Collection,
   Key,
   ChevronRight,
+  FileEarmarkText,
 } from "react-bootstrap-icons";
 import DialogFormInformation from "../../util/DialogFormInformation";
 import { showSuccess, showError, showWarning, showInfo } from "../../util/notificationService";
@@ -24,7 +25,7 @@ interface CourseUserProfile {
   enrollment_date: string;
   status: boolean;
   isDeleted: boolean;
-  completed?: boolean;
+  completedDate?: boolean;
 }
 
 const MyCourse = () => {
@@ -41,11 +42,16 @@ const MyCourse = () => {
 
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(6); // Tăng số lượng hiển thị lên 6
+  const [size, setSize] = useState(6); // Tăng số lượng hiển thị lên 6
   const refresh = useRefreshToken();
   const [statusCourse, setStatusCourse] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("all"); // Trạng thái tab hiện tại: all, studying, completed, activate
+  const [activeTab, setActiveTab] = useState("all"); // Trạng thái tab hiện tại: all, studying, completed, activate, exams
+  const [myExams, setMyExams] = useState<any[]>([]);
+  const [totalExams, setTotalExams] = useState(0);
+  const [examsPage, setExamsPage] = useState(0);
+  const [examsTotalPages, setExamsTotalPages] = useState(0);
+  const [examsSize, setExamsSize] = useState(8);
 
   // Course activation states
   const [courseCode, setCourseCode] = useState("");
@@ -55,112 +61,157 @@ const MyCourse = () => {
   const [showForm, setShowForm] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
 
+  const fetchMyExams = async () => {
+    let token = localStorage.getItem("authToken");
+
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        navigate("/dang-nhap");
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/tests/by-account-exam/${userId}?page=${examsPage}&size=${examsSize}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch exams data: ${response.status} ${response.statusText}`
+        );
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data && data.status === 200 && data.data) {
+        setMyExams(data.data.content || []);
+        setTotalExams(data.data.totalElements || 0);
+        setExamsTotalPages(data.data.totalPages || 0);
+      } else {
+        console.error("Invalid exam data format received");
+      }
+    } catch (error) {
+      console.error("Error fetching exams data:", error);
+    }
+  };
+
+  const fetchCourseData = async () => {
+    let token = localStorage.getItem("authToken");
+
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        navigate("/dang-nhap");
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/count/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch course data: ${response.status} ${response.statusText}`
+        );
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data && typeof data === "object") {
+        setTotalCourse(data.totalCourse || 0);
+        setTotalCourseCompleted(data.totalCourseComplete || 0);
+        setTotalCourseStudying(data.totalCourseStudying || 0);
+      } else {
+        console.error("Invalid data format received");
+      }
+    } catch (error) {
+      console.error("Error fetching course data:", error);
+    }
+  };
+
+  const fetchCoursesWithPagination = async () => {
+    let token = localStorage.getItem("authToken");
+
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        navigate("/dang-nhap");
+        return;
+      }
+      localStorage.setItem("authToken", token);
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/courses/account/enrolled/${userId}?page=${currentPage}&size=${size}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch paginated course data: ${response.status} ${response.statusText}`
+        );
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data && typeof data === "object") {
+        // Giả định dữ liệu có thêm trường để đánh dấu khóa học đã hoàn thành
+        const coursesWithStatus = data.content.map(
+          (course: CourseUserProfile) => ({
+            ...course,
+            completed: Math.random() > 0.5, // Đây chỉ là giả lập, cần thay bằng dữ liệu thực
+          })
+        );
+
+        setCourses(coursesWithStatus);
+        setFilteredCourses(coursesWithStatus);
+        setTotalPages(data.totalPages);
+      } else {
+        console.error("Invalid data format received");
+      }
+    } catch (error) {
+      console.error("Error fetching paginated course data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchCourseData = async () => {
-      let token = localStorage.getItem("authToken");
-
-      if (isTokenExpired(token)) {
-        token = await refresh();
-        if (!token) {
-          navigate("/dang-nhap");
-          return;
-        }
-        localStorage.setItem("authToken", token);
-      }
-
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/count/${userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          console.error(
-            `Failed to fetch course data: ${response.status} ${response.statusText}`
-          );
-          return;
-        }
-
-        const data = await response.json();
-
-        if (data && typeof data === "object") {
-          setTotalCourse(data.totalCourse || 0);
-          setTotalCourseCompleted(data.totalCourseComplete || 0);
-          setTotalCourseStudying(data.totalCourseStudying || 0);
-        } else {
-          console.error("Invalid data format received");
-        }
-      } catch (error) {
-        console.error("Error fetching course data:", error);
-      }
-    };
-
-    const fetchCoursesWithPagination = async (page: number) => {
-      let token = localStorage.getItem("authToken");
-
-      if (isTokenExpired(token)) {
-        token = await refresh();
-        if (!token) {
-          navigate("/dang-nhap");
-          return;
-        }
-        localStorage.setItem("authToken", token);
-      }
-
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_SERVER_HOST}/api/courses/account/enrolled/${userId}?page=${page}&size=${size}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          console.error(
-            `Failed to fetch paginated course data: ${response.status} ${response.statusText}`
-          );
-          return;
-        }
-
-        const data = await response.json();
-
-        if (data && typeof data === "object") {
-          // Giả định dữ liệu có thêm trường để đánh dấu khóa học đã hoàn thành
-          const coursesWithStatus = data.content.map(
-            (course: CourseUserProfile) => ({
-              ...course,
-              completed: Math.random() > 0.5, // Đây chỉ là giả lập, cần thay bằng dữ liệu thực
-            })
-          );
-
-          setCourses(coursesWithStatus);
-          setFilteredCourses(coursesWithStatus);
-          setTotalPages(data.totalPages);
-        } else {
-          console.error("Invalid data format received");
-        }
-      } catch (error) {
-        console.error("Error fetching paginated course data:", error);
-      }
-    };
-
     if (userId) {
       fetchCourseData();
-      fetchCoursesWithPagination(currentPage);
+      fetchCoursesWithPagination();
     } else {
       console.error("No user ID found in localStorage");
     }
-  }, [userId, currentPage]);
+  }, [userId, currentPage, size]);
 
   // Xử lý khi tab thay đổi
   useEffect(() => {
@@ -168,14 +219,41 @@ const MyCourse = () => {
       setFilteredCourses(courses);
     } else if (activeTab === "studying") {
       setFilteredCourses(
-        courses.filter((course) => !course.completed && !course.isDeleted)
+        courses.filter((course) => !course.completedDate && !course.isDeleted)
       );
     } else if (activeTab === "completed") {
-      setFilteredCourses(courses.filter((course) => course.completed));
+      setFilteredCourses(courses.filter((course) => course.completedDate));
     } else if (activeTab === "activate") {
       setFilteredCourses(courses.filter((course) => course.isDeleted));
+    } else if (activeTab === "exams") {
+      fetchMyExams();
     }
   }, [activeTab, courses]);
+
+  // Handle exams pagination
+  useEffect(() => {
+    if (activeTab === "exams") {
+      fetchMyExams();
+    }
+  }, [examsPage, examsSize, activeTab]);
+
+  // Handle courses pagination
+  useEffect(() => {
+    if (activeTab !== "exams" && userId) {
+      fetchCoursesWithPagination();
+    }
+  }, [currentPage, size, activeTab, userId]);
+
+  const handleExamsPageChange = (page: number) => {
+    if (page >= 0 && page < examsTotalPages) {
+      setExamsPage(page);
+    }
+  };
+
+  const handleExamsSizeChange = (newSize: number) => {
+    setExamsSize(newSize);
+    setExamsPage(0); // Reset to first page when changing size
+  };
 
   const handleGoToCoursePlayer = async (course: CourseUserProfile) => {
     if (course.isDeleted) {
@@ -196,10 +274,11 @@ const MyCourse = () => {
         localStorage.setItem("authToken", token);
       }
 
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/status?accountId=${userId}&courseId=${course.id}`,
+      // Directly call the progress/add API to create or update progress
+      const responseProgress = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/progress/add?accountId=${userId}&courseId=${course.id}`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -207,56 +286,24 @@ const MyCourse = () => {
         }
       );
 
-      if (response.ok) {
-        const status = await response.text();
+      if (responseProgress.ok) {
+        const progressData = await responseProgress.json();
 
-        if (status === "Actived") {
-          const responseCourse = await fetch(
-            `${process.env.REACT_APP_SERVER_HOST}/api/courses/${course.id}/first-chapter-lesson`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          if (responseCourse.ok) {
-            const courseData = await responseCourse.json();
-            const { chapterId, lessonId } = courseData;
-            const responseProgress = await fetch(
-              `${process.env.REACT_APP_SERVER_HOST}/api/progress/add?accountId=${userId}&courseId=${course.id}&chapterId=${chapterId}&lessonId=${lessonId}`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            if (responseProgress.ok) {
-              const encryptedCourseId = encryptData(course.id);
-              const encryptedChapterId = encryptData(chapterId);
-              const encryptedLessonId = encryptData(lessonId);
+        // Extract the necessary data from the response
+        const { courseId, chapterId, lessonId } = progressData.data;
 
-              localStorage.setItem("encryptedCourseId", encryptedCourseId);
-              localStorage.setItem("encryptedChapterId", encryptedChapterId);
-              localStorage.setItem("encryptedLessonId", encryptedLessonId);
+        // Encrypt and store the necessary IDs
+        const encryptedCourseId = encryptData(courseId);
+        const encryptedChapterId = encryptData(chapterId);
+        const encryptedLessonId = encryptData(lessonId);
 
-              window.location.href = `/khoa-hoc-thu/vao-hoc`;
-            } else {
-              toast.error("Không thể thêm tiến trình học.");
-            }
-          } else {
-            toast.error("Không thể lấy chương và bài học đầu tiên.");
-          }
-        } else {
-          const encryptedCourseId = encryptData(course.id);
-          localStorage.setItem("encryptedCourseId", encryptedCourseId);
-          window.location.href = `/khoa-hoc-thu/vao-hoc`;
-        }
+        localStorage.setItem("encryptedCourseId", encryptedCourseId);
+        localStorage.setItem("encryptedChapterId", encryptedChapterId);
+        localStorage.setItem("encryptedLessonId", encryptedLessonId);
+
+        window.location.href = `/khoa-hoc-thu/vao-hoc`;
       } else {
-        toast.error("Không thể lấy thông tin khóa học.");
+        toast.error("Không thể tạo tiến trình học. Vui lòng thử lại sau.");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
@@ -280,6 +327,8 @@ const MyCourse = () => {
         return <CheckCircle className="tab-icon" />;
       case "activate":
         return <Key className="tab-icon" />;
+      case "exams":
+        return <FileEarmarkText className="tab-icon" />;
       default:
         return <Collection className="tab-icon" />;
     }
@@ -349,20 +398,18 @@ const MyCourse = () => {
 
   const activateCourse = async () => {
     const auth = getAuthData();
-    setIsLoading(true); // Set loading to true when API call starts
-    setErrorMessage(""); // Reset any previous error messages
+    setIsLoading(true);
+    setErrorMessage("");
     const token = await authTokenLogin(refreshToken, refresh, navigate);
     try {
-      // Make API call to the backend to validate the course code
       const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/course-codes/enable-not-huit`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ code: courseCode, accountId: auth.id }), // Send the code in the request body
+        body: JSON.stringify({ code: courseCode, accountId: auth.id }),
       });
-
       const result = await response.json();
       if (response.ok && result.status === 200) {
         showSuccess("Kích hoạt khóa học thành công.");
@@ -376,7 +423,7 @@ const MyCourse = () => {
       showError("Có lỗi xảy ra khi kích hoạt khóa học. Vui lòng thử lại.");
       setErrorMessage("Có lỗi xảy ra khi kích hoạt khóa học. Vui lòng thử lại.");
     } finally {
-      setIsLoading(false); // Set loading to false after API call finishes
+      setIsLoading(false);
     }
   };
 
@@ -477,6 +524,13 @@ const MyCourse = () => {
             <Key size={18} />
             <span>Kích hoạt khóa học</span>
           </div>
+          <div
+            className={`tab ${activeTab === "exams" ? "active" : ""}`}
+            onClick={() => setActiveTab("exams")}
+          >
+            <FileEarmarkText size={18} />
+            <span>Đề thi của tôi</span>
+          </div>
         </div>
 
         {/* Tab content */}
@@ -488,21 +542,187 @@ const MyCourse = () => {
               {activeTab === "studying" && "Khóa học đang học"}
               {activeTab === "completed" && "Khóa học đã hoàn thành"}
               {activeTab === "activate" && "Kích hoạt khóa học mới"}
+              {activeTab === "exams" && "Đề thi của tôi"}
             </h2>
             <div className="tab-description">
-              {activeTab === "all" &&
-                `Hiển thị tất cả ${filteredCourses.length} khóa học của bạn`}
-              {activeTab === "studying" &&
-                `Bạn đang học ${filteredCourses.length} khóa học`}
-              {activeTab === "completed" &&
-                `Bạn đã hoàn thành ${filteredCourses.length} khóa học`}
+              {(activeTab === "all" || activeTab === "studying" || activeTab === "completed") && (
+                <div className="exams-tab-controls">
+                  <span>
+                    {activeTab === "all" && `Hiển thị tất cả ${filteredCourses.length} khóa học của bạn`}
+                    {activeTab === "studying" && `Bạn đang học ${filteredCourses.length} khóa học`}
+                    {activeTab === "completed" && `Bạn đã hoàn thành ${filteredCourses.length} khóa học`}
+                  </span>
+                  <div className="exams-size-selector">
+                    <label>Hiển thị:</label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={size}
+                      onChange={(e) => {
+                        setSize(Number(e.target.value));
+                        setCurrentPage(0); // Reset to first page when changing size
+                      }}
+                    >
+                      <option value={3}>3 khóa học / trang</option>
+                      <option value={6}>6 khóa học / trang</option>
+                      <option value={9}>9 khóa học / trang</option>
+                      <option value={12}>12 khóa học / trang</option>
+                    </select>
+                  </div>
+                </div>
+              )}
               {activeTab === "activate" &&
                 "Kích hoạt các khóa học mới bằng mã kích hoạt"}
+              {activeTab === "exams" && (
+                <div className="exams-tab-controls">
+                  <span>Hiển thị tất cả {totalExams} đề thi của bạn</span>
+                  <div className="exams-size-selector">
+                    <label>Hiển thị:</label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={examsSize}
+                      onChange={(e) => handleExamsSizeChange(Number(e.target.value))}
+                    >
+                      <option value={4}>4 đề thi / trang</option>
+                      <option value={8}>8 đề thi / trang</option>
+                      <option value={12}>12 đề thi / trang</option>
+                      <option value={16}>16 đề thi / trang</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {activeTab === "activate" ? (
             activateCoursePlaceholder()
+          ) : activeTab === "exams" ? (
+            <div className="exams-container">
+              {myExams.length === 0 ? (
+                <div className="empty-course-state">
+                  <div className="empty-course-content">
+                    <div className="empty-icon">
+                      <FileEarmarkText size={48} />
+                    </div>
+                    <h3>Không có đề thi nào</h3>
+                    <p>Bạn chưa được phân công đề thi nào</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="exams-grid">
+                    {myExams.map((exam) => (
+                      <div className="exam-card" key={exam.testId}>
+                        <div className="exam-thumbnail">
+                          <img src={exam.imageUrl} alt={exam.testTitle} />
+                          <div className="exam-date">
+                            {new Date(exam.testCreatedAt).toLocaleDateString("vi-VN")}
+                          </div>
+                        </div>
+                        <div className="exam-details">
+                          <h3 className="exam-title">{exam.testTitle}</h3>
+                          <div className="exam-description" dangerouslySetInnerHTML={{ __html: exam.testDescription }}></div>
+                          <div className="exam-actions">
+                            <button
+                              className="btn btn-primary take-exam-button"
+                              onClick={() => {
+                                // Navigate to exam page
+                                navigate(`/test/${exam.testId}`);
+                              }}
+                            >
+                              Làm bài thi <ChevronRight size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination for exams */}
+                  {examsTotalPages > 1 && (
+                    <div className="pagination-container">
+                      <button
+                        className={`pagination-button ${examsPage === 0 ? "disabled" : ""}`}
+                        onClick={() => handleExamsPageChange(examsPage - 1)}
+                        disabled={examsPage === 0}
+                      >
+                        <span className="pagination-arrow">←</span>
+                      </button>
+
+                      <div className="pagination-numbers">
+                        {examsTotalPages <= 7 ? (
+                          // Hiển thị tất cả trang khi có ít trang
+                          [...Array(examsTotalPages)].map((_, index) => (
+                            <button
+                              key={index}
+                              className={`pagination-number ${index === examsPage ? "active" : ""}`}
+                              onClick={() => handleExamsPageChange(index)}
+                            >
+                              {index + 1}
+                            </button>
+                          ))
+                        ) : (
+                          // Logic phân trang cho nhiều trang
+                          <>
+                            {/* Luôn hiển thị trang đầu tiên */}
+                            <button
+                              className={`pagination-number ${0 === examsPage ? "active" : ""}`}
+                              onClick={() => handleExamsPageChange(0)}
+                            >
+                              1
+                            </button>
+
+                            {/* Hiển thị dấu "..." nếu trang hiện tại > 3 */}
+                            {examsPage > 3 && (
+                              <span className="pagination-ellipsis">...</span>
+                            )}
+
+                            {/* Hiển thị các trang xung quanh trang hiện tại */}
+                            {[...Array(examsTotalPages)].map((_, index) => {
+                              if (
+                                (index > 0 && index < examsTotalPages - 1) && // Không phải trang đầu hoặc cuối
+                                (index >= examsPage - 1 && index <= examsPage + 1) // Trong phạm vi hiển thị
+                              ) {
+                                return (
+                                  <button
+                                    key={index}
+                                    className={`pagination-number ${index === examsPage ? "active" : ""}`}
+                                    onClick={() => handleExamsPageChange(index)}
+                                  >
+                                    {index + 1}
+                                  </button>
+                                );
+                              }
+                              return null;
+                            })}
+
+                            {/* Hiển thị dấu "..." nếu trang hiện tại < examsTotalPages - 4 */}
+                            {examsPage < examsTotalPages - 4 && (
+                              <span className="pagination-ellipsis">...</span>
+                            )}
+
+                            {/* Luôn hiển thị trang cuối cùng */}
+                            <button
+                              className={`pagination-number ${examsTotalPages - 1 === examsPage ? "active" : ""}`}
+                              onClick={() => handleExamsPageChange(examsTotalPages - 1)}
+                            >
+                              {examsTotalPages}
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      <button
+                        className={`pagination-button ${examsPage === examsTotalPages - 1 ? "disabled" : ""}`}
+                        onClick={() => handleExamsPageChange(examsPage + 1)}
+                        disabled={examsPage === examsTotalPages - 1}
+                      >
+                        <span className="pagination-arrow">→</span>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           ) : (
             <>
               {filteredCourses.length === 0 ? (
@@ -535,7 +755,7 @@ const MyCourse = () => {
                       <div className="course-thumbnail">
                         <img src={course.imageUrl} alt={course.title} />
                         <div className="course-duration">{course.duration}</div>
-                        {course.completed && (
+                        {course.completedDate && (
                           <div className="course-completed-badge">
                             <CheckCircle size={16} /> Hoàn thành
                           </div>
@@ -568,7 +788,7 @@ const MyCourse = () => {
                             onClick={() => handleGoToCoursePlayer(course)}
                             disabled={course.isDeleted}
                           >
-                            {course.completed ? "Xem lại" : "Tiếp tục học"}{" "}
+                            {course.completedDate ? "Xem lại" : "Tiếp tục học"}{" "}
                             <ChevronRight size={16} />
                           </button>
                           <a
@@ -588,8 +808,7 @@ const MyCourse = () => {
               {filteredCourses.length > 0 && totalPages > 1 && (
                 <div className="pagination-container">
                   <button
-                    className={`pagination-button ${currentPage === 0 ? "disabled" : ""
-                      }`}
+                    className={`pagination-button ${currentPage === 0 ? "disabled" : ""}`}
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 0}
                   >
@@ -597,21 +816,70 @@ const MyCourse = () => {
                   </button>
 
                   <div className="pagination-numbers">
-                    {[...Array(totalPages)].map((_, index) => (
-                      <button
-                        key={index}
-                        className={`pagination-number ${index === currentPage ? "active" : ""
-                          }`}
-                        onClick={() => handlePageChange(index)}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
+                    {totalPages <= 7 ? (
+                      // Hiển thị tất cả trang khi có ít trang
+                      [...Array(totalPages)].map((_, index) => (
+                        <button
+                          key={index}
+                          className={`pagination-number ${index === currentPage ? "active" : ""}`}
+                          onClick={() => handlePageChange(index)}
+                        >
+                          {index + 1}
+                        </button>
+                      ))
+                    ) : (
+                      // Logic phân trang cho nhiều trang
+                      <>
+                        {/* Luôn hiển thị trang đầu tiên */}
+                        <button
+                          className={`pagination-number ${0 === currentPage ? "active" : ""}`}
+                          onClick={() => handlePageChange(0)}
+                        >
+                          1
+                        </button>
+
+                        {/* Hiển thị dấu "..." nếu trang hiện tại > 3 */}
+                        {currentPage > 3 && (
+                          <span className="pagination-ellipsis">...</span>
+                        )}
+
+                        {/* Hiển thị các trang xung quanh trang hiện tại */}
+                        {[...Array(totalPages)].map((_, index) => {
+                          if (
+                            (index > 0 && index < totalPages - 1) && // Không phải trang đầu hoặc cuối
+                            (index >= currentPage - 1 && index <= currentPage + 1) // Trong phạm vi hiển thị
+                          ) {
+                            return (
+                              <button
+                                key={index}
+                                className={`pagination-number ${index === currentPage ? "active" : ""}`}
+                                onClick={() => handlePageChange(index)}
+                              >
+                                {index + 1}
+                              </button>
+                            );
+                          }
+                          return null;
+                        })}
+
+                        {/* Hiển thị dấu "..." nếu trang hiện tại < totalPages - 4 */}
+                        {currentPage < totalPages - 4 && (
+                          <span className="pagination-ellipsis">...</span>
+                        )}
+
+                        {/* Luôn hiển thị trang cuối cùng */}
+                        <button
+                          className={`pagination-number ${totalPages - 1 === currentPage ? "active" : ""}`}
+                          onClick={() => handlePageChange(totalPages - 1)}
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
                   </div>
 
                   <button
-                    className={`pagination-button ${currentPage === totalPages - 1 ? "disabled" : ""
-                      }`}
+                    className={`pagination-button ${currentPage === totalPages - 1 ? "disabled" : ""}`}
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages - 1}
                   >

@@ -12,7 +12,7 @@
   <!-- Favicon img -->
   <link rel="shortcut icon" href="/favicon.png" />
 
-  <style>
+  <!-- <style>
     .fa8097ff55eabaa5782b {
       display: block;
       width: 350px !important;
@@ -24,13 +24,13 @@
       bottom: 18px !important;
       right: 20px !important;
     }
-  </style>
+  </style> -->
 </head>
 
 <body>
 
   <div id="root">
-    <script
+    <!-- <script
       src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.5/libs/oversea/index.js"></script>
     <script>
       const API_BASE_URL = "https://api.coze.com/v1";
@@ -224,8 +224,158 @@
           conversation_id: generateUUID(),
         },
       });
-    </script>
+    </script> -->
+
+    <!-- Giải đáp câu hỏi -->
+    <!-- 
+    <div id="chatbot1" style="display: none;">
+      <script
+        src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+      <script>
+        function generateSessionID() {
+          return 'user_' + Math.random().toString(36).substr(2, 9);  // Tạo session ID ngẫu nhiên
+        }
+
+        let sessionID = localStorage.getItem('session_id');
+        if (!sessionID) {
+          sessionID = generateSessionID();
+          localStorage.setItem('session_id', sessionID);
+        }
+
+        // Gọi API tạo hội thoại mới khi tải lại trang
+        window.onload = function () {
+          fetch('https://api.coze.com/v1/conversation/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer pat_PehJ2utjqUveb1cxw2KivtwR1jpd0kXzbHWQ5XTGMIyNKfzXWekOJAsE2c45vtWw'
+            },
+            body: JSON.stringify({
+              bot_id: '7511748744019820545',
+              connector_id: '999'
+            })
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Conversation created:', data);
+              // Có thể lưu ID hội thoại để sử dụng sau
+              localStorage.setItem('conversation_id', data.data.id);
+            })
+            .catch(error => console.error('Error creating conversation:', error));
+        };
+
+        // Khởi tạo Coze Web Chat Client với session ID duy nhất
+        new CozeWebSDK.WebChatClient({
+          config: {
+            bot_id: '7511748744019820545',
+          },
+          componentProps: {
+            title: 'Coze',
+          },
+          auth: {
+            type: 'token',
+            token: 'pat_PehJ2utjqUveb1cxw2KivtwR1jpd0kXzbHWQ5XTGMIyNKfzXWekOJAsE2c45vtWw',
+            onRefreshToken: function () {
+              return 'pat_PehJ2utjqUveb1cxw2KivtwR1jpd0kXzbHWQ5XTGMIyNKfzXWekOJAsE2c45vtWw'
+            }
+          },
+          session: {
+            id: sessionID,
+          }
+        });
+      </script>
+    </div> -->
+
+          
+
+    <!-- Chatbot Coder -->
+    <div id="chatbot2" style="display: none;">
+
+
+      <script
+        src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+      <script>
+        function generateSessionID() {
+          return 'user_' + Math.random().toString(36).substr(2, 9);  // Tạo session ID ngẫu nhiên
+        }
+
+        let sessionID = localStorage.getItem('session_id');
+        if (!sessionID) {
+          sessionID = generateSessionID();
+          localStorage.setItem('session_id', sessionID);
+        }
+
+        // Gọi API tạo hội thoại mới khi tải lại trang
+        window.onload = function () {
+          fetch('https://api.coze.com/v1/conversation/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer pat_PehJ2utjqUveb1cxw2KivtwR1jpd0kXzbHWQ5XTGMIyNKfzXWekOJAsE2c45vtWw'
+            },
+            body: JSON.stringify({
+              bot_id: '7511748744019820545',
+              connector_id: '999'
+            })
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Conversation created:', data);
+              // Có thể lưu ID hội thoại để sử dụng sau
+              localStorage.setItem('conversation_id', data.data.id);
+            })
+            .catch(error => console.error('Error creating conversation:', error));
+        };
+
+
+        new CozeWebSDK.WebChatClient({
+          config: {
+            bot_id: '7511766903497523208',
+          },
+          componentProps: {
+            title: 'Coze Coder',
+          },
+          auth: {
+            type: 'token',
+            token: 'pat_b8kP6GO65P4agqlntfQASbQctyjMRwmuSQsX5mS8r6imYj1iJHUW6pYDicTdIvwS',
+            onRefreshToken: function () {
+              return 'pat_b8kP6GO65P4agqlntfQASbQctyjMRwmuSQsX5mS8r6imYj1iJHUW6pYDicTdIvwS'
+            }
+          },
+          session: {
+            id: sessionID,
+          }
+        });
+      </script>
+    </div>
+
   </div>
+  <script>
+    // // Lấy dữ liệu authData từ localStorage
+    // const authData = JSON.parse(localStorage.getItem('authData'));
+
+    // let check = true;
+
+    // if (check) {
+    //   document.getElementById('chatbot1').style.display = 'block';
+    //   document.getElementById('chatbot2').style.display = 'none';
+    // } else {
+    //   document.getElementById('chatbot1').style.display = 'none';
+    //   document.getElementById('chatbot2').style.display = 'block';
+    // }
+
+    // // Kiểm tra roleId và hiển thị chatbot tương ứng
+    // if (authData && authData.roleId) {
+    //   if (authData.roleId === 1) {
+    //     document.getElementById('chatbot1')
+    //   } else if (authData.roleId === 2) {
+
+    //     // document.getElementById('chatbot1').style.display = 'block';
+    //     document.getElementById('chatbot2').style.display = 'block';
+    //   }
+    // }
+  </script>
+
 </body>
 
 <script></script>

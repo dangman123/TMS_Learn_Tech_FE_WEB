@@ -250,4 +250,20 @@
   .columnStt, .columnScore, .columnCorrect, .columnTime, .columnDownload {
     width: auto;
   }
+}
+
+/* Thêm các styles mới cho kết quả Pass/Fail */
+.resultPass {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.resultFail {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.columnResult {
+  width: 100px;
+  text-align: center;
 } 

@@ -6,6 +6,8 @@ import useRefreshToken from "../util/fucntion/useRefreshToken";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { decryptData, encryptData } from "../util/encryption";
+import LoadingSpinner from "./component/LoadingSpinner";
+import ContentLoader from "./component/ContentLoader";
 import { VideoContent } from "./CoursePageConvert";
 interface LessonRightSidebarProps {
   isSidebarOpen: boolean;
@@ -17,7 +19,7 @@ interface LessonRightSidebarProps {
 interface Comment {
   id: number;
   content: string;
-  approved    : boolean;
+  approved: boolean;
   createdAt: string;
   // updatedAt: string;
   // account: {
@@ -53,8 +55,10 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
   const navigate = useNavigate();
   const refresh = useRefreshToken();
   const [video, setVideo] = useState<VideoContent | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchVideoData = async (videoId: string) => {
+    setIsLoading(true);
     let token = localStorage.getItem("authToken");
 
     if (isTokenExpired(token)) {
@@ -87,6 +91,9 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
       setVideo(videoData);
     } catch (error) {
       console.error("Error fetching video data:", error);
+      showToast("Không thể tải video. Vui lòng thử lại sau.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -228,7 +235,7 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
   ) => {
     let targetLesson;
     console.log("NavigateToLesson:", direction, chapterId, lessonId);
-    
+
     if (direction === "next") {
       targetLesson = getNextLesson(chapterId, lessonId, courseData);
     } else if (direction === "previous") {
@@ -239,9 +246,9 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
       showToast("Không có bài học để chuyển.");
       return;
     }
-    
+
     console.log("Target lesson found:", targetLesson);
-    
+
     // Kiểm tra xem targetLesson có video không
     if (!targetLesson.video || !targetLesson.video.video_id) {
       showToast("Không tìm thấy video cho bài học tiếp theo.");
@@ -249,15 +256,15 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
     }
 
     let isUnlocked = true; // Mặc định cho phép chuyển đến bài học trước
-    
+
     if (direction === "next") {
       // Kiểm tra xem đây có phải là bài học đầu tiên của chương đầu tiên
-      const isFirstChapter = courseData.chapters.length > 0 && 
+      const isFirstChapter = courseData.chapters.length > 0 &&
         courseData.chapters[0].chapter_id === chapterId;
-      const isFirstLesson = isFirstChapter && 
-        courseData.chapters[0].lessons.length > 0 && 
+      const isFirstLesson = isFirstChapter &&
+        courseData.chapters[0].lessons.length > 0 &&
         courseData.chapters[0].lessons[0].lesson_id === lessonId;
-        
+
       // Nếu không phải bài đầu tiên, cần kiểm tra trạng thái mở khóa
       if (!isFirstLesson) {
         isUnlocked = isLessonUnlocked(
@@ -266,7 +273,7 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
           progressData
         );
       }
-      
+
       if (!isUnlocked) {
         showToast("Bài học này chưa được mở khóa!");
         return;
@@ -548,50 +555,46 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
 
   // Hàm đánh dấu bài học hiện tại là đã hoàn thành
   const markCurrentLessonCompleted = async () => {
-    // Lấy dữ liệu từ localStorage
-    const storedChapterId = localStorage.getItem("encryptedChapterId");
-    const storedLessonId = localStorage.getItem("encryptedLessonId");
-    const courseId = localStorage.getItem("encryptedCourseId");
+    try {
+      let token = localStorage.getItem("authToken");
 
-    if (!storedChapterId || !storedLessonId || !courseId) {
-      console.error("Thiếu thông tin cần thiết để cập nhật tiến trình");
-      return;
-    }
+      if (isTokenExpired(token)) {
+        token = await refresh();
+        if (!token) {
+          window.location.href = "/dang-nhap";
+          return;
+        }
+        localStorage.setItem("authToken", token);
+      }
 
-    const chapterId = decryptData(storedChapterId);
-    const lessonId = decryptData(storedLessonId);
-    const decryptedCourseId = decryptData(courseId);
-    const user = getUserData();
+      // Lấy thông tin từ localStorage
+      const authData = localStorage.getItem("authData");
+      const accountId = authData ? JSON.parse(authData).id : null;
 
-    if (!user || !user.id) {
-      console.error("Không tìm thấy thông tin người dùng");
-      return;
-    }
+      const storedCourseId = localStorage.getItem("encryptedCourseId");
+      const storedChapterId = localStorage.getItem("encryptedChapterId");
+      const storedLessonId = localStorage.getItem("encryptedLessonId");
 
-    // Chuẩn bị dữ liệu để cập nhật tiến trình
-    const requestData = {
-      accountId: user.id,
-      courseId: decryptedCourseId,
-      chapterId: chapterId,
-      lessonId: lessonId,
-      videoStatus: true,
-      testStatus: true,
-      isChapterTest: false,
-    };
-
-    let token = localStorage.getItem("authToken");
-    if (isTokenExpired(token)) {
-      token = await refresh();
-      if (!token) {
-        window.location.href = "/dang-nhap";
+      if (!accountId || !storedCourseId || !storedChapterId || !storedLessonId) {
+        console.error("Missing required information for updating progress");
         return;
       }
-      localStorage.setItem("authToken", token);
-    }
 
-    try {
+      const courseId = decryptData(storedCourseId);
+      const chapterId = decryptData(storedChapterId);
+      const lessonId = decryptData(storedLessonId);
+
+      // Mark the lesson as completed
+      const requestData = {
+        accountId: accountId,
+        courseId: parseInt(courseId),
+        chapterId: parseInt(chapterId),
+        lessonId: parseInt(lessonId),
+        videoStatus: true,
+      };
+
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/user-answers/submit-progress-no-test`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/progress/update-progress`,
         {
           method: "POST",
           headers: {
@@ -607,7 +610,43 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
       }
 
       console.log("Bài học đã được đánh dấu hoàn thành");
-      showToast("Bài học đã hoàn thành! Bạn có thể tiếp tục bài học tiếp theo.");
+
+      // Get the lesson information to check if it has a test
+      const chapter = coursesData?.chapters.find(
+        (ch: any) => ch.chapter_id === parseInt(chapterId)
+      );
+      const lesson = chapter?.lessons.find(
+        (l: any) => l.lesson_id === parseInt(lessonId)
+      );
+
+      // If the lesson doesn't have a test, call the unlock-next API
+      if (lesson && lesson.lesson_test === null) {
+        try {
+          const unlockResponse = await fetch(
+            `${process.env.REACT_APP_SERVER_HOST}/api/progress/unlock-next?accountId=${accountId}&courseId=${courseId}&chapterId=${chapterId}&lessonId=${lessonId}`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (unlockResponse.ok) {
+            console.log("Successfully unlocked next lesson");
+            showToast("Bài học đã hoàn thành! Bài tiếp theo đã được mở khóa.");
+          } else {
+            console.error("Failed to unlock next lesson");
+            showToast("Bài học đã hoàn thành! Bạn có thể tiếp tục bài học tiếp theo.");
+          }
+        } catch (error) {
+          console.error("Error unlocking next lesson:", error);
+          showToast("Bài học đã hoàn thành! Bạn có thể tiếp tục bài học tiếp theo.");
+        }
+      } else {
+        showToast("Bài học đã hoàn thành! Hãy làm bài kiểm tra để mở khóa bài tiếp theo.");
+      }
     } catch (error) {
       console.error("Lỗi khi cập nhật tiến trình:", error);
     }
@@ -710,28 +749,36 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
         </div>
       </div>
       <div className="inner vaohoc">
-        <div
-          className="plyr__video-embed rbtplayer vaohoc"
-          style={{ height: "80%" }}
+        <ContentLoader
+          isLoading={isLoading}
+          height={500}
+          overlay={false}
+          text="Đang tải video..."
+          spinnerColor="#4CAF50"
         >
-          <video
-            ref={videoRef}
-            controls
-            autoPlay
-            muted
-            style={{ height: "100%" }}
-            className="main-video"
-            poster={"/default-thumbnail.jpg"}
-            onLoadedData={handleLoadedData}
+          <div
+            className="plyr__video-embed rbtplayer vaohoc"
+            style={{ height: "80%" }}
           >
-            {video?.url ? (
-              <source src={video.url} type="video/mp4" />
-            ) : (
-              <p>Video không khả dụng.</p>
-            )}
-            Your browser does not support the video tag.
-          </video>
-        </div>
+            <video
+              ref={videoRef}
+              controls
+              autoPlay
+              muted
+              style={{ height: "100%" }}
+              className="main-video"
+              poster={"/default-thumbnail.jpg"}
+              onLoadedData={handleLoadedData}
+            >
+              {video?.url ? (
+                <source src={video.url} type="video/mp4" />
+              ) : (
+                <p>Video không khả dụng.</p>
+              )}
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </ContentLoader>
         <div className="content vaohoc" style={{ height: "20%" }}>
           <div className="section-title vaohoc">
             {/* <h4 ></h4> */}

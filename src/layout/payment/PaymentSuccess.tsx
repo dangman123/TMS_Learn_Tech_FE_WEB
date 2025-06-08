@@ -37,6 +37,8 @@ interface CourseItem {
 function PaymentSuccess() {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isWalletPayment, setIsWalletPayment] = useState(false);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
 
   useEffect(() => {
     // Animation effect on mount
@@ -45,6 +47,16 @@ function PaymentSuccess() {
       setIsLoading(false);
     }, 800);
 
+    // Check if this was a wallet payment
+    const paymentMethod = localStorage.getItem("paymentMethod") || sessionStorage.getItem("paymentMethod");
+    if (paymentMethod === "WALLET") {
+      setIsWalletPayment(true);
+      const txId = sessionStorage.getItem("transactionId");
+      if (txId) {
+        setTransactionId(txId);
+      }
+    }
+
     // Get payment data from localStorage
     const paymentDataString = localStorage.getItem("totalPayment");
 
@@ -52,7 +64,7 @@ function PaymentSuccess() {
       try {
         const paymentDataParsed = JSON.parse(paymentDataString);
         console.log("Payment data from localStorage:", paymentDataParsed);
-        
+
         // Normalize payment data structure (handle both formats)
         const normalizedPaymentData = {
           id: paymentDataParsed.id,
@@ -62,12 +74,12 @@ function PaymentSuccess() {
           accountId: paymentDataParsed.accountId || paymentDataParsed.account_id,
           paymentDetails: paymentDataParsed.paymentDetails || [],
         };
-        
+
         setPaymentData(normalizedPaymentData);
-        
+
         // Get user ID for conversation handling
         const userId = (normalizedPaymentData.accountId || 0).toString();
-        
+
         // Handle lecturer conversation initialization
         const idTacGiaArrayString = localStorage.getItem("idTacGiaArray");
         if (idTacGiaArrayString) {
@@ -195,11 +207,11 @@ function PaymentSuccess() {
   }
 
   // Calculate total payment amount
-  const totalAmount = paymentData.totalPayment || 
-    (paymentData.paymentDetails && 
-     paymentData.paymentDetails.reduce((total, item) => total + (item.price || 0), 0)) || 
+  const totalAmount = paymentData.totalPayment ||
+    (paymentData.paymentDetails &&
+      paymentData.paymentDetails.reduce((total, item) => total + (item.price || 0), 0)) ||
     0;
-  
+
   const formattedTotalPayment = new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
@@ -218,7 +230,7 @@ function PaymentSuccess() {
           const currentYear = new Date().getFullYear();
           const correctedDate = new Date(date);
           correctedDate.setFullYear(currentYear);
-          
+
           return correctedDate.toLocaleDateString("vi-VN", {
             year: "numeric",
             month: "long",
@@ -231,7 +243,7 @@ function PaymentSuccess() {
     } catch (error) {
       console.error("Error formatting date:", error);
     }
-    
+
     // Fallback to current date if above fails
     return new Date().toLocaleDateString("vi-VN", {
       year: "numeric",
@@ -254,41 +266,50 @@ function PaymentSuccess() {
             </div>
             <h2>Thanh toán thành công!</h2>
             <p className="subtitle">
-              Cảm ơn bạn đã hoàn tất giao dịch. Khóa học đã sẵn sàng!
+              {isWalletPayment
+                ? "Giao dịch từ ví cá nhân của bạn đã được xử lý thành công."
+                : "Cảm ơn bạn đã hoàn tất giao dịch. Khóa học đã sẵn sàng!"}
             </p>
           </div>
 
           <div className="compact-order-details">
             <div className="compact-detail-item">
               <span className="label">Mã đơn hàng:</span>
-              <span className="value">{paymentData.id}</span>
+              <span className="value">{isWalletPayment && transactionId ? transactionId : paymentData?.id}</span>
             </div>
 
             <div className="compact-detail-item">
               <span className="label">Phương thức:</span>
               <span className="value payment-method">
-                {paymentData.paymentMethod === "VNPAY" && (
+                {paymentData?.paymentMethod === "VNPAY" && (
                   <img
                     src="../../assets/images/logo/VNPAY_Logo.jpg"
                     alt="VNPAY"
                     className="payment-icon"
                   />
                 )}
-                {paymentData.paymentMethod === "MOMO" && (
+                {paymentData?.paymentMethod === "MOMO" && (
                   <img
                     src="../../assets/images/logo/logo-momo.jpg"
                     alt="MoMo"
                     className="payment-icon"
                   />
                 )}
-                {paymentData.paymentMethod === "Zalo Pay" && (
+                {paymentData?.paymentMethod === "Zalo Pay" && (
                   <img
-                    src="../../assets/images/logo/zalopay.jpg" 
+                    src="../../assets/images/logo/zalopay.jpg"
                     alt="ZaloPay"
                     className="payment-icon"
                   />
                 )}
-                {paymentData.paymentMethod}
+                {paymentData?.paymentMethod === "WALLET" && (
+                  <img
+                    src="../../assets/images/logo/wallet.jpg"
+                    alt="Wallet"
+                    className="payment-icon"
+                  />
+                )}
+                {paymentData?.paymentMethod}
               </span>
             </div>
 

@@ -52,6 +52,7 @@ interface AuthData {
 
 function ConfirmPurchase() {
   const [userInfo, setUserInfo] = useState<UserProfile | null>(null);
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [originalPrice, setOriginalPrice] = useState(0);
@@ -63,12 +64,13 @@ function ConfirmPurchase() {
   useEffect(() => {
     fetchUserInfo();
     fetchCart();
+
   }, []);
 
   const getUserData = (): AuthData | null => {
     const authData = localStorage.getItem("authData");
     if (!authData) return null;
-    
+
     try {
       return JSON.parse(authData) as AuthData;
     } catch (error) {
@@ -105,7 +107,7 @@ function ConfirmPurchase() {
         }
 
         const responseData: UserApiResponse = await response.json();
-        
+
         if (responseData.status === 200 && responseData.data) {
           setUserInfo(responseData.data);
         } else {
@@ -121,41 +123,41 @@ function ConfirmPurchase() {
   const fetchCart = async () => {
     try {
       setIsLoading(true);
-      
+
       // Try to get cart data from sessionStorage first
       const cartCheckoutData = sessionStorage.getItem("cartcheckout");
-      
+
       if (cartCheckoutData) {
         const checkoutData = JSON.parse(cartCheckoutData);
-        
+
         // Use the cart items directly from sessionStorage
         if (checkoutData.items && checkoutData.items.length > 0) {
           setCart(checkoutData.items);
-          
+
           // Calculate prices from the stored data
-          const total = checkoutData.totalAmount || 
+          const total = checkoutData.totalAmount ||
             checkoutData.items.reduce((acc: number, item: CartItem) => acc + item.price, 0);
-          
+
           const originalTotal = checkoutData.items.reduce(
             (acc: number, item: CartItem) => acc + item.cost,
             0
           );
-          
+
           const discount = originalTotal - total;
-          
+
           setTotalPrice(total);
           setOriginalPrice(originalTotal);
           setDiscountAmount(discount);
-          
+
           setIsLoading(false);
           return;
         }
       }
-      
+
       // Fall back to API if no data in sessionStorage
       const userData = getUserData();
       const token = getToken();
-      
+
       if (!userData || !token) {
         setError("Bạn cần đăng nhập để xem giỏ hàng");
         setIsLoading(false);
@@ -173,24 +175,24 @@ function ConfirmPurchase() {
       }
 
       const responseData: CartApiResponse = await response.json();
-      
+
       if (responseData.status === 200 && responseData.data) {
         // Use the cart items directly as they match our interface
         setCart(responseData.data);
-        
+
         // Calculate prices
         const total = responseData.data.reduce(
           (acc, item) => acc + item.price,
           0
         );
-        
+
         const originalTotal = responseData.data.reduce(
           (acc, item) => acc + item.cost,
           0
         );
-        
+
         const discount = originalTotal - total;
-        
+
         setTotalPrice(total);
         setOriginalPrice(originalTotal);
         setDiscountAmount(discount);
@@ -205,7 +207,18 @@ function ConfirmPurchase() {
     }
   };
 
-  const handlePayment = (method: string) => {
+  const handlePayment = async (method: string) => {
+    if (method === "VNPAY") {
+      showNotification("Thanh toán qua VNPay đang phát triển, vui lòng chọn phương thức thanh toán khác.", "error");
+      return;
+    } else if (method === "MOMO") {
+      showNotification("Thanh toán qua MoMo đang phát triển, vui lòng chọn phương thức thanh toán khác.", "error");
+      return;
+    }
+    // else if (method === "WALLET") {
+    //   showNotification("Thanh toán qua Ví cá nhân đang phát triển, vui lòng chọn phương thức thanh toán khác.", "error");
+    //   return;
+    // }
     setSelectedPayment(method);
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -240,11 +253,11 @@ function ConfirmPurchase() {
       bankCode: "",
       items: items,
       embedData: {
-        redirecturl: " http://localhost:3000/thanh-toan/logic"// Redirect back to current origin
+        redirecturl: " http://localhost:3001/thanh-toan/logic"// Redirect back to current origin
       },
-      callback_url:"http://103.166.143.198:8080/api/payment/zalo-callback"  
-
+      callback_url: "http://103.166.143.198:8080/api/payment/zalo-callback"
     };
+    sessionStorage.setItem("totalPrice", totalPrice.toString());
 
     // Set preferred payment method based on selected method
     if (method === "ZALOPAY") {
@@ -259,7 +272,7 @@ function ConfirmPurchase() {
     } else if (method === "VNPAY") {
       // Use existing VNPAY endpoint with GET request
       const paymentEndpoint = `${process.env.REACT_APP_SERVER_HOST}/api/payment/vnpay/vn-pay?amount=${totalPrice}&bankCode=NCB`;
-      
+
       fetch(paymentEndpoint, {
         method: "GET",
         headers: {
@@ -283,12 +296,12 @@ function ConfirmPurchase() {
             "error"
           );
         });
-      
+
       return;
     } else if (method === "MOMO") {
       // Use existing MOMO endpoint with GET request      
       const paymentEndpoint = `${process.env.REACT_APP_SERVER_HOST}/api/payment/momo/create?amount=${totalPrice}`;
-      
+
       fetch(paymentEndpoint, {
         method: "GET",
         headers: {
@@ -312,10 +325,48 @@ function ConfirmPurchase() {
             "error"
           );
         });
-      
+
+      return;
+    } else if (method === "WALLET") {
+      try {
+        let walletId = sessionStorage.getItem("walletId");
+        const paymentEndpoint = `${process.env.REACT_APP_SERVER_HOST}/api/payments/v2/init-wallet?walletId=${walletId}`;
+
+        const response = await fetch(paymentEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          setIsLoading(false);
+          showNotification("Có lỗi xảy ra trong quá trình thanh toán", "error");
+          return;
+        }
+
+        const responseData = await response.json();
+        setIsLoading(false);
+
+        if (responseData.status === 200) {
+          // showNotification(responseData.message || "Thanh toán thành công", "success");
+          const transactionId = responseData.data?.transactionId;
+          if (transactionId) {
+            sessionStorage.setItem("transactionId", transactionId);
+          }
+          window.location.href = "/thanh-toan/logic";
+        } else {
+          showNotification(responseData.message || "Có lỗi xảy ra trong quá trình thanh toán", "error");
+        }
+      } catch (error) {
+        setIsLoading(false);
+        console.error("Lỗi thanh toán:", error);
+        showNotification("Đã xảy ra lỗi kết nối, vui lòng thử lại sau", "error");
+      }
       return;
     }
-
     // For ZaloPay payment methods, use the new API
     fetch(`${process.env.REACT_APP_SERVER_HOST}/api/payment/create-order-web`, {
       method: "POST",
@@ -351,6 +402,7 @@ function ConfirmPurchase() {
     // This would be implemented with a toast library like react-toastify
     alert(message);
   };
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -401,9 +453,9 @@ function ConfirmPurchase() {
                       {cart.map((item) => (
                         <div className={styles.courseItem + " d-flex"} key={item.cartItemId}>
                           <div className={styles.courseImage}>
-                            <img 
-                              src={item.image} 
-                              alt={item.name} 
+                            <img
+                              src={item.image}
+                              alt={item.name}
                               className="img-fluid"
                             />
                           </div>
@@ -411,8 +463,8 @@ function ConfirmPurchase() {
                             <h5 className="mb-1">{item.name}</h5>
                             <div className="d-flex align-items-center mb-1">
                               <span className={`${styles.typeBadge} ${item.type.toLowerCase() === "course" ? styles.course : item.type.toLowerCase() === "combo" ? styles.combo : styles.test}`}>
-                                {item.type === "COURSE" ? "Khóa học" : 
-                                 item.type === "COMBO" ? "Combo" : "Đề thi"}
+                                {item.type === "COURSE" ? "Khóa học" :
+                                  item.type === "COMBO" ? "Combo" : "Đề thi"}
                               </span>
                             </div>
                             <div className="d-flex align-items-center">
@@ -502,7 +554,7 @@ function ConfirmPurchase() {
                   </p>
 
                   <div className={styles.paymentOptions}>
-                    <button
+                    {/* <button
                       className={`${styles.paymentButton} ${styles.vnpay} ${selectedPayment === "VNPAY" ? styles.selected : ""} mb-3 w-100 p-3 rounded d-flex align-items-center`}
                       onClick={() => handlePayment("VNPAY")}
                       disabled={isLoading}
@@ -536,7 +588,7 @@ function ConfirmPurchase() {
                       <div className={styles.paymentText}>
                         <p className="mb-0">Thanh toán qua MoMo</p>
                       </div>
-                    </button>
+                    </button> */}
 
                     <button
                       className={`${styles.paymentButton} ${styles.zalopay} ${selectedPayment === "ZALOPAY" ? styles.selected : ""} mb-3 w-100 p-3 rounded d-flex align-items-center`}
@@ -545,14 +597,14 @@ function ConfirmPurchase() {
                     >
                       <div className={styles.paymentIcon + " me-3"} style={{ width: "40px", height: "40px" }}>
                         <img
-                          src="../../assets/images/logo/zalopay.jpg"
+                          src="../../assets/images/logo/atm.jpg"
                           alt="ZaloPay"
                           className="img-fluid"
                           style={{ width: "100%", height: "100%", objectFit: "contain" }}
                         />
                       </div>
                       <div className={styles.paymentText}>
-                        <p className="mb-0">Thanh toán qua ZaloPay</p>
+                        <p className="mb-0">Thanh toán qua thẻ ATM</p>
                       </div>
                     </button>
 
@@ -571,7 +623,25 @@ function ConfirmPurchase() {
                       </div>
                       <div className={styles.paymentText}>
                         <p className="mb-0">ZaloPay - Quét mã QR</p>
-                     
+
+                      </div>
+                    </button>
+                    <button
+                      className={`${styles.paymentButton} ${styles.zaloqr} ${selectedPayment === "WALLET" ? styles.selected : ""} mb-3 w-100 p-3 rounded d-flex align-items-center`}
+                      onClick={() => handlePayment("WALLET")}
+                      disabled={isLoading}
+                    >
+                      <div className={styles.paymentIcon + " me-3"} style={{ width: "40px", height: "40px" }}>
+                        <img
+                          src="../../assets/images/logo/wallet.jpg"
+                          alt="Wallet"
+                          className="img-fluid"
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        />
+                      </div>
+                      <div className={styles.paymentText}>
+                        <p className="mb-0">Ví cá nhân</p>
+
                       </div>
                     </button>
                   </div>
