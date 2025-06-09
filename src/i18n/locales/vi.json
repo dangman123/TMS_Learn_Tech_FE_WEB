@@ -29,7 +29,7 @@
     "home": "Trang chủ",
     "courses": "Khóa học",
     "documents": "Tài liệu",
-    "blogs": "Bài viết",
+    "blogs": "Blog",
     "contact": "Liên hệ",
     "account": "Tài khoản",
     "cart": "Giỏ hàng",
@@ -119,7 +119,7 @@
     "socialMedia": "Mạng xã hội"
   },
   "exam": {
-    "title": "Bài thi",
+    "title": "Bài kiểm tra",
     "startExam": "Bắt đầu thi",
     "submitExam": "Nộp bài",
     "timeRemaining": "Thời gian còn lại",
@@ -180,8 +180,5 @@
     "getInTouch": "Liên hệ với chúng tôi",
     "messageSent": "Tin nhắn đã được gửi!",
     "messageError": "Có lỗi khi gửi tin nhắn!"
-  },
-  "help": {
-    "title": "Hỗ trợ"
   }
 }

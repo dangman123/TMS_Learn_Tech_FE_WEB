@@ -1,4 +1,5 @@
-/* :root {
+:root {
+  /* Light theme variables */
   --bg-color: #ffffff;
   --text-color: #333333;
   --primary-color: #2196F3;
@@ -24,28 +25,43 @@
 }
 
 [data-theme="dark"] {
+  /* Dark theme variables */
   --bg-color: #121212;
   --text-color: #ffffff;
+  --primary-color: #2196F3;
   --secondary-color: #1e1e1e;
+  --border-color: #333333;
   --card-bg: #1e1e1e;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --hover-shadow: 0 4px 16px rgba(0,0,0,0.4);
   --input-bg: #2d2d2d;
+  --input-border: #444;
+  --button-bg: #2196F3;
+  --button-text: #ffffff;
+  --button-hover: #1976D2;
+  --success-color: #4CAF50;
+  --error-color: #f44336;
+  --warning-color: #ff9800;
+  --info-color: #2196F3;
   --navbar-bg: #1e1e1e;
   --navbar-text: #ffffff;
   --sidebar-bg: #2d2d2d;
   --footer-bg: #1e1e1e;
-
+  --footer-text: #ffffff;
 }
 
-
+/* Global styles */
 * {
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* General component styles */
 .card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -57,7 +73,7 @@ body {
   box-shadow: var(--hover-shadow);
 }
 
-
+/* Form elements */
 input,
 textarea,
 select {
@@ -74,8 +90,20 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
+/* Buttons */
+.btn,
+button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  transition: all 0.3s ease;
+}
 
-
+.btn:hover,
+button:hover {
+  background-color: var(--button-hover);
+  transform: translateY(-2px);
+}
 
 .btn-secondary {
   background-color: var(--secondary-color);
@@ -94,7 +122,7 @@ select:focus {
   color: white;
 }
 
-
+/* Navigation */
 .navbar,
 .header {
   background-color: var(--navbar-bg);
@@ -111,19 +139,19 @@ select:focus {
   color: var(--primary-color);
 }
 
-
+/* Sidebar */
 .sidebar {
   background-color: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
 }
 
-
+/* Footer */
 .footer {
   background-color: var(--footer-bg);
   color: var(--footer-text);
 }
 
-
+/* Existing component overrides */
 .courses__wrp {
   background-color: var(--bg-color);
 }
@@ -143,7 +171,7 @@ select:focus {
   box-shadow: var(--hover-shadow);
 }
 
-
+/* Modal and overlays */
 .modal-content {
   background-color: var(--card-bg);
   color: var(--text-color);
@@ -157,7 +185,7 @@ select:focus {
   border-top: 1px solid var(--border-color);
 }
 
-
+/* Toast notifications */
 .Toastify__toast {
   background-color: var(--card-bg);
   color: var(--text-color);
@@ -179,7 +207,7 @@ select:focus {
   background-color: var(--info-color);
 }
 
-
+/* Tables */
 table {
   background-color: var(--card-bg);
   color: var(--text-color);
@@ -194,12 +222,14 @@ tr:hover {
   background-color: var(--secondary-color);
 }
 
+/* Lists */
 .list-group-item {
   background-color: var(--card-bg);
   border-color: var(--border-color);
   color: var(--text-color);
 }
 
+/* Specific theme classes */
 .light-theme {
   background-color: #ffffff;
   color: #333333;
@@ -207,11 +237,12 @@ tr:hover {
 
 .dark-theme {
   background-color: #121212;
+  color: #ffffff;
 }
 
 .dark-theme .card {
   background-color: #1e1e1e;
-  border-color: #e0e0e0;
+  border-color: #333333;
 }
 
 .dark-theme input,
@@ -219,10 +250,16 @@ tr:hover {
 .dark-theme select {
   background-color: #2d2d2d;
   color: #ffffff;
-  border-color: #ddd;
+  border-color: #444444;
 }
 
+.dark-theme .btn {
+  background-color: #2d2d2d;
+  color: #ffffff;
+  border-color: #444444;
+}
 
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 12px;
 }
@@ -240,7 +277,7 @@ tr:hover {
   background: var(--primary-color);
 }
 
-
+/* Theme toggle button */
 .theme-toggle {
   background: none;
   border: none;
@@ -255,12 +292,12 @@ tr:hover {
   background-color: var(--secondary-color);
 }
 
-
+/* Loading spinner */
 .loading-spinner {
   color: var(--primary-color);
 }
 
-
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -276,7 +313,7 @@ tr:hover {
   animation: fadeIn 0.5s ease-out;
 }
 
-
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .card {
     margin: 10px;
@@ -288,6 +325,7 @@ tr:hover {
   }
 }
 
+/* Print styles */
 @media print {
   body {
     background-color: white !important;
@@ -299,9 +337,3 @@ tr:hover {
     border: 1px solid #ccc !important;
   }
 }
-
-[data-theme="dark"] .header__container,
-[data-theme="dark"] .header__container a {
-  color: var(--navbar-text);
-}
- */

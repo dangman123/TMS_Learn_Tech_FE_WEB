@@ -8,7 +8,9 @@ const Settings: React.FC = () => {
   const { language, changeLanguage, t } = useLanguage();
 
   return (
-    <>
+    <div className={styles.settingsContainer}>
+      <h2>{t("settings.title")}</h2>
+
       {/* Theme Settings */}
       <div className={styles.settingsSection}>
         <h3>{t("settings.theme")}</h3>
@@ -49,7 +51,19 @@ const Settings: React.FC = () => {
           </button>
         </div>
       </div>
-    </>
+
+      {/* Additional Settings */}
+      <div className={styles.settingsSection}>
+        <h3>{t("settings.preferences")}</h3>
+        <div className={styles.settingsOption}>
+          <span>{t("settings.notifications")}</span>
+          <label className={styles.toggleSwitch}>
+            <input type="checkbox" defaultChecked />
+            <span className={styles.toggleSlider}></span>
+          </label>
+        </div>
+      </div>
+    </div>
   );
 };
 

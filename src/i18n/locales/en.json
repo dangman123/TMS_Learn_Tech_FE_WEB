@@ -180,8 +180,5 @@
     "getInTouch": "Get In Touch",
     "messageSent": "Message sent successfully!",
     "messageError": "Error sending message!"
-  },
-  "help": {
-    "title": "Help"
   }
 }
