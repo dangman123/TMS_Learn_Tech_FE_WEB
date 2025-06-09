@@ -130,11 +130,9 @@ function App() {
     }
   };
 
-
   return (
-    <NotificationProvider >
+    <NotificationProvider>
       <WebSocketProvider>
-
         <LoadingProvider>
           <div className="App">
             <BrowserRouter>
@@ -472,6 +470,7 @@ function App() {
         </LoadingProvider>
       </WebSocketProvider>
     </NotificationProvider>
+    
   );
 }
 

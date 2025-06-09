@@ -6,6 +6,8 @@ import useRefreshToken from "../../util/fucntion/useRefreshToken";
 
 import "./Profile.css";
 import DeleteAccount from "./ComponentProfile/DeleteAccount/DeleteAccount";
+import Settings from "../../../components/Settings/Settings";
+
 interface ProfileData {
   id: number;
   fullname: string;
@@ -403,6 +405,12 @@ function Profile() {
                 form: "changePasswordForm",
               },
               {
+                id: "appearanceForm",
+                icon: "fas fa-palette",
+                label: "Cài đặt giao diện",
+                form: "appearanceForm",
+              },
+              {
                 id: "privateFrom",
                 icon: "fas fa-exclamation-triangle",
                 label: "Cài đặt riêng tư",
@@ -610,6 +618,16 @@ function Profile() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Appearance Settings */}
+        {activeTab === "appearanceForm" && (
+          <div className="settings-content">
+            <div className="form-section">
+              <h3 className="form-title">Cài đặt giao diện</h3>
+              <Settings />
             </div>
           </div>
         )}

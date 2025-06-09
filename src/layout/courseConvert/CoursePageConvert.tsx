@@ -16,6 +16,7 @@ import { start } from "repl";
 import { Client, Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import DocumentCourse from "./component/DocumentCourse";
+import usePreventDevTools from "../../hooks/usePreventDevTools";
 
 interface Progress {
   accountId: number;
@@ -103,7 +104,8 @@ export const CoursePageConvert = () => {
   >(null);
   const navigate = useNavigate();
   const refresh = useRefreshToken();
-
+  // Áp dụng hook chống DevTools khi đang làm bài thi
+  usePreventDevTools("Không được phép sử dụng công cụ phát triển trong quá trình học!");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeChapter, setActiveChapter] = useState<string | null>(null);
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
