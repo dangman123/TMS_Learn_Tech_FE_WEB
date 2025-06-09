@@ -26,6 +26,8 @@ interface CourseUserProfile {
   status: boolean;
   isDeleted: boolean;
   completedDate?: boolean;
+  statusCompleted: string;
+  createdAt: string;
 }
 
 const MyCourse = () => {
@@ -189,12 +191,13 @@ const MyCourse = () => {
         const coursesWithStatus = data.content.map(
           (course: CourseUserProfile) => ({
             ...course,
-            completed: Math.random() > 0.5, // Đây chỉ là giả lập, cần thay bằng dữ liệu thực
+            completed: course.statusCompleted === "Completed", // Đây chỉ là giả lập, cần thay bằng dữ liệu thực
           })
         );
 
         setCourses(coursesWithStatus);
         setFilteredCourses(coursesWithStatus);
+
         setTotalPages(data.totalPages);
       } else {
         console.error("Invalid data format received");
@@ -767,7 +770,7 @@ const MyCourse = () => {
                           <div className="enrollment-date">
                             <span>Ngày bắt đầu:</span>{" "}
                             {new Date(
-                              course.enrollment_date
+                              course.createdAt
                             ).toLocaleDateString("vi-VN")}
                           </div>
                           <div

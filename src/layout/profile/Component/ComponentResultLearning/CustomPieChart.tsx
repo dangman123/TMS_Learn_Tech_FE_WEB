@@ -19,7 +19,7 @@ const CustomPieChart: React.FC<PieChartProps> = ({ data }) => {
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
         }}>
           <p style={{ margin: 0, fontWeight: 600, color: payload[0].payload.fill }}>
-            {`${payload[0].name}: ${payload[0].value} câu (${((payload[0].value / data.reduce((a, b) => a + b.value, 0)) * 100).toFixed(0)}%)`}
+            {`${payload[0].name}: ${payload[0].value} bài (${((payload[0].value / data.reduce((a, b) => a + b.value, 0)) * 100).toFixed(0)}%)`}
           </p>
         </div>
       );

@@ -10,13 +10,12 @@ import MyCourse from "./Component/MyCourse";
 import PayHistory from "./Component/PayHistory";
 import DocumentHistory from "./Component/DocumentHistory";
 import Chat from "./Component/Chat/Chat";
-import ResultPage from "./Component/ComponentResultLearning/ResultPage";
 import EnableCourse from "./Component/ComponentEnableCourse/EnableCourse";
 
 import Overview from "./Component/OverView/OverView";
 import HeaderProfile from "../header-footer/HeaderProfile";
 import Upgrade from "./Component/UpgradeAccount/Upgrade";
-import CourseResultsPage from "./Component/ComponentResultLearning/CourseResultsPage ";
+// import CourseResultsPage from "./Component/ComponentResultLearning/CourseResultsPage ";
 import LearningResultsPage from "./Component/ComponentResultLearning/LearningResultsPage";
 
 const AccountManagement: React.FC = () => {

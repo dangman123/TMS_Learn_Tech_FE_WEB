@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useRefreshToken from '../../../util/fucntion/useRefreshToken';
-import { isTokenExpired } from '../../../util/fucntion/auth';
+import { authTokenLogin, isTokenExpired } from '../../../util/fucntion/auth';
 import styles from './LearningResultsPage.module.css';
 import {
     Book, BarChart, PieChart, CheckCircle, PersonCircle,
@@ -10,8 +10,8 @@ import {
     ExclamationTriangle, Lightbulb, XLg, ArrowRight
 } from 'react-bootstrap-icons';
 import CustomPieChart from './CustomPieChart';
-import Chart from './Chart';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Tab, Nav } from 'react-bootstrap';
+import axios from 'axios';
 
 // Interfaces
 interface CourseData {
@@ -35,6 +35,8 @@ interface ProgressData {
     lastActivity?: Date;
     strongestTopic?: string;
     weakestTopic?: string;
+    averageScore?: number;
+    passRate?: number;
 }
 
 interface UserProfile {
@@ -47,12 +49,33 @@ interface UserProfile {
     averageScore: number;
     memberSince: Date;
 }
+interface TestResult {
+    result: string;
+    total: number;
+}
+
+interface Test {
+    testResultId: number;
+    testName: string;
+    score: number;
+    result: string;
+    completedAt: Date;
+}
 
 interface PredictionData {
     riskLevel: 'high' | 'medium' | 'low';
     riskScore: number;
     reasons: string[];
     suggestions: string[];
+}
+
+interface ProgressResponse {
+    progress: number;
+    accountId: number;
+    courseId: number;
+    lessonCompleted: number;
+    totalLesson: number;
+    maxScore: number;
 }
 
 // Main Component
@@ -64,19 +87,48 @@ const LearningResultsPage: React.FC = () => {
         const savedCourseId = localStorage.getItem("selectedCourseId");
         return savedCourseId || null;
     });
+
+
     const [progressData, setProgressData] = useState<ProgressData | null>(null);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
+    const [testResults, setTestResults] = useState<TestResult[]>([]);
+    const [tests, setTests] = useState<Test[]>([]);
+    const [averageScore, setAverageScore] = useState<number>(0);
+    const [passRate, setPassRate] = useState<number>(0);
+
+    // Phân trang
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage, setItemsPerPage] = useState<number>(5);
+    const [totalElements, setTotalElements] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(0);
+    const [loadingTests, setLoadingTests] = useState<boolean>(false);
+    const [initialLoad, setInitialLoad] = useState<boolean>(true);
+    const [tableInitialized, setTableInitialized] = useState<boolean>(false);
 
     // Stats
-    const [progress, setProgress] = useState<number>(0);
+    const [progress, setProgress] = useState<ProgressResponse | null>(null);
 
     // UI states
     const [loading, setLoading] = useState<boolean>(true);
     const [showPredictionModal, setShowPredictionModal] = useState<boolean>(false);
-
     const navigate = useNavigate();
     const refresh = useRefreshToken();
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    // Tính toán các chỉ số phân trang
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+    // Thay đổi trang
+    const paginate = (pageNumber: number) => {
+        if (pageNumber < 1) return;
+        if (pageNumber > totalPages) return;
+        if (pageNumber === currentPage) return;
+
+        // Chỉ cập nhật trang hiện tại, useEffect sẽ tự động gọi API
+        setCurrentPage(pageNumber);
+    };
 
     // Get user data
     const getUserData = () => {
@@ -92,17 +144,7 @@ const LearningResultsPage: React.FC = () => {
     // Fetch courses
     const fetchCourses = async () => {
         setLoading(true);
-        let token = localStorage.getItem("authToken");
-
-        if (isTokenExpired(token)) {
-            token = await refresh();
-            if (!token) {
-                window.location.href = "/dang-nhap";
-                return;
-            }
-            localStorage.setItem("authToken", token);
-        }
-
+        const token = await authTokenLogin(refreshToken, refresh, navigate);
         try {
             const response = await fetch(
                 `${process.env.REACT_APP_SERVER_HOST}/api/courses/account/enrolled/${user.id}?page=0&size=100`,
@@ -178,10 +220,7 @@ const LearningResultsPage: React.FC = () => {
                 memberSince: new Date(Date.now() - 180 * 86400000)
             });
 
-            // Remove automatic course selection
-            // if (coursesList.length > 0 && !selectedCourseId) {
-            //     setSelectedCourseId(coursesList[0].id.toString());
-            // }
+
         } catch (error) {
             console.error("Error fetching courses:", error);
         } finally {
@@ -190,7 +229,7 @@ const LearningResultsPage: React.FC = () => {
     };
 
     // Fetch data when course changes
-    const fetchProgressData = async () => {
+    const fetchTestData = async () => {
         if (!selectedCourseId) return;
 
         setLoading(true);
@@ -206,60 +245,198 @@ const LearningResultsPage: React.FC = () => {
         }
 
         try {
-            // Find the selected course to get its progress
-            const selectedCourse = courses.find(c => c.id.toString() === selectedCourseId);
-            const progress = selectedCourse ? parseFloat(selectedCourse.completionPercentage?.toString() || "0") : 0;
+            // Fetch thông tin tiến độ, điểm trung bình và tỷ lệ đạt
+            const [progressRes, avgScoreRes, passRateRes, testResultsRes] =
+                await Promise.all([
+                    fetch(
+                        `${process.env.REACT_APP_SERVER_HOST}/api/progress/calculate-user?accountId=${user.id}&courseId=${selectedCourseId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    ),
+                    fetch(
+                        `${process.env.REACT_APP_SERVER_HOST}/api/test-results/average-score?accountId=${user.id}&courseId=${selectedCourseId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    ),
+                    fetch(
+                        `${process.env.REACT_APP_SERVER_HOST}/api/test-results/pass-rate?accountId=${user.id}&courseId=${selectedCourseId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    ),
+                    fetch(
+                        `${process.env.REACT_APP_SERVER_HOST}/api/test-results/result-count?accountId=${user.id}&courseId=${selectedCourseId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    ),
+                ]);
 
-            // Create progress data based on the actual course progress
-            const completedLessons = Math.floor(Math.random() * 20) + 5;
-            const totalLessons = completedLessons + Math.floor(Math.random() * 10) + 5;
-            const strongestTopic = ['HTML/CSS', 'JavaScript', 'React', 'TypeScript', 'Node.js'][Math.floor(Math.random() * 5)];
-            const weakestTopic = ['Database', 'Testing', 'Security', 'Performance', 'Accessibility'][Math.floor(Math.random() * 5)];
+            // Xử lý dữ liệu trả về
+            let currentProgress = 0;
+            let currentAverageScore = 0;
+            let currentPassRate = 0;
+            let newProgress: ProgressResponse | null = null;
 
-            setProgressData({
-                courseId: parseInt(selectedCourseId),
-                progress: progress,
-                completedLessons: completedLessons,
-                totalLessons: totalLessons,
-                completedTime: Math.floor(progress * 0.6 * 3600),
-                totalTime: 3600 * 6,
-                lastActivity: new Date(Date.now() - Math.floor(Math.random() * 5 + 1) * 86400000),
-                strongestTopic: strongestTopic,
-                weakestTopic: weakestTopic
-            });
-
-            setProgress(progress);
-
-            // Tạo dữ liệu dự đoán ảo
-            const riskScore = Math.floor(Math.random() * 100);
-            let riskLevel: 'high' | 'medium' | 'low' = 'low';
-
-            if (riskScore > 70) {
-                riskLevel = 'high';
-            } else if (riskScore > 40) {
-                riskLevel = 'medium';
+            if (progressRes.ok) {
+                const responseData = await progressRes.json();
+                if (responseData.data) {
+                    newProgress = responseData.data;
+                    currentProgress = newProgress?.progress || 0;
+                    setProgress(newProgress);
+                }
             }
 
-            setPredictionData({
-                riskLevel: riskLevel,
-                riskScore: riskScore,
-                reasons: [
-                    'Tiến độ học tập chậm so với lộ trình',
-                    'Thời gian hoàn thành bài tập quá lâu',
-                    'Điểm số các bài kiểm tra thấp hơn trung bình lớp'
-                ],
-                suggestions: [
-                    'Tăng cường thời gian học tập mỗi ngày',
-                    'Tham gia các buổi học nhóm và thảo luận',
-                    'Đặt lịch học cố định và tuân thủ nghiêm ngặt',
-                    'Tập trung vào các chủ đề còn yếu'
-                ]
-            });
+            if (avgScoreRes.ok) {
+                const scoreText = await avgScoreRes.text();
+                currentAverageScore = parseFloat(scoreText) || 0;
+                setAverageScore(currentAverageScore);
+            }
+
+            if (passRateRes.ok) {
+                const rateText = await passRateRes.text();
+                currentPassRate = parseFloat(rateText) || 0;
+                setPassRate(currentPassRate);
+            }
+
+            if (testResultsRes.ok) {
+                const data = await testResultsRes.json();
+                setTestResults(data.data || []);
+            }
+
+            // Tạo progressData dựa trên dữ liệu đã lấy
+            const newProgressData: ProgressData = {
+                courseId: parseInt(selectedCourseId),
+                progress: currentProgress,
+                completedLessons: newProgress?.lessonCompleted || 0,
+                totalLessons: newProgress?.totalLesson || 0,
+                completedTime: Math.floor(Math.random() * 1000) * 60,
+                totalTime: 3600 * 20,
+                lastActivity: new Date(Date.now() - Math.floor(Math.random() * 10) * 86400000),
+                strongestTopic: "JavaScript",
+                weakestTopic: "CSS & Styling",
+                averageScore: currentAverageScore,
+                passRate: currentPassRate
+            };
+
+            setProgressData(newProgressData);
+
+            // Reset tableInitialized khi đổi khóa học
+            setTableInitialized(false);
+
+            // Gọi API lấy chi tiết kết quả bài kiểm tra (phân trang)
+            await fetchTestResultsDetail();
+
         } catch (error) {
-            console.error("Error fetching progress data:", error);
+            console.error("Error fetching test data:", error);
         } finally {
-            setLoading(false);
+            setLoading(false); // Kết thúc loading cho toàn trang
         }
+    };
+
+    // Hàm riêng để lấy chi tiết kết quả bài kiểm tra (phân trang)
+    const fetchTestResultsDetail = async () => {
+        if (!selectedCourseId) return;
+
+        setLoadingTests(true);
+        let token = localStorage.getItem("authToken");
+
+        if (isTokenExpired(token)) {
+            token = await refresh();
+            if (!token) {
+                window.location.href = "/dang-nhap";
+                return;
+            }
+            localStorage.setItem("authToken", token);
+        }
+
+        try {
+            // Gọi API với tham số phân trang
+            const response = await fetch(
+                `${process.env.REACT_APP_SERVER_HOST}/api/test-results/result/detail?accountId=${user.id}&courseId=${selectedCourseId}&page=${currentPage - 1}&size=${itemsPerPage}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.data) {
+                    // Cấu trúc phản hồi mới
+                    setTests(data.data.content || []);
+                    setTotalElements(data.data.totalElements || 0);
+                    setTotalPages(data.data.totalPages || 0);
+                    setItemsPerPage(data.data.size || 5);
+                } else {
+                    // Tương thích ngược với cấu trúc cũ
+                    setTests(data || []);
+                    setTotalElements(data.length || 0);
+                    setTotalPages(Math.ceil((data.length || 0) / itemsPerPage));
+                }
+
+                // Đánh dấu bảng đã được khởi tạo
+                setTableInitialized(true);
+            }
+        } catch (error) {
+            console.error("Error fetching test results detail:", error);
+        } finally {
+            setLoadingTests(false);
+        }
+    };
+
+    // Tạo dữ liệu dự đoán
+    const generatePredictionData = (progressData: ProgressData) => {
+        // Generate prediction data based on progress and scores
+        const riskScore = Math.floor(
+            (100 - progressData.progress) * 0.4 +
+            (100 - (progressData.averageScore || 0) * 10) * 0.4 +
+            (100 - (progressData.passRate || 0)) * 0.2
+        );
+
+        let riskLevel: 'high' | 'medium' | 'low' = 'low';
+        if (riskScore > 70) {
+            riskLevel = 'high';
+        } else if (riskScore > 40) {
+            riskLevel = 'medium';
+        }
+
+        const reasonsPool = [
+            "Tiến độ học tập chậm hơn so với trung bình của lớp.",
+            "Điểm số trong các bài kiểm tra gần đây có xu hướng giảm.",
+            "Thời gian tương tác với nội dung học tập không đều đặn.",
+            "Tỷ lệ hoàn thành bài tập về nhà thấp hơn mức trung bình.",
+            `Khó khăn trong chủ đề ${progressData.weakestTopic || 'CSS & Styling'}.`,
+            "Thời gian giữa các phiên học quá dài, ảnh hưởng đến việc ghi nhớ kiến thức."
+        ];
+
+        const suggestionsPool = [
+            "Tập trung hoàn thành các bài học còn lại trong tuần này.",
+            `Dành thêm thời gian cho chủ đề ${progressData.weakestTopic || 'CSS & Styling'}.`,
+            "Tham gia diễn đàn thảo luận để được hỗ trợ từ giảng viên và bạn học.",
+            "Lập lịch học tập đều đặn mỗi ngày để duy trì sự liên tục.",
+            "Thực hành giải thêm các bài tập nâng cao để củng cố kiến thức.",
+            "Xem lại các bài học đã hoàn thành để ôn tập và củng cố kiến thức.",
+            "Tham gia học nhóm để trao đổi kiến thức và giải quyết khó khăn."
+        ];
+
+        setPredictionData({
+            riskLevel: riskLevel,
+            riskScore: riskScore,
+            reasons: reasonsPool.sort(() => Math.random() - 0.5).slice(0, 3),
+            suggestions: suggestionsPool.sort(() => Math.random() - 0.5).slice(0, 4)
+        });
     };
 
     // Initial data loading
@@ -270,13 +447,53 @@ const LearningResultsPage: React.FC = () => {
     // Fetch data when course changes
     useEffect(() => {
         if (selectedCourseId) {
-            fetchProgressData();
+            setCurrentPage(1); // Reset trang về 1 khi đổi khóa học
+            setLoading(true); // Chỉ set loading cho toàn trang khi đổi khóa học
+            setInitialLoad(true); // Đặt lại initialLoad khi đổi khóa học
+            fetchTestData();
         }
-    }, [selectedCourseId]);
+    }, [selectedCourseId]); // Chỉ gọi lại khi selectedCourseId thay đổi
+
+    // Theo dõi thay đổi trang để cập nhật dữ liệu bài kiểm tra
+    useEffect(() => {
+        // Chỉ gọi API khi đã chọn khóa học và không phải lần đầu render
+        if (selectedCourseId && !initialLoad) {
+            fetchTestResultsDetail();
+        }
+        // Đánh dấu đã load xong lần đầu
+        setInitialLoad(false);
+    }, [currentPage]); // Chỉ gọi lại khi currentPage thay đổi
 
     // Toggle prediction modal
     const togglePredictionModal = () => {
         setShowPredictionModal(!showPredictionModal);
+    };
+
+    // Function to regenerate prediction data
+    const regeneratePrediction = () => {
+        if (progressData) {
+            generatePredictionData(progressData);
+        } else {
+            const newPredictionData: PredictionData = {
+                riskLevel: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low',
+                riskScore: Math.floor(Math.random() * 100),
+                reasons: [
+                    "Tiến độ học tập chậm hơn so với trung bình của lớp.",
+                    "Điểm số trong các bài kiểm tra gần đây có xu hướng giảm.",
+                    "Thời gian tương tác với nội dung học tập không đều đặn.",
+                    "Tỷ lệ hoàn thành bài tập về nhà thấp hơn mức trung bình.",
+                ].sort(() => Math.random() - 0.5).slice(0, 3),
+                suggestions: [
+                    "Tập trung hoàn thành các bài học còn lại trong tuần này.",
+                    "Dành thêm thời gian cho chủ đề CSS & Styling.",
+                    "Tham gia diễn đàn thảo luận để được hỗ trợ từ giảng viên và bạn học.",
+                    "Lập lịch học tập đều đặn mỗi ngày để duy trì sự liên tục.",
+                    "Thực hành giải thêm các bài tập nâng cao để củng cố kiến thức.",
+                ].sort(() => Math.random() - 0.5).slice(0, 4)
+            };
+
+            setPredictionData(newPredictionData);
+        }
     };
 
     // Format time duration
@@ -318,7 +535,7 @@ const LearningResultsPage: React.FC = () => {
                 <div className={styles.dashboardHeaderBg}></div>
                 <div className={styles.dashboardHeaderContent}>
                     <h1 className={styles.title}>Kết quả học tập</h1>
-                   
+
                 </div>
             </div>
 
@@ -420,12 +637,12 @@ const LearningResultsPage: React.FC = () => {
                                                 <div className={styles.courseProgressBar}>
                                                     <div className={styles.progressLabel}>
                                                         <span>Tiến độ hoàn thành</span>
-                                                        <span>{progress.toFixed(0)}%</span>
+                                                        <span>{progress?.progress.toFixed(0)}%</span>
                                                     </div>
                                                     <div className={styles.progressBar}>
                                                         <div
                                                             className={styles.progressFill}
-                                                            style={{ width: `${progress}%` }}
+                                                            style={{ width: `${progress?.progress}%` }}
                                                         ></div>
                                                     </div>
                                                 </div>
@@ -465,41 +682,39 @@ const LearningResultsPage: React.FC = () => {
                                 {progressData && (
                                     <div className={styles.dashboardContent}>
                                         <div className={styles.mainColumn}>
-                                            {/* Tiến độ học tập chi tiết */}
+                                            {/* Điểm trung bình và Tỷ lệ bài kiểm tra đạt */}
                                             <div className={styles.card}>
                                                 <div className={styles.cardHeader}>
                                                     <h2 className={styles.cardTitle}>
                                                         <GraphUp className="me-2" />
-                                                        Tiến độ học tập chi tiết
+                                                        Tổng quan học tập
                                                     </h2>
                                                 </div>
                                                 <div className={styles.cardBody}>
-                                                    <div className={styles.progressStats}>
-                                                        <div className={styles.progressStat}>
-                                                            <div className={styles.progressStatLabel}>Hoàn thành khóa học</div>
-                                                            <div className={styles.progressStatValue}>{progressData.progress.toFixed(0)}%</div>
-                                                            <div className={styles.progressBar}>
-                                                                <div
-                                                                    className={`${styles.progressFill} ${styles.progressFillPrimary}`}
-                                                                    style={{ width: `${progressData.progress}%` }}
-                                                                ></div>
+                                                    <div className={styles.learningOverview}>
+                                                        <div className={styles.overviewItem}>
+                                                            <div className={styles.overviewIcon}>
+                                                                <BarChart size={24} />
+                                                            </div>
+                                                            <div className={styles.overviewContent}>
+                                                                <div className={styles.overviewLabel}>Điểm trung bình</div>
+                                                                <div className={styles.overviewValue}>
+                                                                    {progressData.averageScore ? progressData.averageScore.toFixed(1) : '0.0'}/10
+                                                                </div>
+                                                                <div className={styles.overviewDescription}>Trên thang điểm 10</div>
                                                             </div>
                                                         </div>
-                                                    </div>
 
-                                                    <div className={styles.improvementSection}>
-                                                        <h3 className={styles.sectionTitle}>Cần cải thiện</h3>
-                                                        <div className={styles.infoCard}>
-                                                            <div className={styles.infoCardIcon}>
-                                                                <BookHalf size={24} />
+                                                        <div className={styles.overviewItem}>
+                                                            <div className={styles.overviewIcon}>
+                                                                <CheckCircle size={24} />
                                                             </div>
-                                                            <div className={styles.infoCardContent}>
-                                                                <p>{progressData.weakestTopic || 'CSS & Styling'}</p>
-                                                                <div className={styles.infoCardAction}>
-                                                                    <button className={styles.actionLink}>
-                                                                        Xem bài học liên quan <ArrowRight size={14} />
-                                                                    </button>
+                                                            <div className={styles.overviewContent}>
+                                                                <div className={styles.overviewLabel}>Tỷ lệ bài kiểm tra đạt</div>
+                                                                <div className={styles.overviewValue}>
+                                                                    {progressData.passRate ? progressData.passRate.toFixed(0) : '0'}%
                                                                 </div>
+                                                                <div className={styles.overviewDescription}>Đạt điểm tối thiểu</div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -515,31 +730,221 @@ const LearningResultsPage: React.FC = () => {
                                                     </h2>
                                                 </div>
                                                 <div className={styles.cardBody}>
-                                                    <div className={styles.chartContainer}>
-                                                        <Chart
-                                                            data={[
-                                                                { name: 'Bài 1', score: Math.random() * 3 + 7 },
-                                                                { name: 'Bài 2', score: Math.random() * 3 + 7 },
-                                                                { name: 'Bài 3', score: Math.random() * 3 + 7 },
-                                                                { name: 'Bài 4', score: Math.random() * 3 + 7 },
-                                                                { name: 'Bài 5', score: Math.random() * 3 + 7 },
-                                                                { name: 'Bài 6', score: Math.random() * 3 + 7 },
-                                                                { name: 'Bài 7', score: Math.random() * 3 + 7 },
-                                                            ]}
-                                                        />
+                                                    <div className={styles.testResultsTable}>
+                                                        {!tableInitialized || (initialLoad && loadingTests) ? (
+                                                            <>
+                                                                <table className="table table-striped">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Tên bài kiểm tra</th>
+                                                                            <th>Điểm số</th>
+                                                                            <th>Kết quả</th>
+                                                                            <th>Ngày làm bài</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {/* Hiển thị 5 dòng trống để giữ kích thước */}
+                                                                        {[...Array(5)].map((_, index) => (
+                                                                            <tr key={`loading-${index}`}>
+                                                                                <td>&nbsp;</td>
+                                                                                <td>&nbsp;</td>
+                                                                                <td>&nbsp;</td>
+                                                                                <td>&nbsp;</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                                <div className={styles.loadingTableContainer}>
+                                                                    <div className="spinner-border spinner-border-sm text-primary" role="status">
+                                                                        <span className="visually-hidden">Đang tải...</span>
+                                                                    </div>
+                                                                    <p className={styles.loadingText}>Đang tải dữ liệu...</p>
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <table className="table table-striped">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Tên bài kiểm tra</th>
+                                                                            <th>Điểm số</th>
+                                                                            <th>Kết quả</th>
+                                                                            <th>Ngày làm bài</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {tests && tests.length > 0 ? (
+                                                                            <>
+                                                                                {tests.map((test, index) => (
+                                                                                    <tr key={`data-${index}`}>
+                                                                                        <td>{test.testName}</td>
+                                                                                        <td>{test.score.toFixed(1)}</td>
+                                                                                        <td>
+                                                                                            <span className={`badge ${test.result === 'Pass' ? 'bg-success' : 'bg-danger'}`}>
+                                                                                                {test.result}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                        <td>{formatDate(test.completedAt)}</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                                {/* Thêm dòng trống nếu dữ liệu ít hơn 5 dòng */}
+                                                                                {tests.length < 5 && [...Array(5 - tests.length)].map((_, index) => (
+                                                                                    <tr key={`empty-${index}`}>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <tr>
+                                                                                    <td colSpan={4} className="text-center">
+                                                                                        <div className={styles.noResultsMessage}>
+                                                                                            <p>Chưa có kết quả bài kiểm tra nào</p>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                {/* Thêm 4 dòng trống để giữ kích thước */}
+                                                                                {[...Array(4)].map((_, index) => (
+                                                                                    <tr key={`empty-no-data-${index}`}>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </>
+                                                                        )}
+                                                                    </tbody>
+                                                                </table>
+                                                                {/* Hiển thị overlay loading khi chuyển trang */}
+                                                                {loadingTests && !initialLoad && (
+                                                                    <div className={styles.loadingTableContainer}>
+                                                                        <div className="spinner-border spinner-border-sm text-primary" role="status">
+                                                                            <span className="visually-hidden">Đang tải...</span>
+                                                                        </div>
+                                                                        <p className={styles.loadingText}>Đang tải dữ liệu...</p>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
                                                     </div>
+
+                                                    {/* Phân trang */}
+                                                    {totalPages > 1 && (
+                                                        <div className={styles.pagination}>
+                                                            <button
+                                                                className={`${styles.pageButton} ${currentPage === 1 ? styles.disabled : ''}`}
+                                                                onClick={() => paginate(currentPage - 1)}
+                                                                disabled={currentPage === 1 || loadingTests}
+                                                            >
+                                                                <ArrowRight style={{ transform: 'rotate(180deg)' }} size={12} />
+                                                            </button>
+
+                                                            {totalPages <= 5 ? (
+                                                                // Hiển thị tất cả trang nếu ít hơn 5 trang
+                                                                [...Array(totalPages)].map((_, i) => (
+                                                                    <button
+                                                                        key={i}
+                                                                        className={`${styles.pageButton} ${currentPage === i + 1 ? styles.active : ''}`}
+                                                                        onClick={() => paginate(i + 1)}
+                                                                        disabled={loadingTests}
+                                                                    >
+                                                                        {i + 1}
+                                                                    </button>
+                                                                ))
+                                                            ) : (
+                                                                // Hiển thị phân trang thông minh nếu nhiều hơn 5 trang
+                                                                <>
+                                                                    {/* Luôn hiển thị trang đầu */}
+                                                                    <button
+                                                                        className={`${styles.pageButton} ${currentPage === 1 ? styles.active : ''}`}
+                                                                        onClick={() => paginate(1)}
+                                                                        disabled={loadingTests}
+                                                                    >
+                                                                        1
+                                                                    </button>
+
+                                                                    {/* Hiển thị "..." nếu không ở gần trang đầu */}
+                                                                    {currentPage > 3 && <span className={styles.pageEllipsis}>...</span>}
+
+                                                                    {/* Hiển thị trang trước trang hiện tại nếu không phải trang đầu hoặc thứ 2 */}
+                                                                    {currentPage > 2 && (
+                                                                        <button
+                                                                            className={styles.pageButton}
+                                                                            onClick={() => paginate(currentPage - 1)}
+                                                                            disabled={loadingTests}
+                                                                        >
+                                                                            {currentPage - 1}
+                                                                        </button>
+                                                                    )}
+
+                                                                    {/* Hiển thị trang hiện tại nếu không phải trang đầu hoặc cuối */}
+                                                                    {currentPage !== 1 && currentPage !== totalPages && (
+                                                                        <button
+                                                                            className={`${styles.pageButton} ${styles.active}`}
+                                                                            onClick={() => paginate(currentPage)}
+                                                                            disabled={loadingTests}
+                                                                        >
+                                                                            {currentPage}
+                                                                        </button>
+                                                                    )}
+
+                                                                    {/* Hiển thị trang sau trang hiện tại nếu không phải trang cuối hoặc áp cuối */}
+                                                                    {currentPage < totalPages - 1 && (
+                                                                        <button
+                                                                            className={styles.pageButton}
+                                                                            onClick={() => paginate(currentPage + 1)}
+                                                                            disabled={loadingTests}
+                                                                        >
+                                                                            {currentPage + 1}
+                                                                        </button>
+                                                                    )}
+
+                                                                    {/* Hiển thị "..." nếu không ở gần trang cuối */}
+                                                                    {currentPage < totalPages - 2 && <span className={styles.pageEllipsis}>...</span>}
+
+                                                                    {/* Luôn hiển thị trang cuối */}
+                                                                    <button
+                                                                        className={`${styles.pageButton} ${currentPage === totalPages ? styles.active : ''}`}
+                                                                        onClick={() => paginate(totalPages)}
+                                                                        disabled={loadingTests}
+                                                                    >
+                                                                        {totalPages}
+                                                                    </button>
+                                                                </>
+                                                            )}
+
+                                                            <button
+                                                                className={`${styles.pageButton} ${currentPage === totalPages ? styles.disabled : ''}`}
+                                                                onClick={() => paginate(currentPage + 1)}
+                                                                disabled={currentPage === totalPages || loadingTests}
+                                                            >
+                                                                <ArrowRight size={12} />
+                                                            </button>
+                                                        </div>
+                                                    )}
+
                                                     <div className={styles.chartInfo}>
                                                         <div className={styles.chartInfoItem}>
                                                             <div className={styles.chartInfoTitle}>Điểm trung bình</div>
-                                                            <div className={styles.chartInfoValue}>8.5</div>
+                                                            <div className={styles.chartInfoValue}>
+                                                                {progressData.averageScore ? progressData.averageScore.toFixed(1) : '0.0'}
+                                                            </div>
                                                         </div>
                                                         <div className={styles.chartInfoItem}>
                                                             <div className={styles.chartInfoTitle}>Điểm cao nhất</div>
-                                                            <div className={styles.chartInfoValue}>9.8</div>
+                                                            <div className={styles.chartInfoValue}>
+                                                                {progress?.maxScore}
+                                                            </div>
                                                         </div>
                                                         <div className={styles.chartInfoItem}>
                                                             <div className={styles.chartInfoTitle}>Số bài đã làm</div>
-                                                            <div className={styles.chartInfoValue}>7/10</div>
+                                                            <div className={styles.chartInfoValue}>
+                                                                {progress?.lessonCompleted} / {progress?.totalLesson}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -557,12 +962,19 @@ const LearningResultsPage: React.FC = () => {
                                                 </div>
                                                 <div className={styles.cardBody}>
                                                     <div className={styles.pieChartContainer}>
-                                                        <CustomPieChart
-                                                            data={[
-                                                                { name: 'Pass', value: Math.floor(Math.random() * 30) + 60 },
-                                                                { name: 'Fail', value: Math.floor(Math.random() * 20) + 20 },
-                                                            ]}
-                                                        />
+                                                                <CustomPieChart
+                                                                    data={[
+                                                                        {
+                                                                            name: 'Pass',
+                                                                            value: testResults.filter(test => test.result === 'Pass').reduce((acc, test) => acc + test.total, 0),
+                                                                        },
+                                                                        {
+                                                                            name: 'Fail',
+                                                                            value: testResults.filter(test => test.result === 'Fail').reduce((acc, test) => acc + test.total, 0),
+                                                                        },
+                                                                    ]}
+                                                                />
+
                                                     </div>
                                                     <div className={styles.chartLegend}>
                                                         <div className={styles.legendItem}>
@@ -701,8 +1113,17 @@ const LearningResultsPage: React.FC = () => {
                                 <Button variant="primary" className={styles.actionButton}>
                                     Xem lộ trình học tập chi tiết
                                 </Button>
-                                <Button variant="outline-primary" className={styles.actionButton}>
-                                    Đặt lịch tư vấn học tập
+
+                                <Button
+                                    variant="outline-secondary"
+                                    className={styles.actionButton}
+                                    onClick={regeneratePrediction}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-arrow-clockwise me-2" viewBox="0 0 16 16">
+                                        <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
+                                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
+                                    </svg>
+                                    Dự đoán lại
                                 </Button>
                             </div>
                         </div>
