@@ -45,6 +45,10 @@ interface Lesson {
     test_title: string;
     test_type: string;
   } | null;
+  isRequired?: boolean;
+  learningTip?: string | null;
+  keyPoint?: string | null;
+  overviewLesson?: string | null;
 }
 
 interface Chapter {
@@ -55,10 +59,11 @@ interface Chapter {
     test_id: number;
     test_title: string;
     test_type: string;
+    isRequired?: boolean;
   } | null;
 }
 
-interface CourseData {
+export interface CourseData {
   course_id: number;
   course_title: string;
   chapters: Chapter[];
@@ -68,11 +73,17 @@ export interface Test_Lesson {
   test_id: number;
   type: "test";
   title: string;
+  description?: string;
+  totalQuestion?: number;
+  duration?: number;
 }
 export interface Test_Chapter {
   test_id: number;
   type: "test_chapter";
   title: string;
+  description?: string;
+  totalQuestion?: number;
+  duration?: number;
 }
 export interface VideoContent {
   id: number;
@@ -126,6 +137,7 @@ export const CoursePageConvert = () => {
     useState<Test_Chapter | null>(null);
 
   const refreshToken = localStorage.getItem("refreshToken");
+  // # Lắng nghe web socket để ghi nhận hành động của người dùng
   const listenAndSendVideoClick = (accountId: number, videoId: number) => {
     const socket = new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`); // URL to your WebSocket server
     const stompClient = Stomp.over(socket);
@@ -165,6 +177,7 @@ export const CoursePageConvert = () => {
     });
   };
 
+
   useEffect(() => {
     const storedEncryptedCourseId = localStorage.getItem("encryptedCourseId");
     const storedEncryptedVideoId = localStorage.getItem("encryptedVideoId");
@@ -203,6 +216,8 @@ export const CoursePageConvert = () => {
     }
   }, []);
 
+
+
   useEffect(() => {
     if (courseData && (videoId || testId || testChapterId)) {
       const storedChapterId = localStorage.getItem("encryptedChapterId");
@@ -218,6 +233,7 @@ export const CoursePageConvert = () => {
       }
     }
   }, [courseData, videoId, testId, testChapterId]);
+
 
   const fetchCourseData = async () => {
     let token = localStorage.getItem("authToken");
@@ -264,6 +280,7 @@ export const CoursePageConvert = () => {
     }
   }, [courseId]);
 
+
   useEffect(() => {
     if (courseData) {
       const initialOpenChapters = Array(courseData.chapters.length).fill(false);
@@ -280,6 +297,7 @@ export const CoursePageConvert = () => {
     }
   }, [courseData]);
 
+  // # Khi có videoId, set lại các state
   useEffect(() => {
     if (videoId) {
       setSelectedTestContent(null);
@@ -417,18 +435,18 @@ export const CoursePageConvert = () => {
       if (!response.ok) {
         throw new Error("Failed to submit progress");
       }
-      
+
       console.log("Cập nhật tiến trình thành công!");
       // Refresh progressData sau khi cập nhật
       await fetchProgressData();
-      
+
       return true;
     } catch (error) {
       console.error("Error updating progress:", error);
       return false;
     }
   };
-  
+
   // Hàm để fetch progress data riêng
   const fetchProgressData = async () => {
     let token = localStorage.getItem("authToken");
@@ -463,7 +481,7 @@ export const CoursePageConvert = () => {
       }
     }
   };
-  
+
   const handleVideoClick = (
     videoId: string,
     lessonId: string,
@@ -480,7 +498,7 @@ export const CoursePageConvert = () => {
           courseData.chapters[0].chapter_id === Number(chapterId) &&
           courseData.chapters[0].lessons.length > 0 &&
           courseData.chapters[0].lessons[0].lesson_id === Number(lessonId);
-          
+
         // Nếu là bài đầu tiên, tự động cập nhật tiến trình
         if (isFirstLesson) {
           console.log("Đây là bài học đầu tiên, đang cập nhật tiến trình...");
@@ -638,12 +656,12 @@ export const CoursePageConvert = () => {
       courseData.chapters[0].chapter_id === chapterId &&
       courseData.chapters[0].lessons.length > 0 &&
       courseData.chapters[0].lessons[0].lesson_id === lessonId;
-    
+
     // Bài đầu tiên luôn có thể truy cập
     if (isFirstLesson) {
       return true;
     }
-    
+
     // Logic cũ cho các bài khác
     const lessonProgress = progressData?.find(
       (p) => p.chapterId === chapterId && p.lessonId === lessonId
@@ -652,6 +670,12 @@ export const CoursePageConvert = () => {
   };
 
   const isTestChapterCompleted = (chapterId: number) => {
+    // Kiểm tra xem chapter test có bắt buộc không
+    const chapter = courseData?.chapters.find(ch => ch.chapter_id === chapterId);
+    if (chapter?.chapter_test?.isRequired === false) {
+      return true; // Không bắt buộc, luôn cho phép truy cập
+    }
+
     const chapterTestProgress = progressData?.find(
       (p) => p.chapterId === chapterId && p.lessonId === null
     );
@@ -915,9 +939,11 @@ export const CoursePageConvert = () => {
     }
   };
   const [isStarted, setIsStarted] = useState(false);
+  const [shouldFetchQuestions, setShouldFetchQuestions] = useState(false);
 
   const handleStart = () => {
     setIsStarted(true);
+    setShouldFetchQuestions(true);
   };
 
   return (
@@ -965,11 +991,10 @@ export const CoursePageConvert = () => {
                           id={`headingChapter${chapter.chapter_id}`}
                         >
                           <button
-                            className={`chapter-header ${
-                              activeChapter === `chapter${chapter.chapter_id}`
-                                ? "active"
-                                : ""
-                            }`}
+                            className={`chapter-header ${activeChapter === `chapter${chapter.chapter_id}`
+                              ? "active"
+                              : ""
+                              }`}
                             type="button"
                             aria-expanded={
                               activeChapter === `chapter${chapter.chapter_id}`
@@ -989,11 +1014,10 @@ export const CoursePageConvert = () => {
                         </h2>
                         <div
                           id={`collapseChapter${chapter.chapter_id}`}
-                          className={`accordion-collapse vaohoc collapse ${
-                            activeChapter === `chapter${chapter.chapter_id}`
-                              ? "show"
-                              : ""
-                          }`}
+                          className={`accordion-collapse vaohoc collapse ${activeChapter === `chapter${chapter.chapter_id}`
+                            ? "show"
+                            : ""
+                            }`}
                           aria-labelledby={`headingChapter${chapter.chapter_id}`}
                         >
                           <div className="accordion-body vaohoc card-body">
@@ -1011,12 +1035,11 @@ export const CoursePageConvert = () => {
                                   id={`headingLesson${lesson.lesson_id}`}
                                 >
                                   <button
-                                    className={`lesson-header ${
-                                      activeLesson ===
+                                    className={`lesson-header ${activeLesson ===
                                       `lesson${lesson.lesson_id} `
-                                        ? "show"
-                                        : ""
-                                    }`}
+                                      ? "show"
+                                      : ""
+                                      }`}
                                     type="button"
                                     aria-expanded={
                                       activeLesson ===
@@ -1035,11 +1058,10 @@ export const CoursePageConvert = () => {
                                 </h2>
                                 <div
                                   id={`collapseLesson${lesson.lesson_id}`}
-                                  className={`accordion-collapse vaohoc collapse ${
-                                    activeLesson === `lesson${lesson.lesson_id}`
-                                      ? "show"
-                                      : ""
-                                  }`}
+                                  className={`accordion-collapse vaohoc collapse ${activeLesson === `lesson${lesson.lesson_id}`
+                                    ? "show"
+                                    : ""
+                                    }`}
                                   aria-labelledby={`headingLesson${lesson.lesson_id}`}
                                 >
                                   <div
@@ -1055,17 +1077,20 @@ export const CoursePageConvert = () => {
                                               onClick={(e) => {
                                                 e.preventDefault();
                                                 // Cho bài đầu tiên, luôn cho phép click
-                                                const isFirstLessonCheck = 
+                                                const isFirstLessonCheck =
                                                   courseData && courseData.chapters && courseData.chapters.length > 0 &&
                                                   courseData.chapters[0].chapter_id === chapter.chapter_id &&
                                                   courseData.chapters[0].lessons.length > 0 &&
                                                   courseData.chapters[0].lessons[0].lesson_id === lesson.lesson_id;
-                                                
-                                                if (lesson.video?.video_id && 
-                                                    (isFirstLessonCheck || isVideoCompleted(
-                                                      chapter.chapter_id,
-                                                      lesson.lesson_id
-                                                    ))
+
+                                                // Kiểm tra xem bài học có bắt buộc không
+                                                const isNotRequired = lesson.isRequired === false;
+
+                                                if (lesson.video?.video_id &&
+                                                  (isFirstLessonCheck || isNotRequired || isVideoCompleted(
+                                                    chapter.chapter_id,
+                                                    lesson.lesson_id
+                                                  ))
                                                 ) {
                                                   handleVideoClick(
                                                     lesson.video.video_id.toString(),
@@ -1080,7 +1105,7 @@ export const CoursePageConvert = () => {
                                                   !isVideoCompleted(
                                                     chapter.chapter_id,
                                                     lesson.lesson_id
-                                                  ) && !isFirstLessonCheck
+                                                  ) && !isFirstLessonCheck && !isNotRequired
                                                 ) {
                                                   showToast(
                                                     "Hoàn thành bài học trước để mở khóa!"
@@ -1088,18 +1113,19 @@ export const CoursePageConvert = () => {
                                                 }
                                               }}
                                               className={`content-item test-item ${
-                                                // Bài đầu tiên luôn được xem là completed
+                                                // Bài đầu tiên luôn được xem là completed hoặc bài không bắt buộc
                                                 (courseData && courseData.chapters && courseData.chapters.length > 0 &&
-                                                courseData.chapters[0].chapter_id === chapter.chapter_id &&
-                                                courseData.chapters[0].lessons.length > 0 &&
-                                                courseData.chapters[0].lessons[0].lesson_id === lesson.lesson_id) ||
-                                                isVideoCompleted(
-                                                  chapter.chapter_id,
-                                                  lesson.lesson_id
-                                                )
+                                                  courseData.chapters[0].chapter_id === chapter.chapter_id &&
+                                                  courseData.chapters[0].lessons.length > 0 &&
+                                                  courseData.chapters[0].lessons[0].lesson_id === lesson.lesson_id) ||
+                                                  lesson.isRequired === false ||
+                                                  isVideoCompleted(
+                                                    chapter.chapter_id,
+                                                    lesson.lesson_id
+                                                  )
                                                   ? "completed"
                                                   : "locked"
-                                              }`}
+                                                }`}
                                             >
                                               <div
                                                 className="course-content-left vaohoc"
@@ -1136,22 +1162,24 @@ export const CoursePageConvert = () => {
                                           <li>
                                             <a
                                               href="#"
-                                              className={`content-item test-item ${
-                                                isTestCompleted(
-                                                  chapter.chapter_id,
-                                                  lesson.lesson_id
-                                                )
-                                                  ? " completed"
-                                                  : " locked"
-                                              }`}
+                                              className={`content-item test-item ${isTestCompleted(
+                                                chapter.chapter_id,
+                                                lesson.lesson_id
+                                              )
+                                                ? " completed"
+                                                : lesson.isRequired === false ? " completed" : " locked"
+                                                }`}
                                               onClick={(e) => {
                                                 // e.preventDefault();
+                                                // Kiểm tra xem bài học có bắt buộc không
+                                                const isNotRequired = lesson.isRequired === false;
+
                                                 if (
                                                   lesson.lesson_test?.test_id &&
-                                                  isTestCompleted(
+                                                  (isNotRequired || isTestCompleted(
                                                     chapter.chapter_id,
                                                     lesson.lesson_id
-                                                  )
+                                                  ))
                                                 ) {
                                                   handleTestClick(
                                                     lesson.lesson_test.test_id.toString(),
@@ -1205,11 +1233,10 @@ export const CoursePageConvert = () => {
                             {chapter.chapter_test && (
                               <div className="accordion-item card vaohoc">
                                 <h2
-                                  className={`accordion-header card-header vaohoc content-item test-item ${
-                                    isTestChapterCompleted(chapter.chapter_id)
-                                      ? " completed"
-                                      : " locked"
-                                  }`}
+                                  className={`accordion-header card-header vaohoc content-item test-item ${isTestChapterCompleted(chapter.chapter_id)
+                                    ? " completed"
+                                    : chapter.chapter_test?.isRequired === false ? " completed" : " locked"
+                                    }`}
                                   style={{
                                     border: "1px solid #ccc",
                                     borderRadius: "4px",
@@ -1220,15 +1247,16 @@ export const CoursePageConvert = () => {
                                     type="button"
                                     onClick={(e) => {
                                       // e.preventDefault();
+                                      const isNotRequired = chapter.chapter_test?.isRequired === false;
+
                                       if (
                                         chapter.chapter_test?.test_id &&
-                                        isTestChapterCompleted(
+                                        (isNotRequired || isTestChapterCompleted(
                                           chapter.chapter_id
-                                        )
+                                        ))
                                       ) {
                                         handleTestChapClick(
                                           chapter.chapter_test?.test_id.toString(),
-
                                           chapter.chapter_id.toString(),
                                           `chapter${chapter.chapter_id}`
                                         );
@@ -1254,16 +1282,19 @@ export const CoursePageConvert = () => {
               const validCourseData = Array.isArray(courseData)
                 ? courseData
                 : [];
+              const courseDataArray = courseData ? [courseData] : [];
               return (
                 <CoverTest
                   isSidebarOpen={isSidebarOpen}
                   handleToggleSidebar={handleToggleSidebar}
                   content={selectedTestContent}
                   progressCheck={progressData}
-                  courseData={validCourseData! || []}
+                  courseData={courseDataArray}
                   setStartTest={setIsStarted}
                   isStarted={isStarted}
                   selectedTestContent={selectedTestContent}
+                  shouldFetchQuestions={shouldFetchQuestions}
+                  setShouldFetchQuestions={setShouldFetchQuestions}
                 />
               );
             } else if (selectedVideoContent) {

@@ -13,6 +13,7 @@ import { CHECK_ACTIVED_ENCROLLED_COURSE } from "../../api/api";
 import CourseContentLearningTest from "./Component/ComponetsDetail/CourseContentLearningTest";
 import axios from "axios";
 import { toast } from "react-toastify";
+import useCozeChat from "../../hooks/useCozeChat";
 
 export interface Video {
   videoId: number; // ID của video
@@ -35,6 +36,12 @@ export interface CourseContent {
 }
 
 function CourseDetail() {
+  // Initialize Coze Chat
+  useCozeChat({
+    token: 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe',
+    title: 'TMS Tư Vấn'
+  });
+
   // Lấy slug từ URL
   const { slug } = useParams<{ slug: string }>();
   

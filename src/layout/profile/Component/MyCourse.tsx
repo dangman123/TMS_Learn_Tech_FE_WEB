@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isTokenExpired } from "../../util/fucntion/auth";
+import { authTokenLogin, isTokenExpired } from "../../util/fucntion/auth";
 import useRefreshToken from "../../util/fucntion/useRefreshToken";
 import { encryptData } from "../../util/encryption";
 import { toast } from "react-toastify";
@@ -13,6 +13,8 @@ import {
   Key,
   ChevronRight,
 } from "react-bootstrap-icons";
+import DialogFormInformation from "../../util/DialogFormInformation";
+import { showSuccess, showError, showWarning, showInfo } from "../../util/notificationService";
 
 interface CourseUserProfile {
   id: number;
@@ -22,7 +24,7 @@ interface CourseUserProfile {
   enrollment_date: string;
   status: boolean;
   isDeleted: boolean;
-  completed?: boolean; // Thêm trường để phân biệt khóa học đã hoàn thành
+  completed?: boolean;
 }
 
 const MyCourse = () => {
@@ -44,6 +46,14 @@ const MyCourse = () => {
   const [statusCourse, setStatusCourse] = useState(false);
 
   const [activeTab, setActiveTab] = useState("all"); // Trạng thái tab hiện tại: all, studying, completed, activate
+
+  // Course activation states
+  const [courseCode, setCourseCode] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isActivated, setIsActivated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -274,6 +284,101 @@ const MyCourse = () => {
         return <Collection className="tab-icon" />;
     }
   };
+  const getAuthData = () => {
+    const authData = localStorage.getItem("authData");
+    if (authData) {
+      try {
+        return JSON.parse(authData);
+      } catch (error) {
+        console.error("Error parsing authData:", error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const closeDialogHandler = () => {
+    setOpenDialog(false);
+    setShowForm(false);
+  };
+
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  const handleCourseCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCourseCode(event.target.value);
+    setErrorMessage(""); // Reset error message when user types
+  };
+
+  const handleActivateCourseCheck = async () => {
+    const auth = getAuthData();
+    setIsLoading(true); // Set loading to true when API call starts
+    setErrorMessage(""); // Reset any previous error messages
+    const token = await authTokenLogin(refreshToken, refresh, navigate);
+    try {
+      // Make API call to the backend to validate the course code
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/course-codes/check-enable`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ code: courseCode, accountId: auth.id }), // Send the code in the request body
+      });
+
+      const result = await response.json();
+      if (response.ok && result.data.valid) {
+        showSuccess("Mã kích hoạt hợp lệ. Vui lòng nhập thông tin để hoàn tất kích hoạt.");
+        console.log(result.data.valid);
+        setShowForm(true);
+        setOpenDialog(true);
+      } else if (result.message === "Đã thu thập dữ liệu sinh viên") {
+        showInfo("Tài khoản đã được thu thập. Đang tiến hành kích hoạt khóa học...");
+        setTimeout(() => {
+          activateCourse();
+        }, 1500);
+      } else {
+        showError(result.message || "Mã khóa học không hợp lệ.");
+      }
+    } catch (error) {
+      showError("Có lỗi xảy ra khi kích hoạt khóa học. Vui lòng thử lại.");
+
+    } finally {
+      setIsLoading(false); // Set loading to false after API call finishes
+    }
+  };
+
+  const activateCourse = async () => {
+    const auth = getAuthData();
+    setIsLoading(true); // Set loading to true when API call starts
+    setErrorMessage(""); // Reset any previous error messages
+    const token = await authTokenLogin(refreshToken, refresh, navigate);
+    try {
+      // Make API call to the backend to validate the course code
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/course-codes/enable-not-huit`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ code: courseCode, accountId: auth.id }), // Send the code in the request body
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === 200) {
+        showSuccess("Kích hoạt khóa học thành công.");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        showError("Kích hoạt khóa học thất bại.");
+      }
+    } catch (error) {
+      showError("Có lỗi xảy ra khi kích hoạt khóa học. Vui lòng thử lại.");
+      setErrorMessage("Có lỗi xảy ra khi kích hoạt khóa học. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false); // Set loading to false after API call finishes
+    }
+  };
 
   const activateCoursePlaceholder = () => {
     return (
@@ -287,11 +392,19 @@ const MyCourse = () => {
               type="text"
               className="form-control"
               placeholder="Nhập mã kích hoạt"
+              value={courseCode}
+              onChange={handleCourseCodeChange}
             />
-            <button className="btn btn-primary activation-btn">
-              Kích hoạt
+            <button
+              className="btn btn-primary activation-btn"
+              onClick={handleActivateCourseCheck}
+              disabled={isLoading}
+            >
+              {isLoading ? "Đang kích hoạt..." : "Kích hoạt"}
             </button>
           </div>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {showForm && <DialogFormInformation open={openDialog} onClose={closeDialogHandler} courseCode={courseCode} />}
         </div>
       </div>
     );
@@ -438,11 +551,10 @@ const MyCourse = () => {
                             ).toLocaleDateString("vi-VN")}
                           </div>
                           <div
-                            className={`course-status ${
-                              course.isDeleted
-                                ? "status-maintenance"
-                                : "status-active"
-                            }`}
+                            className={`course-status ${course.isDeleted
+                              ? "status-maintenance"
+                              : "status-active"
+                              }`}
                           >
                             {course.isDeleted
                               ? "Đang bảo trì"
@@ -451,9 +563,8 @@ const MyCourse = () => {
                         </div>
                         <div className="course-actions">
                           <button
-                            className={`btn ${
-                              course.isDeleted ? "btn-secondary" : "btn-primary"
-                            } continue-button`}
+                            className={`btn ${course.isDeleted ? "btn-secondary" : "btn-primary"
+                              } continue-button`}
                             onClick={() => handleGoToCoursePlayer(course)}
                             disabled={course.isDeleted}
                           >
@@ -477,9 +588,8 @@ const MyCourse = () => {
               {filteredCourses.length > 0 && totalPages > 1 && (
                 <div className="pagination-container">
                   <button
-                    className={`pagination-button ${
-                      currentPage === 0 ? "disabled" : ""
-                    }`}
+                    className={`pagination-button ${currentPage === 0 ? "disabled" : ""
+                      }`}
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 0}
                   >
@@ -490,9 +600,8 @@ const MyCourse = () => {
                     {[...Array(totalPages)].map((_, index) => (
                       <button
                         key={index}
-                        className={`pagination-number ${
-                          index === currentPage ? "active" : ""
-                        }`}
+                        className={`pagination-number ${index === currentPage ? "active" : ""
+                          }`}
                         onClick={() => handlePageChange(index)}
                       >
                         {index + 1}
@@ -501,9 +610,8 @@ const MyCourse = () => {
                   </div>
 
                   <button
-                    className={`pagination-button ${
-                      currentPage === totalPages - 1 ? "disabled" : ""
-                    }`}
+                    className={`pagination-button ${currentPage === totalPages - 1 ? "disabled" : ""
+                      }`}
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages - 1}
                   >

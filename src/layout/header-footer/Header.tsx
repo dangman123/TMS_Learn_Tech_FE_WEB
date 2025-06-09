@@ -19,8 +19,7 @@ import useRefreshToken from "../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../util/fucntion/auth";
 import topics from "../util/fucntion/topics";
 import { useLoading } from "../util/LoadingContext";
-import Settings from "../../components/Settings/Settings";
-import { useTranslation } from "react-i18next";
+
 
 interface CategoryCourse {
   id: number;
@@ -38,7 +37,7 @@ interface Notification {
 }
 
 const Header: React.FC = () => {
-  const { t } = useTranslation();
+
   const [unreadCount, setUnreadCount] = useState(5);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { startLoading, stopLoading } = useLoading();
@@ -316,6 +315,7 @@ const Header: React.FC = () => {
 
         const data = await response.json();
         // Check if the data is in a paginated format
+
         if (
           data &&
           typeof data === "object" &&
@@ -327,8 +327,8 @@ const Header: React.FC = () => {
           // Ensure we're filtering an array
           const unreadCount = Array.isArray(data.content)
             ? data.content.filter(
-                (notification: Notification) => !notification.status
-              ).length
+              (notification: Notification) => !notification.status
+            ).length
             : 0;
           setUnreadCount(unreadCount);
         } else {
@@ -342,6 +342,7 @@ const Header: React.FC = () => {
             safeNotifications.filter(
               (notification: Notification) => !notification.status
             ).length
+
           );
         }
       } catch (error) {
@@ -451,7 +452,7 @@ const Header: React.FC = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
-  const handleRouter = () => {};
+  const handleRouter = () => { };
   // ... phần import và code phía trên giữ nguyên
 
   // Phần render menu trong hàm return
@@ -465,7 +466,7 @@ const Header: React.FC = () => {
           <nav>
             <ul>
               <li>
-                <a href="/">{t("navigation.home")}</a>
+                <a href="/">Trang chủ</a>
               </li>
 
               <li>
@@ -475,7 +476,7 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuctailieu");
                   }}
                 >
-                  {t("navigation.documents")}{" "}
+               Tài liệu
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
@@ -584,7 +585,7 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuckhoahoc");
                   }}
                 >
-                  {t("navigation.courses")}{" "}
+              Khóa học
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
@@ -641,44 +642,46 @@ const Header: React.FC = () => {
                               {/* Thêm danh mục cấp 3 khóa học ở đây nếu có */}
                               {groupedCategoriesLevel3Course[level2.id]
                                 ?.length > 0 && (
-                                <ul className="sub-sub-sub-menu">
-                                  {groupedCategoriesLevel3Course[
-                                    level2.id
-                                  ]?.map((level3) => (
-                                    <li key={level3.id} className="level3-item">
-                                      <a
-                                        href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
-                                          level3.name
-                                        )}`}
-                                        onClick={() => {
-                                          localStorage.setItem(
-                                            "danhmuckhoahoc",
-                                            removeVietnameseTones(level3.name)
-                                          );
-                                          localStorage.setItem(
-                                            "danhmuckhoahoc",
+
+                                  <ul className="sub-sub-sub-menu">
+                                    {groupedCategoriesLevel3Course[
+                                      level2.id
+                                    ]?.map((level3) => (
+                                      <li key={level3.id} className="level3-item">
+                                        <a
+                                          href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
                                             level3.name
-                                          );
-                                          localStorage.setItem(
-                                            "iddanhmuckhoahoc",
-                                            level1.id.toString()
-                                          );
-                                          localStorage.setItem(
-                                            "iddanhmuckhoahoc",
-                                            level2.id.toString()
-                                          );
-                                          localStorage.setItem(
-                                            "iddanhmuckhoahoc",
-                                            level3.id.toString()
-                                          );
-                                        }}
-                                      >
-                                        {level3.name}
-                                      </a>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
+                                          )}`}
+                                          onClick={() => {
+                                            localStorage.setItem(
+                                              "danhmuckhoahoc",
+                                              removeVietnameseTones(level3.name)
+                                            );
+                                            localStorage.setItem(
+                                              "danhmuckhoahoc",
+                                              level3.name
+                                            );
+                                            localStorage.setItem(
+                                              "iddanhmuckhoahoc",
+                                              level1.id.toString()
+                                            );
+                                            localStorage.setItem(
+                                              "iddanhmuckhoahoc",
+                                              level2.id.toString()
+                                            );
+                                            localStorage.setItem(
+                                              "iddanhmuckhoahoc",
+                                              level3.id.toString()
+                                            );
+                                          }}
+                                        >
+                                          {level3.name}
+                                        </a>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+
                             </li>
                           )
                         )}
@@ -689,14 +692,14 @@ const Header: React.FC = () => {
               </li>
               <li>
                 <a href="/de-thi" onClick={handleRouter}>
-                  {t("exam.title")}
+               Bài thi
                 </a>
               </li>
               <li>
-                <a href="/bai-viet">{t("navigation.blogs")}</a>
+                <a href="/bai-viet">Bài viết</a>
               </li>
               <li>
-                <a href="/ho-tro">{t("help.title")}</a>
+                <a href="/ho-tro">Hỗ trợ</a>
               </li>
             </ul>
           </nav>
@@ -705,19 +708,19 @@ const Header: React.FC = () => {
         <div className={`offcanvas-menu ${isMenuOpen ? "open" : ""}`}>
           <ul>
             <li>
-              <a href="/">{t("navigation.home")}</a>
+              <a href="/">Trang chủ</a>
             </li>
             <li>
-              <a href="/tai-lieu">{t("navigation.documents")}</a>
+              <a href="/tai-lieu">Tài liệu</a>
             </li>
             <li>
-              <a href="/khoa-hoc">{t("navigation.courses")}</a>
+              <a href="/khoa-hoc">Khóa học</a>
             </li>
             <li>
-              <a href="/bai-viet">{t("navigation.blogs")}</a>
+              <a href="/bai-viet">Bài viết</a>
             </li>
             <li>
-              <a href="/ho-tro">{t("help.title")}</a>
+              <a href="/ho-tro">Hỗ trợ</a>
             </li>
           </ul>
         </div>
@@ -728,6 +731,7 @@ const Header: React.FC = () => {
         ></div>
         <div></div>
         <div className="d-flex align-items-center gap-4 gap-xl-5">
+
           {isLoggedIn ? (
             // Nếu đã đăng nhập, hiển thị icon User và tên người dùng
             <>
@@ -740,9 +744,11 @@ const Header: React.FC = () => {
                 </a>
               </li>
               <NotificationDropdown
+
                 notifications={
                   Array.isArray(notifications) ? notifications : []
                 }
+
                 unreadCount={unreadCount}
               />
               <div className="user-dropdown">
@@ -754,11 +760,11 @@ const Header: React.FC = () => {
                 {/* Dropdown menu */}
                 <ul className="dropdown-menu">
                   <li>
-                    <a href="/tai-khoan">{t("navigation.profile")}</a>
+                    <a href="/tai-khoan">Tài khoản</a>
                   </li>
                   <li>
                     <button onClick={handleLogout} className="logout-btn">
-                      {t("common.logout")}
+                     Đăng xuất
                     </button>
                   </li>
                 </ul>
@@ -768,9 +774,9 @@ const Header: React.FC = () => {
             // Nếu chưa đăng nhập, hiển thị các nút Đăng nhập và Đăng ký
             <div className="menu-btns d-none d-lg-flex">
               <a className="active" href="/dang-nhap">
-                {t("common.login")}
+              Đăng nhập
               </a>
-              <a href="/dang-ky">{t("common.register")}</a>
+              <a href="/dang-ky">Đăng ký</a>
             </div>
           )}
         </div>
