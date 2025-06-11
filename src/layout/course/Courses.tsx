@@ -15,6 +15,7 @@ import { CourseList as CourseListUser } from "../../model/CourseList";
 // import { CategoryCourse } from "../../model/CategoryCourse";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import useCozeChat from "../../hooks/useCozeChat";
 
 interface ApiResponse {
   content: CourseListUser[];
@@ -30,6 +31,12 @@ export interface Category {
 }
 
 function Courses() {
+  // Initialize Coze Chat
+  useCozeChat({
+    token: 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe',
+      title: 'TMS Tư Vấn'
+  });
+
   const courseCategoryId = localStorage.getItem("iddanhmuckhoahoc");
   const [courses, setCourses] = useState<CourseListUser[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);

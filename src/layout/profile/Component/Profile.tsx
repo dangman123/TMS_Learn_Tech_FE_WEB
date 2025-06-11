@@ -6,7 +6,7 @@ import useRefreshToken from "../../util/fucntion/useRefreshToken";
 
 import "./Profile.css";
 import DeleteAccount from "./ComponentProfile/DeleteAccount/DeleteAccount";
-import Settings from "../../../components/Settings/Settings";
+
 
 interface ProfileData {
   id: number;
@@ -622,15 +622,7 @@ function Profile() {
           </div>
         )}
 
-        {/* Appearance Settings */}
-        {activeTab === "appearanceForm" && (
-          <div className="settings-content">
-            <div className="form-section">
-              <h3 className="form-title">Cài đặt giao diện</h3>
-              <Settings />
-            </div>
-          </div>
-        )}
+  
 
         {/* Delete Component */}
         {activeTab === "privateFrom" && (

@@ -19,8 +19,7 @@ import useRefreshToken from "../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../util/fucntion/auth";
 import topics from "../util/fucntion/topics";
 import { useLoading } from "../util/LoadingContext";
-import Settings from "../../components/Settings/Settings";
-import { useTranslation } from "react-i18next";
+
 
 interface CategoryCourse {
   id: number;
@@ -38,7 +37,7 @@ interface Notification {
 }
 
 const Header: React.FC = () => {
-  const { t } = useTranslation();
+
   const [unreadCount, setUnreadCount] = useState(5);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { startLoading, stopLoading } = useLoading();
@@ -467,7 +466,7 @@ const Header: React.FC = () => {
           <nav>
             <ul>
               <li>
-                <a href="/">{t("navigation.home")}</a>
+                <a href="/">Trang chủ</a>
               </li>
 
               <li>
@@ -477,7 +476,7 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuctailieu");
                   }}
                 >
-                  {t("navigation.documents")}{" "}
+               Tài liệu
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
@@ -586,7 +585,7 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuckhoahoc");
                   }}
                 >
-                  {t("navigation.courses")}{" "}
+              Khóa học
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
@@ -693,14 +692,14 @@ const Header: React.FC = () => {
               </li>
               <li>
                 <a href="/de-thi" onClick={handleRouter}>
-                  {t("exam.title")}
+               Bài thi
                 </a>
               </li>
               <li>
-                <a href="/bai-viet">{t("navigation.blogs")}</a>
+                <a href="/bai-viet">Bài viết</a>
               </li>
               <li>
-                <a href="/ho-tro">{t("help.title")}</a>
+                <a href="/ho-tro">Hỗ trợ</a>
               </li>
             </ul>
           </nav>
@@ -709,19 +708,19 @@ const Header: React.FC = () => {
         <div className={`offcanvas-menu ${isMenuOpen ? "open" : ""}`}>
           <ul>
             <li>
-              <a href="/">{t("navigation.home")}</a>
+              <a href="/">Trang chủ</a>
             </li>
             <li>
-              <a href="/tai-lieu">{t("navigation.documents")}</a>
+              <a href="/tai-lieu">Tài liệu</a>
             </li>
             <li>
-              <a href="/khoa-hoc">{t("navigation.courses")}</a>
+              <a href="/khoa-hoc">Khóa học</a>
             </li>
             <li>
-              <a href="/bai-viet">{t("navigation.blogs")}</a>
+              <a href="/bai-viet">Bài viết</a>
             </li>
             <li>
-              <a href="/ho-tro">{t("help.title")}</a>
+              <a href="/ho-tro">Hỗ trợ</a>
             </li>
           </ul>
         </div>
@@ -761,11 +760,11 @@ const Header: React.FC = () => {
                 {/* Dropdown menu */}
                 <ul className="dropdown-menu">
                   <li>
-                    <a href="/tai-khoan">{t("navigation.profile")}</a>
+                    <a href="/tai-khoan">Tài khoản</a>
                   </li>
                   <li>
                     <button onClick={handleLogout} className="logout-btn">
-                      {t("common.logout")}
+                     Đăng xuất
                     </button>
                   </li>
                 </ul>
@@ -775,9 +774,9 @@ const Header: React.FC = () => {
             // Nếu chưa đăng nhập, hiển thị các nút Đăng nhập và Đăng ký
             <div className="menu-btns d-none d-lg-flex">
               <a className="active" href="/dang-nhap">
-                {t("common.login")}
+              Đăng nhập
               </a>
-              <a href="/dang-ky">{t("common.register")}</a>
+              <a href="/dang-ky">Đăng ký</a>
             </div>
           )}
         </div>

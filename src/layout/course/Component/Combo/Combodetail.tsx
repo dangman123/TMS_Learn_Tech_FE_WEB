@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./ComboDetail.css";
+import useCozeChat from "../../../../hooks/useCozeChat";
 
 interface Course {
   id: number;
@@ -45,7 +46,10 @@ const ComboDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isInCart, setIsInCart] = useState<boolean>(false);
-
+  useCozeChat({
+    token: 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe',
+      title: 'TMS Tư Vấn'
+  });
   // Lấy userId từ localStorage nếu user đã đăng nhập
   const getUserId = (): number | null => {
     try {
