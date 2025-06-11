@@ -128,9 +128,8 @@ function App() {
     }
   };
 
-
   return (
-    <NotificationProvider >
+    <NotificationProvider>
       <WebSocketProvider>
         <LoadingProvider>
           <div className="App">
@@ -468,6 +467,7 @@ function App() {
         </LoadingProvider>
       </WebSocketProvider>
     </NotificationProvider>
+    
   );
 }
 

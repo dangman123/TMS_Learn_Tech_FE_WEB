@@ -16,7 +16,18 @@ import { start } from "repl";
 import { Client, Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import DocumentCourse from "./component/DocumentCourse";
-import { CourseDataCourse } from "./TestQuickConvert";
+import usePreventDevTools from "../../hooks/usePreventDevTools";
+
+interface Progress {
+  accountId: number;
+  courseId: number;
+  chapterId: number;
+  lessonId: number;
+  videoStatus: boolean;
+  testStatus: boolean;
+  testScore: number | null;
+  chapterTest: boolean;
+}
 
 interface Lesson {
   lesson_id: number;
@@ -112,7 +123,8 @@ export const CoursePageConvert = () => {
   >(null);
   const navigate = useNavigate();
   const refresh = useRefreshToken();
-
+  // Áp dụng hook chống DevTools khi đang làm bài thi
+  usePreventDevTools("Không được phép sử dụng công cụ phát triển trong quá trình học!");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeChapter, setActiveChapter] = useState<string | null>(null);
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);

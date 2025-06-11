@@ -20,6 +20,7 @@ import { isTokenExpired } from "../util/fucntion/auth";
 import topics from "../util/fucntion/topics";
 import { useLoading } from "../util/LoadingContext";
 
+
 interface CategoryCourse {
   id: number;
   name: string;
@@ -36,6 +37,7 @@ interface Notification {
 }
 
 const Header: React.FC = () => {
+
   const [unreadCount, setUnreadCount] = useState(5);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { startLoading, stopLoading } = useLoading();
@@ -125,11 +127,14 @@ const Header: React.FC = () => {
       const token = localStorage.getItem("authToken");
       if (!token) return;
 
-      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${userData.id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/cart/${userData.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         console.error("Failed to fetch cart items");
@@ -140,7 +145,9 @@ const Header: React.FC = () => {
 
       if (responseData.status === 200 && responseData.data) {
         // Nếu data là một mảng, thì lấy độ dài của mảng
-        const itemCount = Array.isArray(responseData.data) ? responseData.data.length : 0;
+        const itemCount = Array.isArray(responseData.data)
+          ? responseData.data.length
+          : 0;
         setCartItemCount(itemCount);
       }
     } catch (error) {
@@ -178,11 +185,11 @@ const Header: React.FC = () => {
     };
 
     // Đăng ký sự kiện
-    window.addEventListener('cart-updated', handleCartUpdate);
+    window.addEventListener("cart-updated", handleCartUpdate);
 
     // Dọn dẹp khi component unmount
     return () => {
-      window.removeEventListener('cart-updated', handleCartUpdate);
+      window.removeEventListener("cart-updated", handleCartUpdate);
     };
   }, []);
 
@@ -459,7 +466,7 @@ const Header: React.FC = () => {
           <nav>
             <ul>
               <li>
-                <a href="/">Home</a>
+                <a href="/">Trang chủ</a>
               </li>
 
               <li>
@@ -469,7 +476,8 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuctailieu");
                   }}
                 >
-                  Tài liệu <i className="fa-solid fa-angle-down"></i>
+               Tài liệu
+                  <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
                   {/* Hiển thị danh mục TÀI LIỆU cấp 1 */}
@@ -577,13 +585,16 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuckhoahoc");
                   }}
                 >
-                  Khóa học <i className="fa-solid fa-angle-down"></i>
+              Khóa học
+                  <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
                   {level1CategoriesCourse.map((level1) => (
                     <li key={level1.id} className="level1-item">
                       <a
-                        href={`/khoa-hoc/danh-muc/${removeVietnameseTones(level1.name)}`}
+                        href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
+                          level1.name
+                        )}`}
                         onClick={() => {
                           localStorage.setItem(
                             "danhmuckhoahoc",
@@ -681,7 +692,7 @@ const Header: React.FC = () => {
               </li>
               <li>
                 <a href="/de-thi" onClick={handleRouter}>
-                  Đề Thi
+               Bài thi
                 </a>
               </li>
               <li>
@@ -697,7 +708,7 @@ const Header: React.FC = () => {
         <div className={`offcanvas-menu ${isMenuOpen ? "open" : ""}`}>
           <ul>
             <li>
-              <a href="/">Home</a>
+              <a href="/">Trang chủ</a>
             </li>
             <li>
               <a href="/tai-lieu">Tài liệu</a>
@@ -713,6 +724,7 @@ const Header: React.FC = () => {
             </li>
           </ul>
         </div>
+
         <div
           className={`offcanvas-overlay ${isMenuOpen ? "active" : ""}`}
           onClick={toggleMenu}
@@ -748,11 +760,11 @@ const Header: React.FC = () => {
                 {/* Dropdown menu */}
                 <ul className="dropdown-menu">
                   <li>
-                    <a href="/tai-khoan">Tài Khoản</a>
+                    <a href="/tai-khoan">Tài khoản</a>
                   </li>
                   <li>
                     <button onClick={handleLogout} className="logout-btn">
-                      Đăng Xuất
+                     Đăng xuất
                     </button>
                   </li>
                 </ul>
@@ -762,7 +774,7 @@ const Header: React.FC = () => {
             // Nếu chưa đăng nhập, hiển thị các nút Đăng nhập và Đăng ký
             <div className="menu-btns d-none d-lg-flex">
               <a className="active" href="/dang-nhap">
-                Đăng nhập
+              Đăng nhập
               </a>
               <a href="/dang-ky">Đăng ký</a>
             </div>

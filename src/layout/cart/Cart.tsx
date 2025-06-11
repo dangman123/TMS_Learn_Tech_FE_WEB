@@ -104,11 +104,12 @@ function Cart() {
         selectedItems.includes(item.cartItemId) &&
         item.courseId !== null
     );
+    
+    // Chỉ fetch recommendations cho những item chưa có
+    const itemsNeedingRecs = selectedCourseItems.filter(item => !item.combos);
 
-    if (selectedCourseItems.length > 0) {
-      fetchComboRecommendations(selectedCourseItems);
-
-
+    if (itemsNeedingRecs.length > 0) {
+      fetchComboRecommendations(itemsNeedingRecs);
     }
   }, [selectedItems, cart]);
 
@@ -224,8 +225,11 @@ function Cart() {
 
       // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
       window.dispatchEvent(new Event('cart-updated'));
-
-      // Cập nhật lại giỏ hàng
+      
+      // Cập nhật UI ngay lập tức
+      setCart(prevCart => prevCart.filter(item => item.cartItemId !== cartItemId));
+      
+      // Đồng bộ lại với server sau
       fetchCart();
     } catch (err) {
       toast.error("Có lỗi xảy ra khi xóa sản phẩm");
@@ -246,10 +250,16 @@ function Cart() {
         toast.error("Bạn cần đăng nhập để xóa sản phẩm");
         return;
       }
+      
+      const itemsToRemove = [...selectedItems];
 
-      // Sử dụng Promise.all để xóa song song nhiều sản phẩm
+      // Cập nhật UI trước
+      setCart(prevCart => prevCart.filter(item => !itemsToRemove.includes(item.cartItemId)));
+      setSelectedItems([]);
+
+      // Xóa song song trên server
       await Promise.all(
-        selectedItems.map(cartItemId =>
+        itemsToRemove.map(cartItemId => 
           fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${cartItemId}/remove`, {
             method: 'DELETE',
             headers: {
@@ -259,15 +269,16 @@ function Cart() {
         )
       );
 
-      toast.success(`Đã xóa ${selectedItems.length} sản phẩm khỏi giỏ hàng`);
-
-      // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
+      toast.success(`Đã xóa ${itemsToRemove.length} sản phẩm khỏi giỏ hàng`);
+      
       window.dispatchEvent(new Event('cart-updated'));
-
+      
+      // Đồng bộ lại state cuối cùng từ server
       fetchCart();
     } catch (err) {
       toast.error("Có lỗi xảy ra khi xóa các sản phẩm đã chọn");
       console.error("Lỗi khi xóa các sản phẩm:", err);
+      fetchCart(); // Tải lại giỏ hàng nếu có lỗi
     }
   };
 
@@ -317,39 +328,40 @@ function Cart() {
       }
 
       const token = getToken();
-
-      if (!token) {
+      const userData = getUserData();
+      
+      if (!token || !userData?.id) {
         toast.error("Bạn cần đăng nhập để áp dụng mã giảm giá");
         return;
       }
 
-      // Gọi API để áp dụng mã giảm giá
-      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/discount/apply`, {
-        method: 'POST',
+      const accountId = userData.id;
+
+      // Gọi API mới để kiểm tra mã giảm giá
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/discounts/payment/validate?accountId=${accountId}&voucherCode=${promoCode}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ code: promoCode })
+        }
       });
-
-      if (!response.ok) {
-        toast.error("Mã giảm giá không hợp lệ");
-        return;
-      }
 
       const responseData = await response.json();
 
-      if (responseData.status === 200) {
-        const discountPercent = responseData.data.discountPercent || 0;
+      if (!response.ok || responseData.status !== 200) {
+        toast.error(responseData.message || "Mã giảm giá không hợp lệ hoặc đã hết hạn");
+        return;
+      }
+      
+      if (responseData.status === 200 && responseData.data) {
+        const discountPercent = responseData.data.discountValue || 0;
         setDiscount(discountPercent);
-
-        // Recalculate with new discount
+        
+        // Tính toán lại tổng tiền với mã giảm giá
         const selectedCarts = cart.filter(item => selectedItems.includes(item.cartItemId));
         const subtotal = selectedCarts.reduce((acc, item) => acc + item.price, 0);
         const discountedTotal = subtotal * (1 - discountPercent / 100);
         setTotalPrice(discountedTotal);
-
+        
         toast.success(`Áp dụng mã giảm giá thành công: Giảm ${discountPercent}%`);
       } else {
         toast.error(responseData.message || "Mã giảm giá không hợp lệ");
@@ -481,12 +493,10 @@ function Cart() {
         if (!item.courseId) return null;
 
         const courseId = item.courseId;
-        console.log(`Fetching combo recommendations for course ID: ${courseId}`);
-
+        
         // Use the correct API endpoint as provided
         const apiUrl = `${process.env.REACT_APP_SERVER_HOST}/api/cart/course/${courseId}/bundles`;
-        console.log("Calling API:", apiUrl);
-
+        
         try {
           const response = await fetch(apiUrl, {
             method: 'GET',
@@ -501,8 +511,7 @@ function Cart() {
           }
 
           const data = await response.json();
-          console.log(`Recommendations for course ${courseId}:`, data);
-
+          
           if (data.status === 200 && data.data && data.data.length > 0) {
             // Map the API response to match our ComboRecommendation interface
             const combos = data.data.map((bundle: CourseBundleResponse) => ({
@@ -529,7 +538,6 @@ function Cart() {
       const validResults = results.filter(result => result !== null);
 
       if (validResults.length === 0) {
-        console.log("No combo recommendations found for any courses");
         return;
       }
 
@@ -547,7 +555,6 @@ function Cart() {
             ...updatedCart[cartItemIndex],
             combos: result.combos
           };
-          console.log("Updated cart item with combos:", updatedCart[cartItemIndex]);
         }
       });
 

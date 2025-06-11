@@ -56,6 +56,7 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
   const refresh = useRefreshToken();
   const [video, setVideo] = useState<VideoContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showChatbot, setShowChatbot] = useState(false);
 
   const fetchVideoData = async (videoId: string) => {
     setIsLoading(true);
@@ -671,6 +672,61 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
     }
   }, [videoRef.current]);
 
+  // Thêm script Coze ChatBot
+  useEffect(() => {
+    const userData = getUserData();
+    if (userData && (userData.roleId === 4 || userData.roleId === 5)) {
+      setShowChatbot(true);
+      
+      // Tạo script element cho Coze SDK
+      const sdkScript = document.createElement('script');
+      sdkScript.src = "https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js";
+      sdkScript.async = true;
+      
+      // Chờ script SDK được tải xong
+      sdkScript.onload = () => {
+        // Tạo script khởi tạo Coze Client
+        const initScript = document.createElement('script');
+        initScript.textContent = `
+          new CozeWebSDK.WebChatClient({
+            config: {
+              bot_id: '7511766903497523208',
+            },
+            componentProps: {
+              title: 'Coze',
+            },
+            auth: {
+              type: 'token',
+              token: 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe',
+              onRefreshToken: function () {
+                return 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe'
+              }
+            }
+          });
+        `;
+        document.body.appendChild(initScript);
+      };
+      
+      document.body.appendChild(sdkScript);
+      
+      // Cleanup function to remove scripts when component unmounts
+      return () => {
+        // Tìm và xóa các script đã thêm
+        const scripts = document.querySelectorAll('script');
+        scripts.forEach(script => {
+          if (script.src && script.src.includes('coze.com')) {
+            script.parentNode?.removeChild(script);
+          }
+          
+          // Xóa script khởi tạo (không có src)
+          if (!script.src && script.textContent && script.textContent.includes('CozeWebSDK')) {
+            script.parentNode?.removeChild(script);
+          }
+        });
+      };
+    }
+  }, []);
+
   return (
     <div
       className="rbt-lesson-rightsidebar overflow-hidden lesson-video vaohoc"
@@ -1074,6 +1130,8 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
         </div>
       </div>
       <ToastContainer />
+      {/* Note: Chatbot will be rendered automatically by the script */}
+      {/* The chatbot UI will appear based on the script configuration */}
     </div>
   );
 };
