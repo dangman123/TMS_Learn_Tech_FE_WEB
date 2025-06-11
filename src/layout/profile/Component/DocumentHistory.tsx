@@ -59,8 +59,9 @@ function DocumentHistory() {
       );
       if (response.ok) {
         const data = await response.json();
-        setDocuments(data.content || []);
-        setTotalPages(data.totalPages || 0);
+        console.log("Document API response:", data);
+        setDocuments(data.data.content || []);
+        setTotalPages(data.data.totalPages || 0);
       } else {
         console.error("Failed to fetch documents:", response.statusText);
       }
@@ -188,8 +189,8 @@ function DocumentHistory() {
               filteredDocuments.map((document, index) => (
                 <tr key={document.documentId}>
                   <td className={styles.columnStt}>{index + 1 + page * size}</td>
-                  <td 
-                    className={styles.documentTitle} 
+                  <td
+                    className={styles.documentTitle}
                     onClick={() => clickNavigation(document.documentId)}
                   >
                     {document.title}

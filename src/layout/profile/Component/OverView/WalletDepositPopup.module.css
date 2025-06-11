@@ -232,4 +232,144 @@
   .amountOptions {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Error message styles */
+.errorMessage {
+  background-color: #ffebee;
+  color: #f44336;
+  padding: 12px 16px;
+  margin: 0 20px 15px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.errorMessage svg {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* Confirmation step styles */
+.confirmContent {
+  flex-direction: column;
+  padding: 0 20px 20px;
+}
+
+.confirmDetails {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.confirmTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 20px;
+  color: #333;
+  text-align: center;
+}
+
+.confirmItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.confirmItem:last-of-type {
+  border-bottom: none;
+}
+
+.confirmLabel {
+  color: #666;
+  font-weight: 500;
+}
+
+.confirmValue {
+  font-weight: 600;
+  color: #333;
+}
+
+.confirmNote {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 4px;
+}
+
+.confirmNote p {
+  margin: 0;
+  color: #1b5e20;
+  font-size: 14px;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.backButton {
+  flex: 1;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background-color: #e0e0e0;
+}
+
+.backButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.confirmButton {
+  flex: 2;
+  background-color: #4154f1;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.confirmButton:hover {
+  background-color: #364bdc;
+}
+
+.confirmButton:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top: 2px solid white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 } 

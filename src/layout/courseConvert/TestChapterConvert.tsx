@@ -920,6 +920,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
       .result-popup .buttons {
         display: flex;
         justify-content: center;
+        flex-wrap: wrap;
         gap: 15px;
         margin-top: 20px;
       }
@@ -930,6 +931,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
         cursor: pointer;
         font-weight: bold;
         transition: all 0.2s;
+        min-width: 140px;
       }
       .result-popup .view-answers {
         background-color: #2196f3;
@@ -1047,39 +1049,24 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
           <div style="font-size: 24px; margin-bottom: 10px;">🎓 KHÓA HỌC HOÀN THÀNH 🎓</div>
           Xin chúc mừng bạn đã hoàn thành khóa học một cách xuất sắc!
         </div>
-        <div class="certificate-container">
-          <img src="https://img.freepik.com/premium-vector/certificate-template-with-luxury-elegant-pattern-diploma-border-design-graduation-achievement_153097-692.jpg" class="certificate-img" alt="Chứng chỉ hoàn thành khóa học" />
-        </div>
       `;
-
-      // Tạo hiệu ứng confetti
-      for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = `${Math.random() * 100}%`;
-        confetti.style.width = `${Math.random() * 10 + 5}px`;
-        confetti.style.height = `${Math.random() * 10 + 5}px`;
-        confetti.style.backgroundColor = ['#f44336', '#2196f3', '#ffeb3b', '#4caf50', '#9c27b0'][Math.floor(Math.random() * 5)];
-        confetti.style.animationDelay = `${Math.random() * 5}s`;
-        popupOverlay.appendChild(confetti);
-      }
     }
 
     popup.innerHTML = `
       <h2>${title}</h2>
       <p>${message}</p>
-      ${certificateHTML}
       <div class="score">${score.toFixed(1)}%</div>
       <p>Điểm của bạn</p>
       ${statisticsHTML}
-      ${isCompleted && !courseCompleted ? '<p style="color: #4caf50; font-weight: bold;">Bạn đã hoàn thành khóa học!</p>' : ''}
+      ${certificateHTML}
       <div class="buttons">
         <button class="view-answers">Xem đáp án</button>
-        ${courseCompleted
-        ? '<button class="view-certificate">Tải chứng chỉ</button>'
-        : isPassed
-          ? '<button class="next-lesson">Qua bài tiếp theo</button>'
-          : '<button class="retry">Làm lại</button>'
+        <button class="view-results">Xem kết quả</button>
+        ${isPassed
+        ? (courseCompleted
+          ? '<button class="view-certificate">Xem chứng chỉ</button>'
+          : '<button class="next-lesson">Qua bài tiếp theo</button>')
+        : '<button class="retry">Làm lại</button>'
       }
       </div>
     `;
@@ -1089,6 +1076,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
 
     // Xử lý sự kiện cho các nút
     const viewAnswersBtn = popup.querySelector('.view-answers');
+    const viewResultsBtn = popup.querySelector('.view-results');
     const nextLessonBtn = popup.querySelector('.next-lesson');
     const retryBtn = popup.querySelector('.retry');
     const viewCertificateBtn = popup.querySelector('.view-certificate');
@@ -1104,21 +1092,14 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
       });
     }
 
-    // Xử lý tải chứng chỉ
-    if (viewCertificateBtn) {
-      viewCertificateBtn.addEventListener('click', () => {
-        // Mở trang chứng chỉ trong tab mới hoặc tải về
-        const certificateImg = popup.querySelector('.certificate-img') as HTMLImageElement;
-        if (certificateImg && certificateImg.src) {
-          const link = document.createElement('a');
-          link.href = certificateImg.src;
-          link.download = 'Chung-chi-hoan-thanh-khoa-hoc.jpg';
-          link.target = '_blank';
-          link.click();
-        } else {
-          // Nếu không có ảnh chứng chỉ, chuyển đến trang chứng chỉ
-          window.open('/certificates', '_blank');
-        }
+    if (viewResultsBtn) {
+      viewResultsBtn.addEventListener('click', () => {
+        document.body.removeChild(popupOverlay);
+        document.head.removeChild(popupStyle);
+        // Gọi hàm fetchCorrectAnswersShow để hiển thị kết quả
+        fetchCorrectAnswersShow().then(() => {
+          setIsSubmitted(true);
+        });
       });
     }
 
@@ -1132,23 +1113,19 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
           const storedChapterId = localStorage.getItem("encryptedChapterId");
           const storedLessonId = localStorage.getItem("encryptedLessonId");
 
-          if (!storedChapterId) {
-            console.error("Missing encrypted chapter ID in localStorage");
-            showToast("Không tìm thấy thông tin chương tiếp theo.");
+          if (!storedChapterId || !storedLessonId) {
+            console.error("Missing encrypted chapter or lesson ID in localStorage");
+            showToast("Không tìm thấy thông tin bài học tiếp theo.");
             return;
           }
 
           try {
             const chapterId = decryptData(storedChapterId);
-            let lessonId = null;
+            const lessonId = decryptData(storedLessonId);
 
-            if (storedLessonId) {
-              lessonId = decryptData(storedLessonId);
-            }
-
-            if (!chapterId) {
-              console.error("Failed to decrypt chapter ID");
-              showToast("Không thể giải mã thông tin chương.");
+            if (!chapterId || !lessonId) {
+              console.error("Failed to decrypt chapter or lesson ID");
+              showToast("Không thể giải mã thông tin bài học.");
               return;
             }
 
@@ -1158,11 +1135,10 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
               return;
             }
 
-            // Tìm chương tiếp theo sau chương hiện tại
             navigateToLesson(
               "next",
               Number(chapterId),
-              lessonId ? Number(lessonId) : 0,
+              Number(lessonId),
               courseData,
               progressCheck
             );
@@ -1182,6 +1158,14 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
         document.body.removeChild(popupOverlay);
         document.head.removeChild(popupStyle);
         handleRetry();
+      });
+    }
+
+    if (viewCertificateBtn) {
+      viewCertificateBtn.addEventListener('click', () => {
+        document.body.removeChild(popupOverlay);
+        document.head.removeChild(popupStyle);
+        showCourseCompletionPopup();
       });
     }
   };

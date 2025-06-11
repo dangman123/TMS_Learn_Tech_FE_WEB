@@ -10,13 +10,13 @@ import MyCourse from "./Component/MyCourse";
 import PayHistory from "./Component/PayHistory";
 import DocumentHistory from "./Component/DocumentHistory";
 import Chat from "./Component/Chat/Chat";
-import ResultPage from "./Component/ComponentResultLearning/ResultPage";
 import EnableCourse from "./Component/ComponentEnableCourse/EnableCourse";
 
 import Overview from "./Component/OverView/OverView";
 import HeaderProfile from "../header-footer/HeaderProfile";
 import Upgrade from "./Component/UpgradeAccount/Upgrade";
-import CourseResultsPage from "./Component/ComponentResultLearning/CourseResultsPage ";
+// import CourseResultsPage from "./Component/ComponentResultLearning/CourseResultsPage ";
+import LearningResultsPage from "./Component/ComponentResultLearning/LearningResultsPage";
 
 const AccountManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -55,9 +55,8 @@ const AccountManagement: React.FC = () => {
 
       <div className="row custom-main">
         <div
-          className={`col-md-3 col-lg-3 d-md-block sidebar custom-nav-profile ${
-            showMobileMenu ? "show" : ""
-          }`}
+          className={`col-md-3 col-lg-3 d-md-block sidebar custom-nav-profile ${showMobileMenu ? "show" : ""
+            }`}
         >
           <a href="/" className="logoA">
             <img src="../../assets/images/logo/logoTMS.png" alt="logo" />
@@ -78,13 +77,13 @@ const AccountManagement: React.FC = () => {
             {activeMenu === "profile" && <Profile />}
             {activeMenu === "history" && <TestHistory />}
             {activeMenu === "my-course" && <MyCourse />}
-            {activeMenu === "ket-qua" && <CourseResultsPage />}
-            {/* {activeMenu === "ket-qua" && <ResultPage />} */}
+            {activeMenu === "ket-qua" && <LearningResultsPage />}
+            {/* {activeMenu === "ket-qua" && <CourseResultsPage />} */}
             {activeMenu === "history-pay" && <PayHistory />}
             {activeMenu === "history-document" && <DocumentHistory />}
             {activeMenu === "overview" && (
               <Overview
-      
+
                 onViewDetails={() => console.log("View details clicked")}
               />
             )}

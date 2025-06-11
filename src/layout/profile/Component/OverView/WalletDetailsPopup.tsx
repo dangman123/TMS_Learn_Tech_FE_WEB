@@ -19,11 +19,6 @@ const WalletDetailsPopup: React.FC<WalletDetailsPopupProps> = ({
     return `${amount.toLocaleString("vi-VN")} đ`;
   };
 
-  // Danh sách phương thức thanh toán đã liên kết
-  const paymentMethods = [
-    { id: 1, name: "MoMo", icon: "🅼", connected: true },
-    { id: 2, name: "Vietcombank", icon: "🏦", connected: true },
-  ];
 
   return (
     <div className="wallet-popup-overlay">
@@ -77,30 +72,7 @@ const WalletDetailsPopup: React.FC<WalletDetailsPopupProps> = ({
           </div>
         </div>
 
-        <div className="payment-methods-section">
-          <div className="payment-methods-header">
-            <h3>Phương thức thanh toán</h3>
-            <button className="add-method-button">Thêm mới</button>
-          </div>
 
-          <div className="payment-methods-list">
-            {paymentMethods.map((method) => (
-              <div key={method.id} className="payment-method-item">
-                <div className="payment-method-icon">{method.icon}</div>
-                <div className="payment-method-name">{method.name}</div>
-                <div className="payment-method-status">
-                  {method.connected ? (
-                    <div className="connected-badge">
-                      <span className="check-icon">✓</span> Đã liên kết
-                    </div>
-                  ) : (
-                    <button className="connect-button">Liên kết</button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

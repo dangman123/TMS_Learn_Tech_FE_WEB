@@ -46,8 +46,6 @@ import CourseVaoHoc from "./layout/course/CourseVaoHoc";
 import demomoi2 from "./layout/util/demomoi2";
 import DemoEcrypt from "./layout/util/demomoi2";
 
-import ResultPage from "./layout/profile/Component/ComponentResultLearning/ResultPage";
-
 import ResetPassword from "./layout/login/ResetPassword";
 import HomeLogin from "./layout/login/HomeLogin";
 import { WebSocketProvider } from "./service/WebSocketContext";
@@ -394,10 +392,9 @@ function App() {
                 <Route
                   path="/thanh-toan/logic"
                   element={
-                    //   <MainLayout>
-
-                    <LogicPayment />
-                    // </MainLayout>
+                    <MainLayout>
+                      <LogicPayment />
+                    </MainLayout>
                   }
                 />
               </Routes>

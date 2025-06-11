@@ -60,7 +60,7 @@ const CourseVaoHoc: React.FC = () => {
   const [testId, setTestId] = useState("");
   const [testChapterId, setTestChapterId] = useState("");
 
- const navigate = useNavigate();
+  const navigate = useNavigate();
   const refresh = useRefreshToken();
   const refreshToken = localStorage.getItem("refreshToken");
 
@@ -116,7 +116,7 @@ const CourseVaoHoc: React.FC = () => {
 
   const fetchCourseData = async () => {
     const token = await authTokenLogin(refreshToken, refresh, navigate);
-   
+
 
     try {
       const response = await fetch(
@@ -145,7 +145,7 @@ const CourseVaoHoc: React.FC = () => {
     }
   };
   const fetchVideoData = async (videoId: string) => {
- const token = await authTokenLogin(refreshToken, refresh, navigate);
+    const token = await authTokenLogin(refreshToken, refresh, navigate);
 
 
     try {
@@ -172,7 +172,7 @@ const CourseVaoHoc: React.FC = () => {
     }
   };
   const fetchTestData = async (testId: number) => {
- const token = await authTokenLogin(refreshToken, refresh, navigate);
+    const token = await authTokenLogin(refreshToken, refresh, navigate);
 
 
     try {
@@ -203,8 +203,8 @@ const CourseVaoHoc: React.FC = () => {
     }
   };
   const fetchTestChapterData = async (testChapterId: number) => {
-   const token = await authTokenLogin(refreshToken, refresh, navigate);
-  
+    const token = await authTokenLogin(refreshToken, refresh, navigate);
+
 
     try {
       const response = await fetch(
@@ -258,8 +258,8 @@ const CourseVaoHoc: React.FC = () => {
 
   useEffect(() => {
     const fetchProgressData = async () => {
-    const token = await authTokenLogin(refreshToken, refresh, navigate);
-   
+      const token = await authTokenLogin(refreshToken, refresh, navigate);
+
 
       if (courseData) {
         const courseId = courseData.course_id;
@@ -511,8 +511,8 @@ const CourseVaoHoc: React.FC = () => {
         <CourseSideBarComponent
           isSidebarOpen={isSidebarOpen}
           openChapters={openChapters}
-          openLessons={openLessons} 
-          setOpenChapters={setOpenChapters} 
+          openLessons={openLessons}
+          setOpenChapters={setOpenChapters}
           setOpenLessons={setOpenLessons}
           toggleChapter={toggleChapter}
           toggleLesson={toggleLesson}

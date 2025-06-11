@@ -1,0 +1,1119 @@
+/* LearningResultsPage.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  position: relative;
+}
+
+.dashboardHeader {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.dashboardHeaderBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #4a6cf7 0%, #2451b7 100%);
+  z-index: 1;
+}
+
+.dashboardHeaderContent {
+  position: relative;
+  z-index: 2;
+  padding: 30px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.userInfoWrapper {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin-right: 12px;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.userLevel {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.userLevel span {
+  font-weight: 600;
+}
+
+.contentWrapper {
+  padding: 0 20px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.courseSelectContainer {
+  display: flex;
+  align-items: center;
+}
+
+.courseSelectLabel {
+  margin-right: 10px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.customSelect {
+  min-width: 250px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.selectedCourseCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.courseOverview {
+  display: flex;
+  padding: 20px;
+}
+
+.courseImage {
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.courseImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.courseDetails {
+  flex: 1;
+}
+
+.courseTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  color: #2d3748;
+}
+
+.courseProgressBar {
+  margin-bottom: 15px;
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.progressBar {
+  height: 8px;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(to right, #4a6cf7, #2451b7);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.courseOverviewDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.courseOverviewDetail {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #4a5568;
+  background-color: #f7fafc;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.courseOverviewDetail svg {
+  margin-right: 6px;
+  color: #4a6cf7;
+}
+
+.dashboardContent {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 20px;
+}
+
+@media (max-width: 992px) {
+  .dashboardContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  /* height: 100%; */
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  padding: 16px 20px;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  color: #2d3748;
+}
+
+.cardTitle svg {
+  color: #4a6cf7;
+}
+
+.cardBody {
+  padding: 20px;
+  flex: 1;
+}
+
+.progressStats {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.progressStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.progressStatLabel {
+  font-size: 14px;
+  color: #4a5568;
+  margin-bottom: 5px;
+}
+
+.progressStatValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.progressFillPrimary {
+  background: linear-gradient(to right, #4a6cf7, #2451b7);
+}
+
+.progressFillSuccess {
+  background: linear-gradient(to right, #48bb78, #38a169);
+}
+
+.improvementSection {
+  margin-top: 20px;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.infoCard {
+  display: flex;
+  background-color: #f7fafc;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.infoCardIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background-color: rgba(74, 108, 247, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #4a6cf7;
+}
+
+.infoCardContent {
+  flex: 1;
+}
+
+.infoCardContent h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  color: #2d3748;
+}
+
+.infoCardContent p {
+  font-size: 15px;
+  margin: 0;
+  color: #4a5568;
+}
+
+.infoCardAction {
+  margin-top: 10px;
+}
+
+.actionLink {
+  display: flex;
+  align-items: center;
+  color: #4a6cf7;
+  font-size: 14px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.actionLink svg {
+  margin-left: 5px;
+}
+
+.chartContainer {
+  width: 100%;
+  height: 300px;
+  margin-bottom: 20px;
+}
+
+.pieChartContainer {
+  height: 230px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.chartInfo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.chartInfoItem {
+  background-color: #f7fafc;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.chartInfoTitle {
+  font-size: 12px;
+  color: #718096;
+  margin-bottom: 5px;
+}
+
+.chartInfoValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.chartLegend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+}
+
+.color1 {
+  background-color: #4a6cf7;
+}
+
+.color2 {
+  background-color: #48bb78;
+}
+
+.color3 {
+  background-color: #ed8936;
+}
+
+.color4 {
+  background-color: #9f7aea;
+}
+
+.tipsCard {
+  background: linear-gradient(135deg, #f6f9fe 0%, #edf2f7 100%);
+}
+
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tipItem {
+  display: flex;
+  align-items: flex-start;
+}
+
+.tipIcon {
+  margin-right: 10px;
+  color: #4a6cf7;
+  margin-top: 3px;
+}
+
+.tipContent {
+  flex: 1;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.viewMoreButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  color: #4a6cf7;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.viewMoreButton:hover {
+  background-color: #f8fafc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.viewMoreButton svg {
+  margin-left: 5px;
+}
+
+.predictionButton {
+  display: flex;
+  align-items: center;
+  background-color: #4a6cf7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.predictionButton:hover {
+  background-color: #3a5bd9;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.predictionButton svg {
+  margin-right: 8px;
+}
+
+.loadingContainer, .noDataContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.loadingText {
+  margin-top: 15px;
+  color: #4a5568;
+}
+
+.noDataContent {
+  text-align: center;
+  padding: 40px;
+}
+
+.noDataIcon {
+  color: #cbd5e0;
+  margin-bottom: 15px;
+}
+
+.noDataTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #2d3748;
+}
+
+.noDataText {
+  color: #718096;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.predictionModal :global(.modal-content) {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modalTitle {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.warningIcon {
+  color: #ed8936;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #718096;
+  padding: 0;
+}
+
+.predictionContent {
+  padding: 10px;
+}
+
+.riskIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.highRisk {
+  background-color: #fed7d7;
+  border: 1px solid #fc8181;
+}
+
+.mediumRisk {
+  background-color: #feebc8;
+  border: 1px solid #f6ad55;
+}
+
+.lowRisk {
+  background-color: #c6f6d5;
+  border: 1px solid #68d391;
+}
+
+.riskLabel {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.riskScore {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.riskDescription {
+  font-size: 14px;
+  max-width: 300px;
+}
+
+.predictionSection {
+  margin-bottom: 20px;
+}
+
+.predictionSection h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.reasonsList, .suggestionsList {
+  padding-left: 10px;
+  list-style-type: none;
+}
+
+.reasonsList li, .suggestionsList li {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #4a5568;
+  display: flex;
+  align-items: flex-start;
+}
+
+.reasonBullet {
+  color: #ed8936;
+  font-size: 18px;
+  margin-right: 10px;
+  line-height: 1;
+}
+
+.suggestionIcon {
+  color: #4a6cf7;
+  margin-right: 10px;
+}
+
+.predictionActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .dashboardHeader {
+    height: 150px;
+  }
+  
+  .dashboardHeaderContent {
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .contentHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .courseSelectContainer {
+    width: 100%;
+  }
+  
+  .customSelect {
+    width: 100%;
+  }
+  
+  .predictionButton {
+    margin-top: 10px;
+  }
+  
+  .courseOverview {
+    flex-direction: column;
+  }
+  
+  .courseImage {
+    width: 100%;
+    height: 180px;
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .chartInfo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.courseList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.courseItem {
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.courseItem:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.activeCourse {
+  background-color: #4a6cf7;
+  color: white;
+  border-color: #4a6cf7;
+}
+
+.courseItemIcon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.courseItemTitle {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coursesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.courseCard {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #eaeaea;
+}
+
+.courseCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.courseCardImage {
+  height: 160px;
+  overflow: hidden;
+}
+
+.courseCardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.courseCardImagePlaceholder {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.courseCardContent {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.courseCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 48px;
+}
+
+.courseCardDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.courseCardDetail {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.courseCardDetail svg {
+  margin-right: 6px;
+}
+
+.courseNavigation {
+  margin-bottom: 20px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #4a6cf7;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.backButton:hover {
+  color: #3a5bd9;
+  text-decoration: underline;
+}
+
+.backButton svg {
+  margin-right: 8px;
+}
+
+/* Add new styles for the learning overview */
+.learningOverview {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  gap: 20px;
+}
+
+.overviewItem {
+  flex: 1;
+  background: #f9fbff;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overviewItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.overviewIcon {
+  background: rgba(74, 108, 247, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #4a6cf7;
+}
+
+.overviewContent {
+  flex: 1;
+}
+
+.overviewLabel {
+  font-size: 14px;
+  color: #5c6b89;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.overviewValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a3353;
+  margin-bottom: 5px;
+}
+
+.overviewDescription {
+  font-size: 12px;
+  color: #8e9aaf;
+  font-weight: 400;
+}
+
+/* Add responsive styles for mobile devices */
+@media (max-width: 768px) {
+  .learningOverview {
+    flex-direction: column;
+  }
+  
+  .overviewItem {
+    margin-bottom: 15px;
+  }
+}
+
+/* Add styles for the prediction button animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.predictionActions .actionButton svg {
+  transition: transform 0.3s ease;
+}
+
+.predictionActions .actionButton:hover svg {
+  animation: spin 1s linear infinite;
+}
+
+/* Improve the styling of actionButton */
+.actionButton {
+  margin: 0 8px 8px 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart and Data Visualization */
+.testResultsTable {
+  width: 100%;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  min-height: 335px;
+}
+
+.testResultsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.testResultsTable th:nth-child(1),
+.testResultsTable td:nth-child(1) {
+  width: 45%;
+}
+
+.testResultsTable th:nth-child(2),
+.testResultsTable td:nth-child(2) {
+  width: 15%;
+}
+
+.testResultsTable th:nth-child(3),
+.testResultsTable td:nth-child(3) {
+  width: 15%;
+}
+
+.testResultsTable th:nth-child(4),
+.testResultsTable td:nth-child(4) {
+  width: 25%;
+}
+
+.testResultsTable th, .testResultsTable td {
+  padding: 10px;
+  text-align: left;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 48px;
+  line-height: 1.5;
+}
+
+.testResultsTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.testResultsTable td {
+  border-top: 1px solid #dee2e6;
+}
+
+.testResultsTable tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.noResultsMessage {
+  padding: 30px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Phân trang */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+
+.pageButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pageButton:hover:not(.disabled):not(.active) {
+  background-color: #f0f0f0;
+  border-color: #ced4da;
+}
+
+.pageButton.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.pageButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageEllipsis {
+  margin: 0 5px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.loadingTableContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 20;
+}
+
+.loadingTableContainer .loadingText {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #6c757d;
+} 
