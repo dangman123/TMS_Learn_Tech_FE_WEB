@@ -78,7 +78,7 @@ const HeaderProfile: React.FC = () => {
         </div>
 
         <div className="header-profile-actions">
-          <div className="header-profile-search">
+          {/* <div className="header-profile-search">
             <input type="text" placeholder="Tìm kiếm..." />
             <button type="button">
               <Icon.Search />
@@ -136,10 +136,10 @@ const HeaderProfile: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="header-profile-user">
-            <div className="header-profile-user-avatar">
+            {/* <div className="header-profile-user-avatar">
               <img
                 // src="/assets/images/avatar-default.png"
                 alt={userName}
@@ -147,7 +147,7 @@ const HeaderProfile: React.FC = () => {
                   e.currentTarget.src = "/assets/images/avatar-default.png";
                 }}
               />
-            </div>
+            </div> */}
             <div className="header-profile-user-info">
               <span className="header-profile-user-name">{userName}</span>
               <span className="header-profile-user-role">Học viên</span>

@@ -12,6 +12,7 @@ import { formatCurrency } from "./formatCurrency";
 import { GET_USER_TOP6_COURSE } from "../../api/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { sendActionActivity } from "../../service/WebSocketActions";
 const CoursesSlider: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
 
@@ -24,6 +25,17 @@ const CoursesSlider: React.FC = () => {
       .catch((error) => {
         console.error("Error fetching courses:", error);
       });
+    
+    const authData = localStorage.getItem("authData");
+    const accountId = authData ? JSON.parse(authData).id : null;
+    if (accountId) {
+      const data = { "testId": null,  "lessonId": null, "videoId": null, "action": "Xem khóa học"  }
+      sendActionActivity(accountId.toString(), "/app/view_course", data, "Xem khóa học" )
+    }
+    // sendActionActivity(accountId, "/app/view_course", data, "Xem khóa học" + courses[0].title)
+
+
+    
   }, []);
   const handleLockedCourse = () => {
     toast.error("Khóa học đã bị khóa!", {

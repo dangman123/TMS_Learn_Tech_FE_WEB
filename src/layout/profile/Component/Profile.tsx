@@ -38,7 +38,19 @@ function Profile() {
     setIsUpgradePopupVisible(false);
   };
 
-  const userId = JSON.parse(localStorage.getItem("authData") || "{}").id;
+  // const userId = JSON.parse(localStorage.getItem("authData") || "{}").id;
+  const getAuthData = () => {
+    const authData = localStorage.getItem("authData");
+    if (authData) {
+      try {
+        return JSON.parse(authData);
+      } catch (error) {
+        console.error("Error parsing authData:", error);
+        return null;
+      }
+    }
+    return null;
+  };
   const [fullname, setFullname] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
@@ -55,9 +67,21 @@ function Profile() {
     string | null
   >(null);
 
+  const [commentNotifications, setCommentNotifications] = useState<boolean>(true);
+  const [courseUpdates, setCourseUpdates] = useState<boolean>(true);
+  const [achievementNotifications, setAchievementNotifications] = useState<boolean>(true);
+  const [promotions, setPromotions] = useState<boolean>(false);
+  const [settingsLoading, setSettingsLoading] = useState<boolean>(false);
+
+  // Add a new state for study reminders
+  const [studyReminderEnabled, setStudyReminderEnabled] = useState<boolean>(false);
+  const [studyReminderTime, setStudyReminderTime] = useState<string>("08:00");
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        const authData = getAuthData();
+        const userId = authData?.id;
         let token = localStorage.getItem("authToken");
 
         if (isTokenExpired(token)) {
@@ -106,7 +130,7 @@ function Profile() {
     };
 
     fetchProfile();
-  }, [userId]);
+  }, []);
 
   const validateForm = () => {
     if (!fullname) {
@@ -135,7 +159,7 @@ function Profile() {
 
   const validatePassword = () => {
     const errors = [];
-    
+
     // Kiểm tra mật khẩu hiện tại
     if (!currentPassword) {
       errors.push("Mật khẩu hiện tại không được để trống");
@@ -181,7 +205,7 @@ function Profile() {
       errors.forEach(error => toast.error(error));
       return false;
     }
-    
+
     return true;
   };
 
@@ -192,7 +216,8 @@ function Profile() {
 
     try {
       let token = localStorage.getItem("authToken");
-
+      const authData = getAuthData();
+      const userId = authData?.id;
       if (isTokenExpired(token)) {
         token = await refresh();
         if (!token) {
@@ -224,7 +249,7 @@ function Profile() {
       });
 
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/account/update/${userId}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/account/update/${authData?.id}`,
         {
           method: "PUT",
           body: formData,
@@ -241,7 +266,7 @@ function Profile() {
       if (response.ok) {
         if (responseData.status === 200) {
           toast.success(responseData.message || "Cập nhật thành công!");
-          
+
           setTimeout(() => {
             window.location.reload();
           }, 2000);
@@ -263,48 +288,48 @@ function Profile() {
       toast.error("Vui lòng nhập mật khẩu hiện tại");
       return;
     }
-    
+
     if (!newPassword) {
       toast.error("Vui lòng nhập mật khẩu mới");
       return;
     }
-    
+
     if (!confirmPassword) {
       toast.error("Vui lòng nhập xác nhận mật khẩu");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       toast.error("Mật khẩu mới và xác nhận không khớp");
       return;
     }
-    
+
     // Kiểm tra định dạng mật khẩu mới
     if (newPassword.length < 8) {
       toast.error("Mật khẩu mới phải có ít nhất 8 ký tự");
       return;
     }
-    
+
     if (!/[A-Z]/.test(newPassword)) {
       toast.error("Mật khẩu mới phải có ít nhất 1 chữ hoa");
       return;
     }
-    
+
     if (!/[a-z]/.test(newPassword)) {
       toast.error("Mật khẩu mới phải có ít nhất 1 chữ thường");
       return;
     }
-    
+
     if (!/[0-9]/.test(newPassword)) {
       toast.error("Mật khẩu mới phải có ít nhất 1 chữ số");
       return;
     }
-    
+
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword)) {
       toast.error("Mật khẩu mới phải có ít nhất 1 ký tự đặc biệt");
       return;
     }
-    
+
     // Tiếp tục gọi API nếu tất cả các điều kiện đều hợp lệ
     console.log("Password validation passed, proceeding with API call");
     let token = localStorage.getItem("authToken");
@@ -324,6 +349,8 @@ function Profile() {
     };
 
     try {
+      const authData = getAuthData();
+      const userId = authData?.id;
       console.log("Sending change password request", { userId });
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_HOST}/api/account/change-password/${userId}`,
@@ -344,7 +371,7 @@ function Profile() {
       if (response.ok) {
         if (responseData.status === 200) {
           toast.success(responseData.message || "Đổi mật khẩu thành công!");
-          
+
           // Reset form fields after successful password change
           setCurrentPassword("");
           setNewPassword("");
@@ -371,6 +398,317 @@ function Profile() {
       const file = event.target.files[0];
       setSelectedImagePreview(URL.createObjectURL(file));
       setSelectedImage(file);
+    }
+  };
+
+  const updateNotificationSettings = async (
+    notificationType: 'commentNotifications' | 'courseUpdates' | 'achievementNotifications' | 'promotions' | 'studyReminder',
+    enabled: boolean
+  ) => {
+    try {
+      const authData = getAuthData();
+      if (!authData || !authData.id) {
+        toast.error("Bạn cần đăng nhập để thay đổi cài đặt thông báo");
+        return;
+      }
+
+      let token = localStorage.getItem("authToken");
+      if (isTokenExpired(token)) {
+        token = await refresh();
+        if (!token) {
+          window.location.href = "/dang-nhap";
+          return;
+        }
+        localStorage.setItem("authToken", token);
+      }
+
+      setSettingsLoading(true);
+
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/user-notifications-settings/account/${authData.id}/settings/${notificationType}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ enabled }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to update notification settings: ${response.status}`);
+      }
+
+      toast.success("Cập nhật cài đặt thông báo thành công");
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      toast.error("Lỗi khi cập nhật cài đặt thông báo");
+      throw error;
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleToggleSetting = (
+    settingType: 'commentNotifications' | 'courseUpdates' | 'achievementNotifications' | 'promotions' | 'studyReminder',
+    newValue: boolean
+  ) => {
+    // Update UI immediately for responsiveness
+    const settingSetters = {
+      commentNotifications: setCommentNotifications,
+      courseUpdates: setCourseUpdates,
+      achievementNotifications: setAchievementNotifications,
+      promotions: setPromotions,
+      studyReminder: setStudyReminderEnabled
+    };
+
+    settingSetters[settingType](newValue);
+
+    // Call API to update setting
+    updateNotificationSettings(settingType, newValue)
+      .catch(() => {
+        // Revert UI state on error
+        settingSetters[settingType](!newValue);
+      });
+  };
+
+  const resetNotificationDefaults = () => {
+    // Update UI immediately
+    setCommentNotifications(true);
+    setCourseUpdates(true);
+    setAchievementNotifications(true);
+    setPromotions(false);
+    setStudyReminderEnabled(false);
+    setStudyReminderTime("08:00");
+
+    // Get user data
+    const authData = getAuthData();
+    if (!authData || !authData.id) {
+      toast.error("Bạn cần đăng nhập để thay đổi cài đặt thông báo");
+      return;
+    }
+
+    // Call API to update all settings
+    setSettingsLoading(true);
+
+    Promise.all([
+      updateNotificationSettings('commentNotifications', true),
+      updateNotificationSettings('courseUpdates', true),
+      updateNotificationSettings('achievementNotifications', true),
+      updateNotificationSettings('promotions', false),
+      updateStudyReminderSettings(false, "08:00")
+    ])
+      .then(() => {
+        toast.success("Đã đặt lại cài đặt mặc định");
+      })
+      .catch(error => {
+        console.error("Error resetting notification settings:", error);
+        toast.error("Lỗi khi đặt lại cài đặt mặc định");
+      })
+      .finally(() => {
+        setSettingsLoading(false);
+      });
+  };
+
+  // Add a function to update study reminder settings
+  const updateStudyReminderSettings = async (enabled: boolean, time: string) => {
+    try {
+      const authData = getAuthData();
+      if (!authData || !authData.id) {
+        toast.error("Bạn cần đăng nhập để thay đổi cài đặt nhắc nhở");
+        return;
+      }
+
+      let token = localStorage.getItem("authToken");
+      if (isTokenExpired(token)) {
+        token = await refresh();
+        if (!token) {
+          window.location.href = "/dang-nhap";
+          return;
+        }
+        localStorage.setItem("authToken", token);
+      }
+
+      setSettingsLoading(true);
+
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/user-notifications-settings/account/${authData.id}/settings/study-reminder`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ enabled, reminderTime: time }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to update study reminder settings: ${response.status}`);
+      }
+
+      toast.success("Cập nhật cài đặt nhắc nhở học tập thành công");
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating study reminder settings:", error);
+      toast.error("Lỗi khi cập nhật cài đặt nhắc nhở học tập");
+      throw error;
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  // Add a handler for study reminder toggle
+  const handleStudyReminderToggle = (enabled: boolean) => {
+    setStudyReminderEnabled(enabled);
+    updateStudyReminderSettings(enabled, studyReminderTime)
+      .catch(() => {
+        // Revert UI state on error
+        setStudyReminderEnabled(!enabled);
+      });
+  };
+
+  // Add a handler for study reminder time change
+  const handleStudyReminderTimeChange = (time: string) => {
+    setStudyReminderTime(time);
+    // Only update if reminder is enabled
+    if (studyReminderEnabled) {
+      updateStudyReminderSettings(studyReminderEnabled, time)
+        .catch(() => {
+          // Revert UI state on error
+          setStudyReminderTime(studyReminderTime);
+        });
+    }
+  };
+
+  // Add a function to fetch all notification settings
+  const fetchNotificationSettings = async () => {
+    try {
+      const authData = getAuthData();
+      if (!authData || !authData.id) {
+        toast.error("Bạn cần đăng nhập để xem cài đặt thông báo");
+        return;
+      }
+
+      let token = localStorage.getItem("authToken");
+      if (isTokenExpired(token)) {
+        token = await refresh();
+        if (!token) {
+          window.location.href = "/dang-nhap";
+          return;
+        }
+        localStorage.setItem("authToken", token);
+      }
+
+      setSettingsLoading(true);
+
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/user-notifications-settings/account/${authData.id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch notification settings: ${response.status}`);
+      }
+
+      const settings = await response.json();
+
+      // Update all the settings states with the retrieved values
+      if (settings) {
+        // Update notification toggles
+        setCommentNotifications(settings.commentNotifications || true);
+        setCourseUpdates(settings.courseUpdates || true);
+        setAchievementNotifications(settings.achievementNotifications || true);
+        setPromotions(settings.promotions || false);
+
+        // Update study reminder settings
+        if (settings.studyReminder) {
+          setStudyReminderEnabled(settings.studyReminder.enabled || false);
+          setStudyReminderTime(settings.studyReminder.reminderTime || "08:00");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching notification settings:", error);
+      toast.error("Không thể tải cài đặt thông báo");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  // Add a useEffect to fetch notification settings when the tab changes to "settingForm"
+  useEffect(() => {
+    if (activeTab === "settingForm") {
+      fetchNotificationSettings();
+    }
+  }, [activeTab]);
+
+  // Add a function to save all notification settings at once
+  const saveAllNotificationSettings = async () => {
+    const authData = getAuthData();
+    if (!authData || !authData.id) {
+      toast.error("Bạn cần đăng nhập để lưu cài đặt thông báo");
+      return;
+    }
+
+    setSettingsLoading(true);
+
+    try {
+      let token = localStorage.getItem("authToken");
+      if (isTokenExpired(token)) {
+        token = await refresh();
+        if (!token) {
+          window.location.href = "/dang-nhap";
+          return;
+        }
+        localStorage.setItem("authToken", token);
+      }
+
+      // Prepare settings payload
+      const settingsPayload = {
+        commentNotifications,
+        courseUpdates,
+        achievementNotifications,
+        promotions,
+        studyReminder: {
+          enabled: studyReminderEnabled,
+          reminderTime: studyReminderTime
+        }
+      };
+
+      // Send all settings in a single request
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_HOST}/api/user-notifications-settings/account/${authData.id}/settings/all`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(settingsPayload)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to save notification settings: ${response.status}`);
+      }
+
+      toast.success("Đã lưu tất cả cài đặt thông báo thành công!");
+    } catch (error) {
+      console.error("Error saving all notification settings:", error);
+      toast.error("Lỗi khi lưu cài đặt thông báo");
+
+      // Refresh settings to ensure UI is in sync with server
+      await fetchNotificationSettings();
+    } finally {
+      setSettingsLoading(false);
     }
   };
 
@@ -404,12 +742,12 @@ function Profile() {
                 label: "Mật khẩu",
                 form: "changePasswordForm",
               },
-              {
-                id: "appearanceForm",
-                icon: "fas fa-palette",
-                label: "Cài đặt giao diện",
-                form: "appearanceForm",
-              },
+              // {
+              //   id: "appearanceForm",
+              //   icon: "fas fa-palette",
+              //   label: "Cài đặt giao diện",
+              //   form: "appearanceForm",
+              // },
               {
                 id: "privateFrom",
                 icon: "fas fa-exclamation-triangle",
@@ -426,9 +764,8 @@ function Profile() {
               <li key={item.id} className="settings-itemm">
                 <a
                   href="#"
-                  className={`settings-link ${
-                    activeTab === item.form ? "active" : ""
-                  }`}
+                  className={`settings-link ${activeTab === item.form ? "active" : ""
+                    }`}
                   onClick={(e) => {
                     e.preventDefault();
                     handleTabClick(item.form);
@@ -622,7 +959,7 @@ function Profile() {
           </div>
         )}
 
-  
+
 
         {/* Delete Component */}
         {activeTab === "privateFrom" && (
@@ -630,7 +967,7 @@ function Profile() {
             {" "}
             <div className="form-section">
               {" "}
-              <DeleteAccount userId={userId.id} />
+              <DeleteAccount userId={getAuthData()?.id} />
             </div>
           </div>
         )}
@@ -658,7 +995,12 @@ function Profile() {
                     </div>
                   </div>
                   <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
+                    <input
+                      type="checkbox"
+                      checked={commentNotifications}
+                      onChange={(e) => handleToggleSetting('commentNotifications', e.target.checked)}
+                      disabled={settingsLoading}
+                    />
                     <span className="toggle-slider"></span>
                   </label>
                 </div>
@@ -674,7 +1016,12 @@ function Profile() {
                     </div>
                   </div>
                   <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
+                    <input
+                      type="checkbox"
+                      checked={courseUpdates}
+                      onChange={(e) => handleToggleSetting('courseUpdates', e.target.checked)}
+                      disabled={settingsLoading}
+                    />
                     <span className="toggle-slider"></span>
                   </label>
                 </div>
@@ -693,7 +1040,12 @@ function Profile() {
                     </div>
                   </div>
                   <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
+                    <input
+                      type="checkbox"
+                      checked={achievementNotifications}
+                      onChange={(e) => handleToggleSetting('achievementNotifications', e.target.checked)}
+                      disabled={settingsLoading}
+                    />
                     <span className="toggle-slider"></span>
                   </label>
                 </div>
@@ -708,27 +1060,75 @@ function Profile() {
                     </div>
                   </div>
                   <label className="toggle-switch">
-                    <input type="checkbox" />
+                    <input
+                      type="checkbox"
+                      checked={promotions}
+                      onChange={(e) => handleToggleSetting('promotions', e.target.checked)}
+                      disabled={settingsLoading}
+                    />
                     <span className="toggle-slider"></span>
                   </label>
                 </div>
               </div>
 
+              <div className="settings-section">
+                <h3 className="settings-section-title">Cài đặt giờ nhắc học</h3>
+
+                <div className="settings-option">
+                  <div className="settings-option-info">
+                    <div className="settings-option-title">
+                      Nhắc nhở học tập hàng ngày
+                    </div>
+                    <div className="settings-option-description">
+                      Nhận thông báo nhắc nhở học tập vào thời gian bạn chọn mỗi ngày
+                    </div>
+                  </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={studyReminderEnabled}
+                      onChange={(e) => handleStudyReminderToggle(e.target.checked)}
+                      disabled={settingsLoading}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
+
+                {studyReminderEnabled && (
+                  <div className="settings-option time-option">
+                    <div className="settings-option-info">
+                      <div className="settings-option-title">
+                        Thời gian nhắc nhở
+                      </div>
+                      <div className="settings-option-description">
+                        Chọn thời gian bạn muốn nhận thông báo nhắc nhở
+                      </div>
+                    </div>
+                    <div className="time-picker">
+                      <input
+                        type="time"
+                        value={studyReminderTime}
+                        onChange={(e) => handleStudyReminderTimeChange(e.target.value)}
+                        disabled={settingsLoading}
+                        className="form-control time-input"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="settings-actions">
                 <button
                   className="btn btn-primary"
-                  onClick={() => {
-                    toast.success("Đã lưu cài đặt thông báo!");
-                  }}
+                  onClick={saveAllNotificationSettings}
+                  disabled={settingsLoading}
                 >
-                  Lưu cài đặt
+                  {settingsLoading ? "Đang lưu..." : "Lưu cài đặt"}
                 </button>
                 <button
                   className="reset-defaults-button-2"
-                  onClick={() => {
-                    // Logic đặt lại cài đặt mặc định
-                    toast.info("Đã đặt lại cài đặt mặc định");
-                  }}
+                  onClick={resetNotificationDefaults}
+                  disabled={settingsLoading}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -743,7 +1143,7 @@ function Profile() {
                       d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"
                     />
                   </svg>
-                  Đặt lại mặc định
+                  {settingsLoading ? "Đang đặt lại..." : "Đặt lại mặc định"}
                 </button>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./ComboDetail.css";
 import useCozeChat from "../../../../hooks/useCozeChat";
+import { sendActionActivity } from "../../../../service/WebSocketActions";
 
 interface Course {
   id: number;
@@ -226,6 +227,13 @@ const ComboDetail: React.FC = () => {
       if (responseData.status === 200) {
         toast.success("Đã thêm combo vào giỏ hàng");
         setIsInCart(true);
+
+        if (userId) {
+          const data = { "testId": null, "courseId": null, "lessonId": null, "videoId": null,"comboId": comboDetail?.id, "action": "Thêm combo vào giỏ hàng" + comboDetail?.name }
+          sendActionActivity(userId?.toString() || "", "/app/add_course_to_cart", data, "Thêm combo vào giỏ hàng" + comboDetail?.name)
+        }
+        
+        // sendActionActivity(userId?.toString() || "", "/app/add_course_to_cart", data, "Thêm combo vào giỏ hàng" + comboDetail?.name)
         
         // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
         window.dispatchEvent(new Event('cart-updated'));

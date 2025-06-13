@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+    import SockJS from 'sockjs-client';
 
 // Create a proper typed context with null as default
 const WebSocketContext = createContext<Client | null>(null);

@@ -64,9 +64,9 @@ interface UserAnswer {
 const TakeTest: React.FC = () => {
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
-  
+
   // Áp dụng hook chống DevTools khi đang làm bài thi
-  usePreventDevTools("Không được phép sử dụng công cụ phát triển trong quá trình làm bài thi!");
+  // usePreventDevTools("Không được phép sử dụng công cụ phát triển trong quá trình làm bài thi!");
 
   const [testData, setTestData] = useState<TestData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -90,7 +90,7 @@ const TakeTest: React.FC = () => {
       let token = localStorage.getItem("authToken");
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_SERVER_HOST}/api/questions/test-mobile/69`,
+          `${process.env.REACT_APP_SERVER_HOST}/api/questions/test-mobile/${testId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -126,7 +126,7 @@ const TakeTest: React.FC = () => {
     };
 
     fetchTestData();
-  }, [testId, navigate]);
+  }, [testId]);
 
   // Timer effect
   useEffect(() => {
@@ -246,12 +246,12 @@ const TakeTest: React.FC = () => {
   // Calculate if all questions are answered
   const allQuestionsAnswered = () => {
     if (!testData) return false;
-    
+
     return userAnswers.every((answer) => {
       // Check if any answer type is filled based on the question type
       const question = testData.questionList.find(q => q.questionId === answer.questionId);
       if (!question) return false;
-      
+
       switch (question.type) {
         case "multiple-choice":
           return answer.selectedOption !== null;
@@ -286,13 +286,13 @@ const TakeTest: React.FC = () => {
   const handleSubmitTest = async () => {
     // Clear any previous validation errors
     setValidationError(null);
-    
+
     // Check if all questions are answered
     if (!allQuestionsAnswered()) {
       setValidationError("Bạn cần trả lời tất cả các câu hỏi trước khi nộp bài.");
       return;
     }
-    
+
     if (confirmSubmit) {
       setTestSubmitted(true);
 
@@ -437,9 +437,8 @@ const TakeTest: React.FC = () => {
         return (
           <div className={styles.optionsContainer}>
             <div
-              className={`${styles.optionItem} ${
-                answer?.selectedOption === "A" ? styles.selectedOption : ""
-              }`}
+              className={`${styles.optionItem} ${answer?.selectedOption === "A" ? styles.selectedOption : ""
+                }`}
               onClick={() => handleOptionSelect(question.questionId, "A")}
             >
               <div className={styles.optionMark}>A</div>
@@ -447,9 +446,8 @@ const TakeTest: React.FC = () => {
             </div>
 
             <div
-              className={`${styles.optionItem} ${
-                answer?.selectedOption === "B" ? styles.selectedOption : ""
-              }`}
+              className={`${styles.optionItem} ${answer?.selectedOption === "B" ? styles.selectedOption : ""
+                }`}
               onClick={() => handleOptionSelect(question.questionId, "B")}
             >
               <div className={styles.optionMark}>B</div>
@@ -457,9 +455,8 @@ const TakeTest: React.FC = () => {
             </div>
 
             <div
-              className={`${styles.optionItem} ${
-                answer?.selectedOption === "C" ? styles.selectedOption : ""
-              }`}
+              className={`${styles.optionItem} ${answer?.selectedOption === "C" ? styles.selectedOption : ""
+                }`}
               onClick={() => handleOptionSelect(question.questionId, "C")}
             >
               <div className={styles.optionMark}>C</div>
@@ -467,9 +464,8 @@ const TakeTest: React.FC = () => {
             </div>
 
             <div
-              className={`${styles.optionItem} ${
-                answer?.selectedOption === "D" ? styles.selectedOption : ""
-              }`}
+              className={`${styles.optionItem} ${answer?.selectedOption === "D" ? styles.selectedOption : ""
+                }`}
               onClick={() => handleOptionSelect(question.questionId, "D")}
             >
               <div className={styles.optionMark}>D</div>
@@ -482,11 +478,10 @@ const TakeTest: React.FC = () => {
         return (
           <div className={styles.optionsContainer}>
             <div
-              className={`${styles.checkboxItem} ${
-                answer?.selectedOptions.includes("1")
-                  ? styles.selectedCheckbox
-                  : ""
-              }`}
+              className={`${styles.checkboxItem} ${answer?.selectedOptions.includes("1")
+                ? styles.selectedCheckbox
+                : ""
+                }`}
               onClick={() => handleCheckboxSelect(question.questionId, "1")}
             >
               <div className={styles.checkboxMark}>
@@ -500,11 +495,10 @@ const TakeTest: React.FC = () => {
             </div>
 
             <div
-              className={`${styles.checkboxItem} ${
-                answer?.selectedOptions.includes("2")
-                  ? styles.selectedCheckbox
-                  : ""
-              }`}
+              className={`${styles.checkboxItem} ${answer?.selectedOptions.includes("2")
+                ? styles.selectedCheckbox
+                : ""
+                }`}
               onClick={() => handleCheckboxSelect(question.questionId, "2")}
             >
               <div className={styles.checkboxMark}>
@@ -518,11 +512,10 @@ const TakeTest: React.FC = () => {
             </div>
 
             <div
-              className={`${styles.checkboxItem} ${
-                answer?.selectedOptions.includes("3")
-                  ? styles.selectedCheckbox
-                  : ""
-              }`}
+              className={`${styles.checkboxItem} ${answer?.selectedOptions.includes("3")
+                ? styles.selectedCheckbox
+                : ""
+                }`}
               onClick={() => handleCheckboxSelect(question.questionId, "3")}
             >
               <div className={styles.checkboxMark}>
@@ -536,11 +529,10 @@ const TakeTest: React.FC = () => {
             </div>
 
             <div
-              className={`${styles.checkboxItem} ${
-                answer?.selectedOptions.includes("4")
-                  ? styles.selectedCheckbox
-                  : ""
-              }`}
+              className={`${styles.checkboxItem} ${answer?.selectedOptions.includes("4")
+                ? styles.selectedCheckbox
+                : ""
+                }`}
               onClick={() => handleCheckboxSelect(question.questionId, "4")}
             >
               <div className={styles.checkboxMark}>
@@ -776,16 +768,14 @@ const TakeTest: React.FC = () => {
               Câu {currentQuestionIndex + 1}/{testData.questionList.length}
             </div>
             <button
-              className={`${styles.markButton} ${
-                currentAnswer?.isMarked ? styles.marked : ""
-              }`}
+              className={`${styles.markButton} ${currentAnswer?.isMarked ? styles.marked : ""
+                }`}
               onClick={() => handleMarkQuestion(currentQuestion.questionId)}
             >
               {currentAnswer?.isMarked ? "Bỏ đánh dấu" : "Đánh dấu xem lại"}
               <i
-                className={`fas fa-bookmark ${
-                  currentAnswer?.isMarked ? styles.markedIcon : ""
-                }`}
+                className={`fas fa-bookmark ${currentAnswer?.isMarked ? styles.markedIcon : ""
+                  }`}
               ></i>
             </button>
           </div>
@@ -835,10 +825,10 @@ const TakeTest: React.FC = () => {
             <h3>Xác nhận nộp bài</h3>
             <p>
               Bạn đã trả lời{" "}
-              {userAnswers.filter((a) => 
-                a.selectedOption !== null || 
-                a.selectedOptions.length > 0 || 
-                a.essayAnswer.trim() !== "" || 
+              {userAnswers.filter((a) =>
+                a.selectedOption !== null ||
+                a.selectedOptions.length > 0 ||
+                a.essayAnswer.trim() !== "" ||
                 a.fillAnswer.trim() !== ""
               ).length}/
               {testData.questionList.length} câu hỏi.
@@ -863,7 +853,7 @@ const TakeTest: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Results Popup */}
       {testResult && (
         <Suspense fallback={<div className={styles.loadingContainer}>

@@ -24,6 +24,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  
   const listenAndSendLoginData = (accountId:number) => {
     // Bạn có thể gửi sự kiện qua WebSocket hoặc API để ghi lại hành động
     const socket = new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`);

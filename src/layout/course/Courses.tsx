@@ -34,7 +34,7 @@ function Courses() {
   // Initialize Coze Chat
   useCozeChat({
     token: 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe',
-      title: 'TMS Tư Vấn'
+    title: 'TMS Tư Vấn'
   });
 
   const courseCategoryId = localStorage.getItem("iddanhmuckhoahoc");
@@ -75,14 +75,14 @@ function Courses() {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        
+
         const responseData = await response.json();
         console.log("API Response:", responseData); // Log để debug
-        
+
         // Trích xuất dữ liệu theo đúng cấu trúc API
         let coursesData: CourseListUser[] = [];
         let totalPagesCount = 0;
-        
+
         if (courseCategoryId) {
           // Cấu trúc API cho GET_COURSES_BY_CATEGORIES
           if (responseData.status === 200 && responseData.data) {
@@ -96,7 +96,7 @@ function Courses() {
             totalPagesCount = responseData.data.totalPages || 0;
           }
         }
-        
+
         setCourses(coursesData);
         setTotalPages(totalPagesCount);
         setLoading(false);
@@ -148,8 +148,8 @@ function Courses() {
 
   const filteredCourses = courses && courses.length > 0
     ? courses.filter((course) =>
-        course.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      course.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : [];
 
   const handleSearchChange = (query: string) => {
@@ -168,8 +168,8 @@ function Courses() {
       style={{ backgroundColor: "rgb(243 244 246)" }}
     >
       <div className="container" style={{ marginTop: "0px", padding: "0px" }}>
-    
-        
+
+
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12">
             <div className="row">
@@ -184,7 +184,7 @@ function Courses() {
               </div>
             </div>
           </div>
-          
+
           {/* Course Combo Section */}
           <div className="col-lg-12 col-md-12 col-sm-12">
             <div className="row">
@@ -194,19 +194,19 @@ function Courses() {
             </div>
           </div>
 
-    {/* Featured Courses Section */}
-    <div className="row mb-5">
-          <div className="col-12">
-            <CourseListRow title="Khóa Học Nổi Bật" type="popular" />
+          {/* Featured Courses Section */}
+          <div className="row mb-5">
+            <div className="col-12">
+              <CourseListRow title="Khóa Học Nổi Bật" type="popular" />
+            </div>
           </div>
-        </div>
-        
-        {/* Discounted Courses Section */}
-        <div className="row mb-5">
-          <div className="col-12">
-            <CourseListRow title="Khóa Học Giảm Giá" type="discount" />
+
+          {/* Discounted Courses Section */}
+          <div className="row mb-5">
+            <div className="col-12">
+              <CourseListRow title="Khóa Học Giảm Giá" type="discount" />
+            </div>
           </div>
-        </div>
           <div className="col-lg-12 col-md-12 col-sm-12">
             <CourseList courses={filteredCourses} />
             <div className="pegi justify-content-center mt-60">
@@ -231,9 +231,8 @@ function Courses() {
               <a
                 href="#0"
                 onClick={() => handlePageChange(currentPage + 1)}
-                className={`border-none ${
-                  currentPage === totalPages - 1 ? "disabled" : ""
-                }`}
+                className={`border-none ${currentPage === totalPages - 1 ? "disabled" : ""
+                  }`}
                 aria-disabled={currentPage === totalPages - 1}
               >
                 <i className="fa-regular fa-arrow-right primary-color transition"></i>

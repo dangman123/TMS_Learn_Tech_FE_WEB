@@ -3,6 +3,7 @@ import "./Cart.css";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FiShoppingBag, FiTrash2, FiCheck, FiShoppingCart, FiTag, FiGift, FiPackage } from "react-icons/fi";
+import { sendActionActivity } from "../../service/WebSocketActions";
 
 interface CourseBundleResponse {
   id: number;
@@ -104,7 +105,7 @@ function Cart() {
         selectedItems.includes(item.cartItemId) &&
         item.courseId !== null
     );
-    
+
     // Chỉ fetch recommendations cho những item chưa có
     const itemsNeedingRecs = selectedCourseItems.filter(item => !item.combos);
 
@@ -225,10 +226,10 @@ function Cart() {
 
       // Phát sự kiện để cập nhật số lượng giỏ hàng trong header
       window.dispatchEvent(new Event('cart-updated'));
-      
+
       // Cập nhật UI ngay lập tức
       setCart(prevCart => prevCart.filter(item => item.cartItemId !== cartItemId));
-      
+
       // Đồng bộ lại với server sau
       fetchCart();
     } catch (err) {
@@ -250,7 +251,7 @@ function Cart() {
         toast.error("Bạn cần đăng nhập để xóa sản phẩm");
         return;
       }
-      
+
       const itemsToRemove = [...selectedItems];
 
       // Cập nhật UI trước
@@ -259,7 +260,7 @@ function Cart() {
 
       // Xóa song song trên server
       await Promise.all(
-        itemsToRemove.map(cartItemId => 
+        itemsToRemove.map(cartItemId =>
           fetch(`${process.env.REACT_APP_SERVER_HOST}/api/cart/${cartItemId}/remove`, {
             method: 'DELETE',
             headers: {
@@ -270,9 +271,9 @@ function Cart() {
       );
 
       toast.success(`Đã xóa ${itemsToRemove.length} sản phẩm khỏi giỏ hàng`);
-      
+
       window.dispatchEvent(new Event('cart-updated'));
-      
+
       // Đồng bộ lại state cuối cùng từ server
       fetchCart();
     } catch (err) {
@@ -329,7 +330,7 @@ function Cart() {
 
       const token = getToken();
       const userData = getUserData();
-      
+
       if (!token || !userData?.id) {
         toast.error("Bạn cần đăng nhập để áp dụng mã giảm giá");
         return;
@@ -351,17 +352,17 @@ function Cart() {
         toast.error(responseData.message || "Mã giảm giá không hợp lệ hoặc đã hết hạn");
         return;
       }
-      
+
       if (responseData.status === 200 && responseData.data) {
         const discountPercent = responseData.data.discountValue || 0;
         setDiscount(discountPercent);
-        
+
         // Tính toán lại tổng tiền với mã giảm giá
         const selectedCarts = cart.filter(item => selectedItems.includes(item.cartItemId));
         const subtotal = selectedCarts.reduce((acc, item) => acc + item.price, 0);
         const discountedTotal = subtotal * (1 - discountPercent / 100);
         setTotalPrice(discountedTotal);
-        
+
         toast.success(`Áp dụng mã giảm giá thành công: Giảm ${discountPercent}%`);
       } else {
         toast.error(responseData.message || "Mã giảm giá không hợp lệ");
@@ -435,6 +436,14 @@ function Cart() {
         sessionStorage.setItem("walletId", "0");
       }
 
+      const userData = getUserData();
+      const accountId = userData?.id;
+      if (accountId) {
+        const data = { "testId": null, "courseId": null, "lessonId": null, "videoId": null, "action": "Thanh toán" }
+        sendActionActivity(accountId?.toString() || "", "/app/purchase_course", data, "Thanh toán khóa học")
+      }
+
+
 
       if (selectedItems.length === 0) {
         toast.warning("Vui lòng chọn sản phẩm để thanh toán");
@@ -493,10 +502,10 @@ function Cart() {
         if (!item.courseId) return null;
 
         const courseId = item.courseId;
-        
+
         // Use the correct API endpoint as provided
         const apiUrl = `${process.env.REACT_APP_SERVER_HOST}/api/cart/course/${courseId}/bundles`;
-        
+
         try {
           const response = await fetch(apiUrl, {
             method: 'GET',
@@ -511,7 +520,7 @@ function Cart() {
           }
 
           const data = await response.json();
-          
+
           if (data.status === 200 && data.data && data.data.length > 0) {
             // Map the API response to match our ComboRecommendation interface
             const combos = data.data.map((bundle: CourseBundleResponse) => ({

@@ -17,6 +17,7 @@ import { Client, Stomp } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import DocumentCourse from "./component/DocumentCourse";
 import usePreventDevTools from "../../hooks/usePreventDevTools";
+import { sendActionActivity } from "../../service/WebSocketActions";
 
 interface Progress {
   accountId: number;
@@ -169,7 +170,17 @@ export const CoursePageConvert = () => {
     lessonIndex: number,
     lesson: Lesson
   ) => {
-    listenAndSendVideoClick(accountId, parseInt(videoId));
+    // listenAndSendVideoClick(accountId, parseInt(videoId));
+
+
+
+    if (accountId) {
+      const data = { "testId": null, "courseId": courseId, "lessonId": lessonId, "videoId": videoId, "action": "Xem video" + lesson.lesson_title }
+      sendActionActivity(accountId.toString(), "/app/watch_video", data, "Xem video " + lesson.lesson_title)
+    }
+
+
+
 
     // If the lesson doesn't have a test, call the unlock-next API
     if (lesson.lesson_test === null) {
@@ -246,7 +257,7 @@ export const CoursePageConvert = () => {
     lessonIndex: number,
     lesson: Lesson
   ) => {
-    listenAndSendTestClick(accountId, parseInt(testId));
+    // listenAndSendTestClick(accountId, parseInt(testId));
     let testIDStore = localStorage.getItem("testIDSTORE");
     if (testId !== testIDStore) {
       localStorage.removeItem("testIDSTORE");
@@ -264,6 +275,26 @@ export const CoursePageConvert = () => {
       type: "test",
       title: "",
     });
+
+
+
+
+    const authData = localStorage.getItem("authData");
+    const accountId = authData ? JSON.parse(authData).id : null;
+
+
+    const storedEncryptedCourseId = localStorage.getItem("encryptedCourseId");
+    const storedEncryptedLessonId = localStorage.getItem("encryptedLessonId");
+    if (storedEncryptedCourseId && !storedEncryptedLessonId) {
+      const decryptedCourseId = decryptData(storedEncryptedCourseId);
+      if (accountId) {
+        const data = { "testId": testId, "courseId": decryptedCourseId, "lessonId": lessonId, "videoId": null, "action": "Làm bài kiểm tra" + lesson.lesson_title }
+        sendActionActivity(accountId.toString(), "/app/start_exam", data, "Làm bài kiểm tra " + lesson.lesson_title)
+      }
+      // sendActionActivity(accountId, "/app/start_exam", data, "Làm bài kiểm tra " + lesson.lesson_title)
+    }
+
+
     const encryptedTestId = encryptData(testId);
     localStorage.setItem("encryptedTestId", encryptedTestId);
 

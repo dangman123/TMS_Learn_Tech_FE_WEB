@@ -1578,7 +1578,7 @@ const MessagesPage: React.FC = () => {
       <Layout style={{ background: '#fff', padding: '24px 0', minHeight: 'calc(100vh - 200px)' }}>
         <Sider width={320} theme="light" style={{ borderRight: '1px solid #f0f0f0' }}>
           <div style={{ padding: '0 16px', marginBottom: 16 }}>
-            <Button
+            {/* <Button
               type="primary"
               icon={<EditOutlined />}
               onClick={handleCompose}
@@ -1586,7 +1586,7 @@ const MessagesPage: React.FC = () => {
               style={{ marginBottom: 16 }}
             >
               Soạn tin nhắn
-            </Button>
+            </Button> */}
 
             <Search
               placeholder="Tìm liên hệ..."
@@ -1812,7 +1812,7 @@ const MessagesPage: React.FC = () => {
                               {msg.messageType === 'image' && msg.imageUrl ? (
                                 <div style={{ marginBottom: '8px' }}>
                                   <Image
-                                    src={msg.fromImage}
+                                    src={msg.content}
                                     alt="Image"
                                     style={{ maxWidth: '100%', borderRadius: '6px' }}
                                     preview={{
@@ -1872,7 +1872,7 @@ const MessagesPage: React.FC = () => {
                               ) : isImageUrl(msg.content) ? (
                                 <div style={{ marginBottom: '8px' }}>
                                   <Image
-                                    src={msg.fromImage}
+                                    src={msg.content}
                                     alt="Image"
                                     style={{ maxWidth: '100%', borderRadius: '6px' }}
                                     preview={{

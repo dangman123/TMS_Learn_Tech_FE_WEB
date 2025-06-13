@@ -20,6 +20,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import "./examDetail.css";
+import { sendActionActivity } from "../../../service/WebSocketActions";
 
 interface ExamData {
   testId: number;
@@ -134,11 +135,9 @@ const ExamDetail: React.FC = () => {
         const userId = getUserId();
 
         // Tạo URL API với accountId nếu đã đăng nhập
-        const apiUrl = `${
-          process.env.REACT_APP_SERVER_HOST
-        }/api/tests/exam/public/${testId}${
-          userId ? `?accountId=${userId}` : ""
-        }`;
+        const apiUrl = `${process.env.REACT_APP_SERVER_HOST
+          }/api/tests/exam/public/${testId}${userId ? `?accountId=${userId}` : ""
+          }`;
 
         const response = await fetch(apiUrl);
 
@@ -258,7 +257,7 @@ const ExamDetail: React.FC = () => {
 
     // Nếu đề thi miễn phí hoặc đã mua, chuyển đến trang làm bài
     if (examData?.examType === "FREE" || examData?.purchased) {
-      navigate(`/exam/take/${testId}`);
+      navigate(`/take-test/${testId}`);
       return;
     }
 
@@ -299,6 +298,12 @@ const ExamDetail: React.FC = () => {
         courseBundleId: null,
         cartItemId: "",
       };
+
+      const data = { "testId": Number(testId), "courseId": null, "lessonId": null, "videoId": null, "action": "Thêm đề thi vào giỏ hàng" + examData.title }
+      if (userId) {
+        sendActionActivity(userId?.toString() || "", "/app/add_course_to_cart", data, "Thêm đề thi vào giỏ hàng" + examData.title)
+      }
+      // sendActionActivity(userId?.toString() || "", "/app/add_course_to_cart", data, "Thêm đề thi vào giỏ hàng" + examData.title)
 
       // Gọi API để thêm vào giỏ hàng
       const response = await fetch(
@@ -447,9 +452,9 @@ const ExamDetail: React.FC = () => {
         {canTakeExam
           ? "Làm bài"
           : isInCart
-            ? "Đến giỏ hàng" 
-            : examData?.examType === "FREE" 
-              ? "Làm miễn phí" 
+            ? "Đến giỏ hàng"
+            : examData?.examType === "FREE"
+              ? "Làm miễn phí"
               : "Thêm vào giỏ hàng"}
         <i className={`${isInCart && !canTakeExam ? 'fa-solid fa-shopping-cart' : 'fa-light fa-arrow-right-long'}`}></i>
       </a>
@@ -502,25 +507,22 @@ const ExamDetail: React.FC = () => {
           <div className="exam-tabs-container">
             <div className="exam-tabs-header">
               <button
-                className={`exam-tab-button ${
-                  activeTab === "overview" ? "exam-tab-active" : ""
-                }`}
+                className={`exam-tab-button ${activeTab === "overview" ? "exam-tab-active" : ""
+                  }`}
                 onClick={() => setActiveTab("overview")}
               >
                 Tổng quan
               </button>
               <button
-                className={`exam-tab-button ${
-                  activeTab === "requirements" ? "exam-tab-active" : ""
-                }`}
+                className={`exam-tab-button ${activeTab === "requirements" ? "exam-tab-active" : ""
+                  }`}
                 onClick={() => setActiveTab("requirements")}
               >
                 Yêu cầu
               </button>
               <button
-                className={`exam-tab-button ${
-                  activeTab === "reviews" ? "exam-tab-active" : ""
-                }`}
+                className={`exam-tab-button ${activeTab === "reviews" ? "exam-tab-active" : ""
+                  }`}
                 onClick={() => setActiveTab("reviews")}
               >
                 Đánh giá ({examData.itemCountReview})
@@ -682,11 +684,10 @@ const ExamDetail: React.FC = () => {
                             (_, idx) => (
                               <button
                                 key={idx}
-                                className={`exam-pagination-button ${
-                                  currentPage === idx
+                                className={`exam-pagination-button ${currentPage === idx
                                     ? "exam-pagination-active"
                                     : ""
-                                }`}
+                                  }`}
                                 onClick={() => handlePageChange(idx)}
                               >
                                 {idx + 1}

@@ -476,7 +476,7 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuctailieu");
                   }}
                 >
-               Tài liệu
+                  Tài liệu
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
@@ -585,7 +585,7 @@ const Header: React.FC = () => {
                     localStorage.removeItem("iddanhmuckhoahoc");
                   }}
                 >
-              Khóa học
+                  Khóa học
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
@@ -692,7 +692,7 @@ const Header: React.FC = () => {
               </li>
               <li>
                 <a href="/de-thi" onClick={handleRouter}>
-               Bài thi
+                  Bài thi
                 </a>
               </li>
               <li>
@@ -757,14 +757,14 @@ const Header: React.FC = () => {
                     <i className="fa-solid fa-user"></i> {userName}
                   </a>
                 </div>
-                {/* Dropdown menu */}
+
                 <ul className="dropdown-menu">
                   <li>
                     <a href="/tai-khoan">Tài khoản</a>
                   </li>
                   <li>
                     <button onClick={handleLogout} className="logout-btn">
-                     Đăng xuất
+                      Đăng xuất
                     </button>
                   </li>
                 </ul>
@@ -774,7 +774,7 @@ const Header: React.FC = () => {
             // Nếu chưa đăng nhập, hiển thị các nút Đăng nhập và Đăng ký
             <div className="menu-btns d-none d-lg-flex">
               <a className="active" href="/dang-nhap">
-              Đăng nhập
+                Đăng nhập
               </a>
               <a href="/dang-ky">Đăng ký</a>
             </div>

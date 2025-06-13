@@ -10,6 +10,7 @@ import {
 import useRefreshToken from "../../../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../../../util/fucntion/auth";
 import { encryptData } from "../../../util/encryption";
+import { sendActionActivity } from "../../../../service/WebSocketActions";
 interface CourseSidebarProps {
   course: CoureseDetail;
   total: {
@@ -292,6 +293,13 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
           );
           const enrollData = await enrollResponse.text(); 
           if (enrollResponse.ok) {
+            
+            if (authData.id) {
+              const data = { "testId": null, "courseId": course.id, "lessonId": null, "videoId": null, "action": "Đăng ký khóa học" + course.title }
+              sendActionActivity(authData.id.toString(), "/app/enroll_course", data, "Đăng ký khóa học" + course.title)
+            }
+            
+            // sendActionActivity(authData.id.toString().toString(), "/app/enroll_course", data, "Đăng ký khóa học" + course.title)
             handleGoToCoursePlayer(course.id);
           } else {
             toast.error("Đăng ký khóa học không thành công!");

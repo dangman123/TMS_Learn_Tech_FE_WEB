@@ -4,6 +4,7 @@ import { Test_Lesson } from "./CoursePageConvert";
 import { isTokenExpired } from "../util/fucntion/auth";
 import useRefreshToken from "../util/fucntion/useRefreshToken";
 import { toast } from "react-toastify";
+import { sendActionActivity } from "../../service/WebSocketActions";
 
 interface TestQuickConvertProps {
     isSidebarOpen: boolean;
@@ -101,6 +102,17 @@ export const CoverTest: React.FC<TestQuickConvertProps> = ({
     const handleStart = () => {
         setStartTest(true);
         if (setShouldFetchQuestions) {
+
+            const authData = localStorage.getItem("authData");
+            const accountId = authData ? JSON.parse(authData).id : null;
+
+            if (accountId) {
+                const data = { "testId": content.test_id, "courseId": courseData?.[0].course_id, "lessonId": null, "videoId": null, "action": "Làm bài kiểm tra" + content.title }
+                sendActionActivity(accountId.toString(), "/app/start_exam", data, "Làm bài kiểm tra " + content.title)
+            }
+            // sendActionActivity(accountId, "/app/start_exam", data, "Làm bài kiểm tra " + content.title)
+
+
             setShouldFetchQuestions(true);
         }
         setShowTestQuickConvert(true);

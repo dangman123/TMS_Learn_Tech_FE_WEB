@@ -51,9 +51,9 @@ const DeleteAccount: React.FC<DeleteAccountProps> = ({ userId }) => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/accounts/delete/${userId}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/account/lock/${userId}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

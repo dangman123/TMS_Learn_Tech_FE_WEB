@@ -292,6 +292,9 @@ const LearningResultsPage: React.FC = () => {
                 const responseData = await progressRes.json();
                 if (responseData.data) {
                     newProgress = responseData.data;
+                    if (newProgress?.progress === undefined || isNaN(newProgress?.progress)) {
+                        currentProgress = 0;
+                    }
                     currentProgress = newProgress?.progress || 0;
                     setProgress(newProgress);
                 }
@@ -637,12 +640,12 @@ const LearningResultsPage: React.FC = () => {
                                                 <div className={styles.courseProgressBar}>
                                                     <div className={styles.progressLabel}>
                                                         <span>Tiến độ hoàn thành</span>
-                                                        <span>{progress?.progress.toFixed(0)}%</span>
+                                                        <span>{typeof progress?.progress === "number" && !isNaN(progress?.progress) ? progress?.progress.toFixed(0) : 0}%</span>
                                                     </div>
                                                     <div className={styles.progressBar}>
                                                         <div
                                                             className={styles.progressFill}
-                                                            style={{ width: `${progress?.progress}%` }}
+                                                            style={{ width: `${progress?.progress ? progress?.progress : 0}%` }}
                                                         ></div>
                                                     </div>
                                                 </div>

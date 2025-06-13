@@ -21,7 +21,7 @@ const CourseListRow: React.FC<CourseListRowProps> = ({ title, type }) => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://103.166.143.198:8080/api/courses/public/filter?type=${type}`
+          `${process.env.REACT_APP_SERVER_HOST}/api/courses/public/filter?type=${type}`
         );
         if (response.data.status === 200) {
           setCourses(response.data.data.content);
@@ -93,9 +93,8 @@ const CourseListRow: React.FC<CourseListRowProps> = ({ title, type }) => {
     return stars;
   };
 
-  // Function to format price in Vietnamese currency
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN").format(price);
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   };
 
   // Get the currently visible courses

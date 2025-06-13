@@ -12,6 +12,7 @@ import Timer from "./component/Timer";
 import LoadingSpinner from "./component/LoadingSpinner";
 import ContentLoader from "./component/ContentLoader";
 import SubmissionLoader from "./component/SubmissionLoader";
+import { sendActionActivity } from "../../service/WebSocketActions";
 
 // Thêm style cho textarea
 const textareaBaseStyle = {
@@ -490,6 +491,16 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
     // Remove immediate submission - we'll only show answers when user clicks "View Answers"
     const authData = localStorage.getItem("authData");
     const accountId = authData ? JSON.parse(authData).id : null;
+    const data = { "testId": content.test_id, "courseId": testData.course_id, "lessonId": null, "videoId": null, "action": "Nộp bài kiểm tra" + content.title }
+    if (accountId) {
+      sendActionActivity(accountId.toString(), "/app/submit_exam", data, "Nộp bài kiểm tra " + content.title)
+    }
+    // sendActionActivity(accountId, "/app/submit_exam", data, "Nộp bài kiểm tra " + content.title)
+
+
+
+
+
 
     // Tạo danh sách questionResponsiveList theo định dạng mới
     const questionResponsiveList = Object.keys(answers).map((questionId) => {

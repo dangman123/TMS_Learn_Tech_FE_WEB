@@ -326,7 +326,8 @@ function PayHistory() {
       fetchPaymentHistory();
     } else if (activeTab === "deposit") {
       fetchDepositHistory();
-    } else if (activeTab === "exam") {
+    }
+    else if (activeTab === "exam") {
       fetchExamPurchaseHistory();
     }
   }, [page, depositPage, examPage, size, activeTab]);
@@ -481,7 +482,7 @@ function PayHistory() {
                     Lịch sử giao dịch
                   </button>
                 </li>
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === "exam" ? "active fw-semibold" : ""
                       }`}
@@ -490,7 +491,7 @@ function PayHistory() {
                     <i className="bi bi-file-earmark-text me-2"></i>
                     Lịch sử mua bài thi
                   </button>
-                </li>
+                </li> */}
               </ul>
             </div>
 

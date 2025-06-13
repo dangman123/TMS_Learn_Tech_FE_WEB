@@ -16,6 +16,7 @@ import {
 } from "react-bootstrap-icons";
 import DialogFormInformation from "../../util/DialogFormInformation";
 import { showSuccess, showError, showWarning, showInfo } from "../../util/notificationService";
+import { sendActionActivity } from "../../../service/WebSocketActions";
 
 interface CourseUserProfile {
   id: number;
@@ -304,8 +305,22 @@ const MyCourse = () => {
         localStorage.setItem("encryptedChapterId", encryptedChapterId);
         localStorage.setItem("encryptedLessonId", encryptedLessonId);
 
+        const authData = localStorage.getItem("authData");
+        const accountId = authData ? JSON.parse(authData).id : null;
+        if (accountId) {
+          const data = { "testId": null, "courseId": courseId, "lessonId": lessonId, "videoId": null, "action": "Học khóa học" + course.title }
+          sendActionActivity(accountId.toString(), "/app/view_course", data, "Học khóa học " + course.title)
+        }
+        // sendActionActivity(accountId, "/app/view_course", data, "Học khóa học " + course.title)
         window.location.href = `/khoa-hoc-thu/vao-hoc`;
       } else {
+        const authData = localStorage.getItem("authData");
+        const accountId = authData ? JSON.parse(authData).id : null;
+        if (accountId) {
+          const data = { "testId": null, "courseId": course.id, "lessonId": null, "videoId": null, "action": "Học khóa học" + course.title }
+          sendActionActivity(accountId.toString(), "/app/view_course", data, "Học khóa học " + course.title)
+        }
+        // sendActionActivity(accountId, "/app/view_course", data, "Học khóa học " + course.title)
         toast.error("Không thể tạo tiến trình học. Vui lòng thử lại sau.");
       }
     } catch (error) {

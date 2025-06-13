@@ -4,6 +4,7 @@ import "./Upgrade.css";
 import { authTokenLogin, refreshToken } from "../../../util/fucntion/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import useRefreshToken from "../../../util/fucntion/useRefreshToken";
+import { sendActionActivity } from "../../../../service/WebSocketActions";
 
 interface Feature {
   text: string;
@@ -408,6 +409,12 @@ const Upgrade: React.FC = () => {
 
   // Handle subscription purchase
   const handleSubscribe = (plan: SubscriptionPlan) => {
+    if (userData.id) {
+      const data = { "testId": null,subscriptionId: plan.id, "courseId": null, "lessonId": null, "videoId": null, "action": "Thanh toán gói thành viên" + plan.name }
+      sendActionActivity(userData.id.toString(), "/app/purchase_subscription", data, "Thanh toán gói thành viên" + plan.name)
+    }
+    // sendActionActivity(userData.id.toString(), "/app/purchase_subscription", data, "Thanh toán gói thành viên" + plan.name)
+
     // Store plan details in sessionStorage for payment confirmation later
     sessionStorage.setItem('subscribingPlan', JSON.stringify(plan));
     setPlanToSubscribe(plan);

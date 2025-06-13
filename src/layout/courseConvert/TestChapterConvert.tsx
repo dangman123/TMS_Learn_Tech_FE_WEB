@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import GiftPopup from "./GiftPopup";
 import { Test_Chapter, Test_Lesson } from "./CoursePageConvert";
 import Timer from "./component/Timer";
+import { sendActionActivity } from "../../service/WebSocketActions";
 
 interface TestChapterConvertProps {
   isSidebarOpen: boolean;
@@ -409,6 +410,13 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
 
     const authData = localStorage.getItem("authData");
     const accountId = authData ? JSON.parse(authData).id : null;
+    const data = { "testId": content.test_id, "courseId": testData.course_id, "lessonId": null, "videoId": null, "action": "Làm bài kiểm tra chương" + content.title }
+    if (accountId) {
+      sendActionActivity(accountId.toString(), "/app/start_exam_chapter", data, "Làm bài kiểm tra chương " + content.title)
+    }
+    // sendActionActivity(accountId, "/app/start_exam_chapter", data, "Làm bài kiểm tra chương " + content.title)
+   
+
 
     // Tạo danh sách questionResponsiveList theo định dạng mới
     const questionResponsiveList = Object.keys(answers).map((questionId) => {

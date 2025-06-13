@@ -269,6 +269,15 @@ function App() {
                   }
                 />
                 <Route
+                  path="/take-test/:testId"
+                  element={
+
+
+                    <TakeTest />
+
+                  }
+                />
+                <Route
                   path="/bai-viet"
                   element={
                     <MainLayout>
@@ -467,7 +476,7 @@ function App() {
         </LoadingProvider>
       </WebSocketProvider>
     </NotificationProvider>
-    
+
   );
 }
 

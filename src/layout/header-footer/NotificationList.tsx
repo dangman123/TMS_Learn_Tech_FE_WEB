@@ -72,7 +72,7 @@ const NotificationList: React.FC = () => {
 
         const data = await response.json();
         console.log("Notifications data received:", data);
-        
+
         // Handle paginated response format
         if (data && typeof data === 'object' && data.content && Array.isArray(data.content)) {
           setNotifications(data.content);
@@ -135,7 +135,7 @@ const NotificationList: React.FC = () => {
       console.error("notifications is not an array:", notifications);
       return 0;
     }
-    
+
     return notifications.filter(
       (notification) =>
         notification.topic === topic && !notification.status
@@ -534,8 +534,8 @@ const NotificationList: React.FC = () => {
 
                 <div
                   className={`notification-message ${expandedItems.includes(notification.id)
-                      ? "expanded"
-                      : ""
+                    ? "expanded"
+                    : ""
                     }`}
                 >
                   {formatMessage(

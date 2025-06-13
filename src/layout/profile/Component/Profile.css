@@ -372,3 +372,54 @@ input:checked + .toggle-slider:before {
     margin-top: 10px;
   }
 }
+
+/* Add these styles for the time picker */
+
+.time-option {
+  margin-left: 25px;
+  border-left: 2px solid #f1f1f1;
+  padding-left: 15px;
+}
+
+.time-picker {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+}
+
+.time-input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 100px;
+}
+
+/* Add to reset defaults button styling */
+.reset-defaults-button-2 {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 10px;
+}
+
+.reset-defaults-button-2:hover {
+  background-color: #f5f5f5;
+}
+
+.reset-defaults-button-2 svg {
+  margin-right: 8px;
+}
+
+.reset-defaults-button-2:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

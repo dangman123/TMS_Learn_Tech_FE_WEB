@@ -9,6 +9,7 @@ import { decryptData, encryptData } from "../util/encryption";
 import LoadingSpinner from "./component/LoadingSpinner";
 import ContentLoader from "./component/ContentLoader";
 import { VideoContent } from "./CoursePageConvert";
+import { sendActionActivity } from "../../service/WebSocketActions";
 interface LessonRightSidebarProps {
   isSidebarOpen: boolean;
   handleToggleSidebar: () => void;
@@ -87,6 +88,8 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
           `Failed to fetch video data. Status: ${response.status}`
         );
       }
+
+      
 
       const videoData = await response.json();
       setVideo(videoData);
@@ -223,6 +226,17 @@ export const LessonVideoRight: React.FC<LessonRightSidebarProps> = ({
     const encryptedLessonId = encryptData(lessonId);
     localStorage.setItem("encryptedChapterId", encryptedChapterId);
     localStorage.setItem("encryptedLessonId", encryptedLessonId);
+
+    const authData = localStorage.getItem("authData");
+    const accountId = authData ? JSON.parse(authData).id : null;
+
+    if (accountId) {
+      const data = { "testId": null, "courseId": coursesData.course_id, "lessonId": lessonId, "videoId": videoId, "action": "Xem video" + content.title }
+      sendActionActivity(accountId.toString(), "/app/watch_video", data, "Xem video " + content.title)
+    }
+    // sendActionActivity(accountId, "/app/watch_video", data, "Xem video " + content.title)
+
+
 
     window.location.reload();
   };

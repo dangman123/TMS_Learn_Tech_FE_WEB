@@ -11,6 +11,7 @@ import { database } from "../util/fucntion/firebaseConfig";
 import { ref, set } from "firebase/database";
 import { Phone } from "react-bootstrap-icons";
 import "./register.css";
+import { sendActionActivity } from "../../service/WebSocketActions";
 interface account {
   id: number;
   email: string;
