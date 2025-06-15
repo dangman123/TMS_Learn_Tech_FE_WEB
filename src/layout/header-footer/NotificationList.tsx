@@ -226,14 +226,14 @@ const NotificationList: React.FC = () => {
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_HOST}/api/notifications/mark-as-read/${userId}`,
+        `${process.env.REACT_APP_SERVER_HOST}/api/notifications/${notificationId}/read`,
         {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(notificationId),
+
         }
       );
 
