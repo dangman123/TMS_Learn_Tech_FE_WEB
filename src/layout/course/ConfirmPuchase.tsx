@@ -43,7 +43,7 @@ interface CartApiResponse {
   data: CartItem[];
 }
 
-interface AuthData {
+export interface AuthData {
   id: number;
   fullname: string;
   email: string;

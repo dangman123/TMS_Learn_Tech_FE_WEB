@@ -11,6 +11,292 @@ import { Test_Chapter, Test_Lesson } from "./CoursePageConvert";
 import Timer from "./component/Timer";
 import { sendActionActivity } from "../../service/WebSocketActions";
 
+// Custom CSS for better UI
+const chapterTestStyles = `
+  .rbt-lesson-rightsidebar {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .lesson-top-bar {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .lesson-top-bar h5 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  .rbt-lesson-toggle button {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: all 0.3s;
+  }
+
+  .rbt-lesson-toggle button:hover {
+    background-color: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+  }
+
+  .rbt-single-quiz {
+    background: white;
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .rbt-single-quiz:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+
+  .rbt-single-quiz h4 {
+    color: #344767;
+    font-weight: 700;
+    font-size: 16px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .rbt-form-check {
+    transition: all 0.3s;
+    border: 1px solid #e9e9e9;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    background-color: #fafafa;
+  }
+
+  .rbt-form-check:hover {
+    background-color: #f5f9ff;
+    border-color: #d0e1ff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+  }
+
+  .rbt-form-check input[type="radio"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 15px;
+    accent-color: #4e73df;
+    cursor: pointer;
+  }
+
+  .rbt-form-check label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .submit-btn button {
+    padding: 14px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .submit-btn button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
+
+  .answer-review {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #2196f3;
+    margin: 15px 0;
+  }
+
+  .correct {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 5px solid #4caf50;
+  }
+
+  .incorrect {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 5px solid #f44336;
+  }
+
+  .loading-spinner {
+    border: 4px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Test Cover Styling */
+  .test-cover-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+  }
+  
+  .test-cover-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .test-cover-header {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .test-cover-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
+  }
+  
+  .test-cover-body {
+    padding: 40px;
+  }
+  
+  .test-description {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  
+  .test-info {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 0;
+  }
+  
+  .test-info-item {
+    display: flex;
+    align-items: center;
+    background-color: #f0f7ff;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+  }
+  
+  .test-info-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  }
+  
+  .test-info-icon {
+    font-size: 24px;
+    margin-right: 15px;
+    color: #4e73df;
+  }
+  
+  .test-info-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .test-instructions {
+    text-align: center;
+    font-size: 15px;
+    margin: 30px 0;
+    color: #555;
+    line-height: 1.6;
+  }
+  
+  .test-cover-footer {
+    padding: 20px 30px 40px;
+    text-align: center;
+    border-top: 1px solid #eee;
+  }
+  
+  .start-test-button {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: white;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  
+  .start-test-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(78, 115, 223, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    .lesson-top-bar h5 {
+      font-size: 14px;
+    }
+    
+    .rbt-single-quiz h4 {
+      font-size: 15px;
+    }
+    
+    .test-cover-header h2 {
+      font-size: 20px;
+    }
+  }
+`;
+
 interface TestChapterConvertProps {
   isSidebarOpen: boolean;
   handleToggleSidebar: () => void;
@@ -1522,6 +1808,17 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
     return { popupOverlay, popupStyle, fireworkInterval };
   };
 
+  // Add custom styles to document head when component mounts
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = chapterTestStyles;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   return (
     <div
       className="rbt-lesson-rightsidebar overflow-hidden"
@@ -1531,7 +1828,6 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
         <div className="lesson-top-left">
           <div className="rbt-lesson-toggle">
             <button
-              style={{ color: "white" }}
               title="Toggle Sidebar"
               onClick={handleToggleSidebar}
             >
@@ -1566,7 +1862,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
               )}
             </button>
           </div>
-          <h5 style={{ color: "white" }}>{testContent?.title}</h5>
+          <h5>{testContent?.title}</h5>
         </div>
         <div className="lesson-top-right">
           <div className="rbt-btn-close">
@@ -1575,10 +1871,14 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
               title="Go Back to Course"
               className="rbt-round-btn"
               style={{
-                color: "white",
-                width: "30px",
-                height: "30px",
-                textAlign: "center",
+                width: "35px",
+                height: "35px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                borderRadius: "50%",
+                transition: "all 0.3s"
               }}
               onClick={(e) => {
                 e.preventDefault();
@@ -1599,7 +1899,7 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
           </div>
         </div>
       </div>
-      <div className="inner" style={{ padding: " 0px" }}>
+      <div className="inner" style={{ padding: "0px" }}>
         {isSubmitting && (
           <div
             style={{
@@ -1626,118 +1926,110 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                 animation: "spin 1s ease-in-out infinite"
               }}
             ></div>
-            <p style={{ color: "white", marginTop: "15px", fontWeight: "bold" }}>Đang gửi bài kiểm tra...</p>
+            <p style={{ 
+              color: "white", 
+              marginTop: "15px", 
+              fontWeight: "bold",
+              textShadow: "0 1px 3px rgba(0,0,0,0.3)" 
+            }}>Đang gửi bài kiểm tra...</p>
           </div>
         )}
         <div
           className="content"
-          style={{ padding: "40px 50px", width: "95%", margin: "0 auto" }}
+          style={{ padding: "30px", width: "100%", maxWidth: "1200px", margin: "0 auto" }}
         >
-          {console.log("TestChapterConvert render:", { loading, isStarted, isQuestionsLoaded, testContent })}
           {loading ? (
-            <div style={{ textAlign: "center", padding: "50px 0" }}>
-              <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>Đang tải bài kiểm tra...</h2>
-              <div className="spinner-border text-primary" role="status">
+            <div style={{ 
+              textAlign: "center", 
+              padding: "80px 0",
+              backgroundColor: "white",
+              borderRadius: "12px",
+              boxShadow: "0 5px 15px rgba(0,0,0,0.05)"
+            }}>
+              <h2 style={{ 
+                fontSize: "24px", 
+                marginBottom: "30px",
+                color: "#344767" 
+              }}>Đang tải bài kiểm tra...</h2>
+              <div className="spinner-border" role="status" style={{ 
+                width: "50px", 
+                height: "50px",
+                color: "#4e73df",
+                borderWidth: "5px"
+              }}>
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
           ) : !isStarted ? (
-            <div style={{ textAlign: "center", padding: "50px 0" }}>
-              <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>Bài kiểm tra: {testContent?.title}</h2>
-
-              <div style={{
-                fontSize: "16px",
-                marginBottom: "30px",
-                display: "flex",
-                justifyContent: "center",
-                gap: "30px"
-              }}>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: "#f0f4f8",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-question-circle" viewBox="0 0 16 16" style={{ marginRight: "10px", color: "#4caf50" }}>
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                    <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z" />
-                  </svg>
-                  <div>
-                    <div style={{ fontWeight: "bold", color: "#333" }}>Số câu hỏi</div>
-                    <div style={{ fontSize: "18px", color: "#4caf50" }}>{testContent?.totalQuestion || "N/A"}</div>
-                  </div>
+            <div className="test-cover-container">
+              <div className="test-cover-card">
+                <div className="test-cover-header">
+                  <h2>Bài kiểm tra: {testContent?.title}</h2>
                 </div>
 
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: "#f0f4f8",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-clock" viewBox="0 0 16 16" style={{ marginRight: "10px", color: "#2196f3" }}>
-                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z" />
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z" />
-                  </svg>
-                  <div>
-                    <div style={{ fontWeight: "bold", color: "#333" }}>Thời gian</div>
-                    <div style={{ fontSize: "18px", color: "#2196f3" }}>{(testContent?.duration || testDuration) / 60} phút</div>
+                <div className="test-cover-body">
+                  {testContent?.description && (
+                    <div
+                      className="test-description"
+                      dangerouslySetInnerHTML={{ __html: testContent.description }}
+                    />
+                  )}
+
+                  <div className="test-info">
+                    <div className="test-info-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="test-info-icon bi bi-question-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                      </svg>
+                      <div>
+                        <div style={{ fontWeight: "bold", color: "#333", fontSize: "14px", marginBottom: "5px" }}>Số câu hỏi</div>
+                        <div style={{ fontSize: "20px", color: "#4e73df", fontWeight: "600" }}>{testContent?.totalQuestion || "N/A"}</div>
+                      </div>
+                    </div>
+
+                    <div className="test-info-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="test-info-icon bi bi-clock" viewBox="0 0 16 16">
+                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                      </svg>
+                      <div>
+                        <div style={{ fontWeight: "bold", color: "#333", fontSize: "14px", marginBottom: "5px" }}>Thời gian</div>
+                        <div style={{ fontSize: "20px", color: "#4e73df", fontWeight: "600" }}>{Math.round((testContent?.duration || testDuration) / 60)} phút</div>
+                      </div>
+                    </div>
                   </div>
+
+                  <p className="test-instructions">
+                    Đây là bài kiểm tra cuối chương. Hãy chuẩn bị sẵn sàng và hoàn thành tốt nhất có thể.
+                  </p>
+                </div>
+
+                <div className="test-cover-footer">
+                  <button
+                    className="start-test-button"
+                    onClick={handleStart}
+                  >
+                    Bắt Đầu Làm Bài
+                  </button>
                 </div>
               </div>
-
-              {/* {testContent?.description && (
-                <div
-                  style={{
-                    fontSize: "16px",
-                    marginBottom: "15px",
-                    padding: "10px",
-                    backgroundColor: "#f9f9f9",
-                    borderRadius: "5px",
-                    maxWidth: "800px",
-                    margin: "0 auto 20px"
-                  }}
-                  dangerouslySetInnerHTML={{ __html: testContent.description }}
-                />
-              )} */}
-
-
-              <button
-                style={{
-                  padding: "15px 40px",
-                  backgroundColor: "#4CAF50",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                  transition: "all 0.3s ease",
-                  letterSpacing: "1px",
-                  textTransform: "uppercase"
-                }}
-                onClick={handleStart}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = "#45a049";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 6px 12px rgba(0, 0, 0, 0.3)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = "#4CAF50";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
-                }}
-              >
-                BẮT ĐẦU LÀM BÀI
-              </button>
             </div>
           ) : (
             <>
-              <div style={{ display: "flex", justifyContent: "right", gap: "10px" }}>
+              <div style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center", 
+                backgroundColor: "white",
+                padding: "15px 20px",
+                borderRadius: "8px",
+                marginBottom: "20px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+              }}>
+                <div style={{ fontWeight: "600", fontSize: "18px", color: "#344767" }}>
+                  {testContent?.title}
+                </div>
+
                 {!isSubmitted ? (
                   <Timer initialTime={testContent?.duration || testDuration} onTimeUpdate={handleTimeUpdate} />
                 ) : (
@@ -1745,11 +2037,12 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                     background: "#4caf50",
                     color: "white",
                     padding: "8px 15px",
-                    borderRadius: "4px",
+                    borderRadius: "50px",
                     display: "flex",
                     alignItems: "center",
                     fontSize: "14px",
-                    fontWeight: "bold"
+                    fontWeight: "bold",
+                    boxShadow: "0 2px 6px rgba(76, 175, 80, 0.3)"
                   }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle" viewBox="0 0 16 16" style={{ marginRight: "5px" }}>
                       <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
@@ -1758,39 +2051,42 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                     Đã hoàn thành: {usedTime} phút
                   </div>
                 )}
-                {/* <button
-                  type="button"
-                  className="rbt-btn btn-gradient hover-icon-reverse"
-                  style={{
-                    background: "#4caf50",
-                    color: "white",
-                  }}
-                  onClick={showAnswer}
-                >
-                  Hiển thị đáp án
-                </button> */}
               </div>
 
               {/* Hiển thị thời gian đã sử dụng chỉ khi đang làm bài */}
-              {usedTime > 0 && !isSubmitted && (
-                <div style={{ textAlign: "right", marginTop: "5px", fontSize: "14px", color: "#666" }}>
+              {/* {usedTime > 0 && !isSubmitted && (
+                <div style={{ 
+                  textAlign: "right", 
+                  marginBottom: "20px", 
+                  fontSize: "14px", 
+                  color: "#495057",
+                  backgroundColor: "rgba(78, 115, 223, 0.1)",
+                  display: "inline-block",
+                  padding: "8px 15px",
+                  borderRadius: "50px",
+                  float: "right"
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-clock" viewBox="0 0 16 16" style={{ marginRight: "5px", verticalAlign: "text-top" }}>
+                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                  </svg>
                   Thời gian đã làm bài: {usedTime} phút
                 </div>
-              )}
+              )} */}
 
-              <hr />
+              <div style={{ clear: "both" }}></div>
+
               <div
-                className="rbt-dashboard-table table-responsive mobile-table-750 mt--30 overflow-hidden"
-                style={{ marginTop: "30px" }}
+                className="rbt-dashboard-table table-responsive mt--30"
+                style={{ marginTop: "20px" }}
               >
                 <form id="quiz-form" className="quiz-form-wrapper">
                   {questions.map((question, index) => (
                     <div
                       key={question.questionId}
                       className="rbt-single-quiz"
-                      style={{ marginTop: "10px" }}
                     >
-                      <h4 style={{ fontSize: "20px", marginBottom: "10px" }}>
+                      <h4>
                         Câu {index + 1}: {question.content}
                       </h4>
                       <div className="row g-3">
@@ -1827,14 +2123,14 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                                   onChange={() =>
                                     handleAnswerChange(question.questionId, option)
                                   }
-                                  disabled={isSubmitted} // Disable sau khi nộp bài
+                                  disabled={isSubmitted}
                                 />
                                 <label
                                   htmlFor={`question-${question.questionId}-${option}`}
                                   className={optionClass}
                                   style={{ width: "100%", height: "100%" }}
                                 >
-                                  <strong style={{ marginRight: "2px" }}>
+                                  <strong style={{ marginRight: "8px" }}>
                                     {option}.
                                   </strong>
                                   {optionValue}{" "}
@@ -1842,12 +2138,15 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                                     <span
                                       className="answer-status"
                                       style={{
-                                        fontWeight: "900",
+                                        fontWeight: "600",
                                         float: "right",
-                                        color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
+                                        color: isAnswerCorrect ? "#4caf50" : "#f44336",
+                                        padding: "2px 8px",
+                                        borderRadius: "4px",
+                                        backgroundColor: isAnswerCorrect ? "rgba(76, 175, 80, 0.1)" : "rgba(244, 67, 54, 0.1)"
                                       }}
                                     >
-                                      {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
+                                      {isAnswerCorrect ? "Đúng" : "Sai"}
                                     </span>
                                   )}
                                 </label>
@@ -1862,7 +2161,6 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                                 <div
                                   key={correctAnswer.id}
                                   className="answer-review"
-                                  style={{ margin: "15px 0px 20px 0px" }}
                                 >
                                   <p>
                                     <b>Giải thích: </b>
@@ -1875,21 +2173,26 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                     </div>
                   ))}
 
-                  <div className="submit-btn mt--20" style={{ marginTop: "20px" }}>
+                  <div className="submit-btn mt--20" style={{ textAlign: "center", marginTop: "40px", padding: "20px 0" }}>
                     <button
                       type="button"
                       className="rbt-btn btn-gradient hover-icon-reverse"
                       style={{
-                        background: isSubmitted ? "#f44336" : "#4caf50", // Màu đỏ nếu đã nộp bài, màu xanh nếu chưa nộp
+                        background: isSubmitted 
+                          ? "linear-gradient(135deg, #f44336 0%, #e53935 100%)" 
+                          : "linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)",
                         color: "white",
-                        position: "relative",
-                        padding: isSubmitting ? "12px 40px" : "12px 20px", // Padding lớn hơn khi đang loading
-                        opacity: isSubmitting ? 0.8 : 1 // Mờ hơn khi đang loading
+                        padding: "15px 40px",
+                        borderRadius: "30px",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        letterSpacing: "0.5px",
+                        boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
                       }}
                       onClick={
                         isSubmitted ? handleRetry : submitTestAndUpdateProgress
                       }
-                      disabled={isSubmitting} // Vô hiệu hóa khi đang gửi bài
+                      disabled={isSubmitting}
                     >
                       {isSubmitting ? (
                         <>
@@ -1904,13 +2207,6 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
                             marginRight: "10px",
                             verticalAlign: "middle"
                           }}></span>
-                          <style>
-                            {`
-                              @keyframes spin {
-                                to { transform: rotate(360deg); }
-                              }
-                            `}
-                          </style>
                           Đang gửi bài...
                         </>
                       ) : (
@@ -1925,7 +2221,6 @@ export const TestChapterConvert: React.FC<TestChapterConvertProps> = ({
         </div>
       </div>
       <GiftPopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
-      {/* <ToastContainer /> */}
     </div>
   );
 };

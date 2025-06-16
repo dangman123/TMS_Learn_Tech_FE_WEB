@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./CoursePageConvert.css";
+import "./component/TestStyles.css";
 import { Col } from "react-bootstrap";
 import { isTokenExpired } from "../util/fucntion/auth";
 import useRefreshToken from "../util/fucntion/useRefreshToken";
 import { ToastContainer, toast } from "react-toastify"; // Import Toastify và toast
 import "react-toastify/dist/ReactToastify.css";
 import { decryptData, encryptData } from "../util/encryption";
-import "./test.css";
+// import "./test.css";
 import { Test_Lesson } from "./CoursePageConvert";
 import Timer from "./component/Timer";
 import LoadingSpinner from "./component/LoadingSpinner";
@@ -14,57 +15,301 @@ import ContentLoader from "./component/ContentLoader";
 import SubmissionLoader from "./component/SubmissionLoader";
 import { sendActionActivity } from "../../service/WebSocketActions";
 
+// Custom CSS for better UI
+const quickTestStyles = `
+  .rbt-lesson-rightsidebar {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .lesson-top-bar {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .lesson-top-bar h5 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
+    max-width: 80%;
+  }
+
+  .rbt-lesson-toggle button {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: all 0.3s;
+  }
+
+  .rbt-lesson-toggle button:hover {
+    background-color: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+  }
+
+  .rbt-single-quiz {
+    background: white;
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .rbt-single-quiz:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+
+  .rbt-single-quiz h4 {
+    color: #344767;
+    font-weight: 700;
+    font-size: 16px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .rbt-form-check {
+    transition: all 0.3s;
+    border: 1px solid #e9e9e9;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    background-color: #fafafa;
+  }
+
+  .rbt-form-check:hover {
+    background-color: #f5f9ff;
+    border-color: #d0e1ff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+  }
+
+  .rbt-form-check input[type="radio"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 15px;
+    accent-color: #4e73df;
+    cursor: pointer;
+  }
+
+  .rbt-form-check label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .submit-btn button {
+    padding: 14px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .submit-btn button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
+
+  .answer-review {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #2196f3;
+    margin: 15px 0;
+  }
+
+  .correct {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 5px solid #4caf50;
+  }
+
+  .incorrect {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 5px solid #f44336;
+  }
+
+  .loading-spinner {
+    border: 4px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .test-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #344767;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+
+  .test-time {
+    background: rgba(78, 115, 223, 0.1);
+    color: #4e73df;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .completed-test-badge {
+    background-color: #4caf50;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+  }
+
+  .test-content-container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+  
+  @media (max-width: 768px) {
+    .lesson-top-bar h5 {
+      font-size: 14px;
+      max-width: 70%;
+    }
+    
+    .rbt-single-quiz h4 {
+      font-size: 15px;
+    }
+    
+    .test-title {
+      font-size: 15px;
+    }
+    
+    .rbt-form-check label {
+      font-size: 14px;
+    }
+    
+    .submit-btn button {
+      font-size: 15px;
+      padding: 12px 25px;
+    }
+  }
+`;
+
 // Thêm style cho textarea
 const textareaBaseStyle = {
   border: "1px solid #ddd",
-  borderRadius: "4px",
-  padding: "10px",
+  borderRadius: "8px",
+  padding: "15px",
   width: "100%",
   fontFamily: "inherit",
-  transition: "border-color 0.2s, box-shadow 0.2s",
+  transition: "all 0.3s",
   outline: "none"
 };
 
 const textareaEssayStyle = {
   ...textareaBaseStyle,
-  minHeight: "120px"
+  minHeight: "160px",
+  fontSize: "16px",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
 };
 
 const textareaFillStyle = {
   ...textareaBaseStyle,
-  minHeight: "80px"
+  minHeight: "100px",
+  fontSize: "16px",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
 };
 
 const textareaFocusHandler = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-  e.target.style.borderColor = "#6c63ff";
-  e.target.style.boxShadow = "0 0 0 2px rgba(108, 99, 255, 0.2)";
+  e.target.style.borderColor = "#4e73df";
+  e.target.style.boxShadow = "0 0 0 3px rgba(78, 115, 223, 0.25)";
 };
 
 const textareaBlurHandler = (e: React.FocusEvent<HTMLTextAreaElement>) => {
   e.target.style.borderColor = "#ddd";
-  e.target.style.boxShadow = "none";
+  e.target.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05)";
 };
 
 // Thêm style mới cho các component
 const getFilterItemStyle = (isSelected: boolean) => ({
   display: "flex",
   alignItems: "center",
-  background: isSelected ? "#e6f7ff" : "#f5f5f5",
-  padding: "8px 15px",
-  borderRadius: "4px",
-  transition: "all 0.2s ease",
-  boxShadow: isSelected ? "0 2px 5px rgba(108,170,255,0.25)" : "0 1px 3px rgba(0,0,0,0.1)",
+  background: isSelected ? "#e8f5e9" : "#f8f9fa",
+  padding: "10px 18px",
+  borderRadius: "30px",
+  transition: "all 0.3s ease",
+  boxShadow: isSelected ? "0 3px 8px rgba(76, 175, 80, 0.25)" : "0 1px 4px rgba(0,0,0,0.08)",
   cursor: "pointer",
-  border: isSelected ? "1px solid #1890ff" : "1px solid transparent"
+  border: isSelected ? "1px solid #4caf50" : "1px solid transparent",
+  fontWeight: isSelected ? "600" : "normal",
+  fontSize: "15px"
 });
 
 const checkboxOptionStyle = {
   border: "1px solid #e9e9e9",
-  borderRadius: "5px",
-  padding: "10px",
-  marginBottom: "5px",
-  transition: "all 0.2s ease",
-  cursor: "pointer"
+  borderRadius: "8px",
+  padding: "15px",
+  marginBottom: "10px",
+  transition: "all 0.3s ease",
+  cursor: "pointer",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
 };
 
 interface TestQuickConvertProps {
@@ -182,6 +427,7 @@ interface TestContent {
   type: "test";
   title: string;
   description?: string;
+  duration?: number;
 }
 
 interface TestResponse {
@@ -243,8 +489,21 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
     type: "test";
     title: string;
     description?: string;
+    duration?: number;
   } | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+
+  // Add custom styles to document head when component mounts
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = quickTestStyles;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+  
   const getUserData = () => {
     const authData = localStorage.getItem("authData");
     if (authData) {
@@ -292,7 +551,8 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
         test_id: testData.id,
         type: "test",
         title: testData.title,
-        description: testData.description || ""
+        description: testData.description || "",
+        duration: testData.duration
       });
     } catch (error) {
       console.error("Error fetching test data:", error);
@@ -347,7 +607,8 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
           test_id: responseData.data.testId,
           type: "test",
           title: responseData.data.testTitle,
-          description: responseData.data.description || ""
+          description: responseData.data.description || "",
+          duration: responseData.data.duration
         });
 
         // Đánh dấu đã load câu hỏi
@@ -1446,16 +1707,26 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
     selectedQuestionType === "all" || question.type === selectedQuestionType
   );
 
+  // Add custom styles to document head when component mounts
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = quickTestStyles;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   return (
     <div
       className="rbt-lesson-rightsidebar overflow-hidden"
-      style={{ width: isSidebarOpen ? "100%" : "100%", flex: "1" }}
+      style={{ width: isSidebarOpen ? "75%" : "100%", flex: "1" }}
     >
       <div className="lesson-top-bar">
         <div className="lesson-top-left">
           <div className="rbt-lesson-toggle">
             <button
-              style={{ color: "white" }}
               title="Toggle Sidebar"
               onClick={handleToggleSidebar}
             >
@@ -1490,7 +1761,7 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
               )}
             </button>
           </div>
-          <h5 style={{ color: "white" }}>{testContent?.title}</h5>
+          <h5>{testContent?.title}</h5>
         </div>
         <div className="lesson-top-right">
           <div className="rbt-btn-close">
@@ -1499,10 +1770,14 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
               title="Go Back to Course"
               className="rbt-round-btn"
               style={{
-                color: "white",
-                width: "30px",
-                height: "30px",
-                textAlign: "center",
+                width: "35px",
+                height: "35px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                borderRadius: "50%",
+                transition: "all 0.3s"
               }}
               onClick={(e) => {
                 e.preventDefault();
@@ -1524,229 +1799,126 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
         </div>
       </div>
 
-      {/* Loading overlay khi đang gửi bài */}
-      <SubmissionLoader
-        isVisible={isSubmitting}
-        message="Đang gửi bài kiểm tra..."
-        showProgress={true}
-      />
-
-      <div className="inner" style={{ padding: " 0px" }}>
-
-        {loading ? (
-          <ContentLoader
-            isLoading={true}
-            height={300}
-            text="Đang tải bài kiểm tra..."
-            spinnerSize="large"
+      <div className="inner" style={{ padding: "0px" }}>
+        {isSubmitting && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              zIndex: 9999,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column"
+            }}
           >
-            <div></div>
-          </ContentLoader>
-        ) : !isQuestionsLoaded ? (
-          <div className="test-cover-container">
-            <div className="test-cover-card">
-              <div className="test-cover-header">
-                <h2>Bài kiểm tra: {testContent?.title}</h2>
-              </div>
-
-              <div className="test-cover-body">
-                {testContent?.description && (
-                  <div
-                    className="test-description"
-                    dangerouslySetInnerHTML={{ __html: testContent.description }}
-                  />
-                )}
-
-                <div className="test-info">
-                  <div className="test-info-item">
-                    <span className="test-info-icon">⏱️</span>
-                    <span className="test-info-text">Thời gian: {Math.floor(testDuration / 60)} phút</span>
-                  </div>
-                </div>
-
-                <p className="test-instructions">
-                  Hãy chuẩn bị sẵn sàng để làm bài kiểm tra. Khi bạn đã sẵn sàng, hãy nhấn nút "Bắt đầu làm bài" bên dưới.
-                </p>
-              </div>
-
-              <div className="test-cover-footer">
-                <button
-                  className="start-test-button"
-                  onClick={() => {
-                    fetchQuestions(content.test_id);
-                    // Lưu trạng thái đã bắt đầu làm bài
-                    localStorage.setItem("testStarted_" + content.test_id, "true");
-                  }}
-                >
-                  Bắt Đầu Làm Bài
-                </button>
-              </div>
-            </div>
-
-            <style>{`
-              .test-cover-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 30px 0;
-              }
-              
-              .test-cover-card {
-                background-color: white;
-                border-radius: 10px;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-                width: 100%;
-                max-width: 800px;
-                overflow: hidden;
-              }
-              
-              .test-cover-header {
-                background-color: #4CAF50;
-                color: white;
-                padding: 20px 30px;
-                text-align: center;
-              }
-              
-              .test-cover-header h2 {
-                margin: 0;
-                font-size: 24px;
-              }
-              
-              .test-cover-body {
-                padding: 30px;
-              }
-              
-              .test-description {
-                background-color: #f9f9f9;
-                padding: 20px;
-                border-radius: 5px;
-                margin-bottom: 20px;
-                font-size: 16px;
-                line-height: 1.5;
-              }
-              
-              .test-info {
-                display: flex;
-                justify-content: center;
-                margin: 25px 0;
-              }
-              
-              .test-info-item {
-                display: flex;
-                align-items: center;
-                margin: 0 15px;
-                background-color: #f0f8ff;
-                padding: 10px 20px;
-                border-radius: 50px;
-              }
-              
-              .test-info-icon {
-                font-size: 20px;
-                margin-right: 10px;
-              }
-              
-              .test-info-text {
-                font-size: 16px;
-                font-weight: 500;
-              }
-              
-              .test-instructions {
-                text-align: center;
-                font-size: 16px;
-                margin: 20px 0;
-                color: #555;
-              }
-              
-              .test-cover-footer {
-                padding: 20px 30px;
-                text-align: center;
-                border-top: 1px solid #eee;
-              }
-              
-              .start-test-button {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 15px 40px;
-                border-radius: 5px;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-              }
-              
-              .start-test-button:hover {
-                background-color: #3e8e41;
-                transform: translateY(-2px);
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-              }
-              
-              .start-test-button:active {
-                transform: translateY(0);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-              }
-            `}</style>
+            <div
+              style={{
+                width: "50px",
+                height: "50px",
+                border: "5px solid rgba(255, 255, 255, 0.3)",
+                borderRadius: "50%",
+                borderTopColor: "#fff",
+                animation: "spin 1s ease-in-out infinite"
+              }}
+            ></div>
+            <p style={{ 
+              color: "white", 
+              marginTop: "15px", 
+              fontWeight: "bold",
+              textShadow: "0 1px 3px rgba(0,0,0,0.3)" 
+            }}>Đang gửi bài kiểm tra...</p>
           </div>
-        ) : (
-          <>
-
-          </>
         )}
 
+        <div className="test-content-container">
+          {loading ? (
+            <div style={{ 
+              textAlign: "center", 
+              padding: "80px 0",
+              backgroundColor: "white",
+              borderRadius: "12px",
+              width: "100%"
+            }}>
+              <h2 style={{ 
+                fontSize: "24px", 
+                marginBottom: "30px",
+                color: "#344767" 
+              }}>Đang tải bài kiểm tra...</h2>
+              <div className="spinner-border" role="status" style={{ 
+                width: "50px", 
+                height: "50px",
+                color: "#4e73df",
+                borderWidth: "5px"
+              }}>
+                <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+          ) : (
+            <>
+              <div className="test-header">
+                <div className="test-title">
+                  {testContent?.title}
+              </div>
 
+                {!isSubmitted ? (
+                  <div className="test-time">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-clock" viewBox="0 0 16 16">
+                      <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                    </svg>
+                    <Timer initialTime={testContent?.duration || testDuration} onTimeUpdate={handleTimeUpdate} />
+          </div>
+        ) : (
+                  <div className="completed-test-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                      <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z" />
+                    </svg>
+                    Hoàn thành: {usedTime} phút
+                  </div>
+                )}
       </div>
 
-      <div
-        className="rbt-dashboard-table table-responsive mobile-table-750 mt--30 overflow-hidden"
-
-      >
-        <form id="quiz-form" className="quiz-form-wrapper">
-
-
-          <div className="submit-btn mt--20" style={{ marginTop: "20px" }}>
-            <button
-              type="button"
-              className="rbt-btn btn-gradient hover-icon-reverse"
-              style={{
-                background: "#4caf50",
-                color: "white",
-              }}
-              onClick={showAnswer}
-            >
-              Hiển thị đáp án
-            </button>
+              {/* Hiển thị thời gian đã sử dụng nếu đang làm bài */}
+              {/* {usedTime > 0 && !isSubmitted && (
+                <div style={{ 
+                  textAlign: "right", 
+                  marginBottom: "20px", 
+                  fontSize: "14px", 
+                  color: "#495057",
+                  backgroundColor: "rgba(78, 115, 223, 0.1)",
+                  display: "inline-block",
+                  padding: "8px 15px",
+                  borderRadius: "50px",
+                  float: "right"
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-stopwatch" viewBox="0 0 16 16" style={{ marginRight: "5px", verticalAlign: "text-top" }}>
+                    <path d="M8.5 5.6a.5.5 0 1 0-1 0v2.9h-3a.5.5 0 0 0 0 1H8a.5.5 0 0 0 .5-.5V5.6z"/>
+                    <path d="M6.5 1A.5.5 0 0 1 7 .5h2a.5.5 0 0 1 0 1v.57c1.36.196 2.594.78 3.584 1.64a.715.715 0 0 1 .012-.013l.354-.354-.354-.353a.5.5 0 0 1 .707-.708l1.414 1.415a.5.5 0 1 1-.707.707l-.353-.354-.354.354a.512.512 0 0 1-.013.012A7 7 0 1 1 7 2.071V1.5a.5.5 0 0 1-.5-.5zM8 3a6 6 0 1 0 .001 12A6 6 0 0 0 8 3z"/>
+                  </svg>
+                  Thời gian đã làm bài: {usedTime} phút
           </div>
+              )} */}
 
-          {usedTime > 0 && !isSubmitted && (
-            <div style={{ textAlign: "right", marginTop: "5px", fontSize: "14px", color: "#666" }}>
-              Thời gian đã làm bài: {Math.floor(usedTime / 60)} phút {usedTime % 60} giây
-            </div>
-          )}
+              <div style={{ clear: "both" }}></div>
 
-          <hr />
-          <div className="question-type-filter" style={{ marginBottom: "20px" }}>
-
-          </div>
-          <div
-            className="rbt-dashboard-table table-responsive mobile-table-750 mt--30 overflow-hidden"
-            style={{ marginTop: "30px" }}
-          >
+              <div className="rbt-dashboard-table table-responsive mt--30" style={{ width: "100%" }}>
             <form id="quiz-form" className="quiz-form-wrapper">
-              {filteredQuestions.map((question, index) => (
+                  {questions.map((question, index) => (
                 <div
                   key={question.questionId}
                   className="rbt-single-quiz"
-                  style={{ marginTop: "10px", margin: "0px 20px" }}
                 >
-                  <h4 style={{ fontSize: "20px", marginBottom: "10px" }}>
+                      <h4 style={{ wordBreak: "break-word" }}>
                     Câu {index + 1}: {question.content}
                   </h4>
-
-                  {/* Các loại câu hỏi khác nhau */}
-                  {question.type === "multiple-choice" && (
                     <div className="row g-3">
-                      {["A", "B", "C", "D"].map((option) => {
+                        {["A", "B", "C", "D"].map((option, optionIndex) => {
                         const optionValue = question[`option${option}` as keyof Question];
                         if (!optionValue) return null;
 
@@ -1754,9 +1926,11 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
                         const isSelected = answers[question.questionId] === option;
                         const isSelectedCheck =
                           userAnswerTest?.find(
-                            (pickme) => pickme.questionId == question.questionId
-                          )?.result == option;
-                        const isAnswerCorrect = question.resultCheck === option;
+                              (pickme) => pickme.questionId === question.questionId
+                            )?.result === option;
+                          const isAnswerCorrect = correctAnswers.find(
+                            (ans) => ans.id === question.questionId
+                          )?.correct_check === option;
 
                         const optionClass = isSubmitted
                           ? isSelectedCheck
@@ -1768,7 +1942,7 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
 
                         return (
                           <div className="col-lg-6" key={option}>
-                            <div className="rbt-form-check">
+                              <div className={`rbt-form-check ${optionClass}`}>
                               <input
                                 type="radio"
                                 name={`question-${question.questionId}`}
@@ -1777,27 +1951,44 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
                                 onChange={() =>
                                   handleAnswerChange(question.questionId, option)
                                 }
-                                disabled={isSubmitted} // Disable sau khi nộp bài
+                                  disabled={isSubmitted}
                               />
                               <label
                                 htmlFor={`question-${question.questionId}-${option}`}
-                                className={optionClass}
-                                style={{ width: "100%", height: "100%" }}
+                                    style={{ width: "100%", height: "100%", wordBreak: "break-word" }}
                               >
-                                <strong style={{ marginRight: "2px" }}>
+                                  <strong style={{ marginRight: "8px" }}>
                                   {option}.
                                 </strong>
                                 {optionValue}{" "}
-                                {isSubmitted && (
+                                  {isSubmitted && isAnswerCorrect && (
                                   <span
                                     className="answer-status"
                                     style={{
-                                      fontWeight: "900",
+                                        fontWeight: "600",
                                       float: "right",
-                                      color: isAnswerCorrect ? "green" : "red", // Màu xanh cho đúng, màu đỏ cho sai
+                                        color: "#4caf50",
+                                        padding: "2px 8px",
+                                        borderRadius: "4px",
+                                        backgroundColor: "rgba(76, 175, 80, 0.1)"
                                     }}
                                   >
-                                    {isAnswerCorrect ? " (Đúng)" : " (Sai)"}
+                                      Đúng
+                                  </span>
+                                )}
+                                  {isSubmitted && isSelectedCheck && !isAnswerCorrect && (
+                                  <span
+                                    className="answer-status"
+                                    style={{
+                                        fontWeight: "600",
+                                      float: "right",
+                                        color: "#f44336",
+                                        padding: "2px 8px",
+                                        borderRadius: "4px",
+                                        backgroundColor: "rgba(244, 67, 54, 0.1)"
+                                    }}
+                                  >
+                                      Sai
                                   </span>
                                 )}
                               </label>
@@ -1805,194 +1996,45 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
                           </div>
                         );
                       })}
-                    </div>
-                  )}
-
-                  {/* Câu hỏi tự luận */}
-                  {question.type === "essay" && (
-                    <div className="row">
-                      <div className="col-12">
-                        <textarea
-                          className="form-control"
-                          placeholder="Nhập câu trả lời tự luận của bạn..."
-                          rows={5}
-                          disabled={isSubmitted}
-                          value={answers[question.questionId] || ""}
-                          onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
-                          style={textareaEssayStyle}
-                          onFocus={textareaFocusHandler}
-                          onBlur={textareaBlurHandler}
-                        ></textarea>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Câu hỏi điền khuyết */}
-                  {question.type === "fill-in-the-blank" && (
-                    <div className="row">
-                      <div className="col-12">
-                        <textarea
-                          className="form-control"
-                          placeholder="Điền đáp án vào đây..."
-                          rows={3}
-                          disabled={isSubmitted}
-                          value={answers[question.questionId] || ""}
-                          onChange={(e) => handleAnswerChange(question.questionId, e.target.value)}
-                          style={textareaFillStyle}
-                          onFocus={textareaFocusHandler}
-                          onBlur={textareaBlurHandler}
-                        ></textarea>
-                        {isSubmitted && (
-                          <div className="mt-2">
-                            <strong>Đáp án đúng:</strong> {question.result}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Câu hỏi checkbox */}
-                  {question.type === "checkbox" && (
-                    <div className="row g-3">
-                      {["A", "B", "C", "D"].map((option, optionIndex) => {
-                        const optionValue = question[`option${option}` as keyof Question];
-                        if (!optionValue) return null;
-
-                        // Xử lý để kiểm tra xem option này có được chọn không
-                        const selectedOptions = answers[question.questionId]?.split(",") || [];
-                        const isSelected = selectedOptions.includes((optionIndex + 1).toString());
-
-                        // Kiểm tra xem option này có phải đáp án đúng không
-                        const correctOptions = question.resultCheck?.split(",") || [];
-                        const isCorrect = correctOptions.includes((optionIndex + 1).toString());
-
-                        const optionClass = isSubmitted
-                          ? isSelected
-                            ? isCorrect
-                              ? "correct"
-                              : "incorrect"
-                            : ""
-                          : "";
-
-                        return (
-                          <div className="col-lg-6" key={option}>
-                            <div
-                              className="rbt-form-check"
-                              style={{
-                                border: "1px solid #e9e9e9",
-                                borderRadius: "5px",
-                                padding: "10px",
-                                marginBottom: "5px",
-                                transition: "all 0.2s ease",
-                                cursor: "pointer",
-                                background: isSelected ? "#f0f5ff" : "", // Highlight nếu được chọn
-                                borderColor: isSelected ? "#6c63ff" : "#e9e9e9", // Border màu nếu được chọn
-                              }}
-                              onMouseOver={(e) => {
-                                e.currentTarget.style.backgroundColor = isSelected ? "#e6ecff" : "#f0f0f0";
-                                e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.15)";
-                              }}
-                              onMouseOut={(e) => {
-                                e.currentTarget.style.backgroundColor = isSelected ? "#f0f5ff" : "";
-                                e.currentTarget.style.boxShadow = "";
-                              }}
-                              onClick={(e) => {
-                                if (!isSubmitted) {
-                                  const checkbox = document.getElementById(`question-${question.questionId}-${option}`) as HTMLInputElement;
-                                  if (checkbox) {
-                                    checkbox.checked = !checkbox.checked;
-                                    handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
-                                  }
-                                }
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                name={`question-${question.questionId}`}
-                                id={`question-${question.questionId}-${option}`}
-                                checked={isSelected}
-                                onChange={(e) => {
-                                  e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
-                                  handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
-                                }}
-                                disabled={isSubmitted}
-                                style={{
-                                  width: "20px",
-                                  height: "20px",
-                                  accentColor: "#6c63ff",
-                                  cursor: "pointer",
-                                  marginRight: "10px"
-                                }}
-                              />
-                              <label
-                                htmlFor=""  // Loại bỏ liên kết với checkbox
-                                className={optionClass}
-                                style={{
-                                  width: "calc(100% - 30px)",
-                                  height: "100%",
-                                  display: "inline-block",
-                                  verticalAlign: "middle",
-                                  cursor: "pointer",
-                                  fontWeight: isSelected ? "600" : "normal", // Đậm nếu được chọn
-                                  userSelect: "none" // Ngăn việc bôi chọn text
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Ngăn sự kiện lan truyền lên div cha
-                                  if (!isSubmitted) {
-                                    handleCheckboxChange(question.questionId, (optionIndex + 1).toString());
-                                  }
-                                }}
-                              >
-                                <strong style={{ marginRight: "2px" }}>
-                                  {option}.
-                                </strong>
-                                {optionValue}{" "}
-                                {isSubmitted && isCorrect && (
-                                  <span
-                                    className="answer-status"
-                                    style={{
-                                      fontWeight: "900",
-                                      float: "right",
-                                      color: "green",
-                                    }}
-                                  >
-                                    (Đúng)
-                                  </span>
-                                )}
-                              </label>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {isSubmitted && question.instruction && (
-                    <div className="answer-review" style={{ margin: "15px 0px 20px 0px" }}>
+                        {isSubmitted &&
+                          correctAnswers.map(
+                            (correctAnswer) =>
+                              correctAnswer.id === question.questionId && (
+                                <div
+                                  key={correctAnswer.id}
+                                  className="answer-review"
+                                >
                       <p>
                         <b>Giải thích: </b>
-                        {question.instruction}
+                                    {correctAnswer.instruction}
                       </p>
                     </div>
+                              )
                   )}
+                      </div>
                 </div>
               ))}
 
-              <div className="submit-btn mt--20" style={{ marginTop: "20px" }}>
+                  <div className="submit-btn mt--20" style={{ textAlign: "center", marginTop: "40px", padding: "20px 0" }}>
                 <button
                   type="button"
                   className="rbt-btn btn-gradient hover-icon-reverse"
                   style={{
-                    background: isSubmitted ? "#f44336" : "#4caf50", // Màu đỏ nếu đã nộp bài, màu xanh nếu chưa nộp
+                        background: isSubmitted 
+                          ? "linear-gradient(135deg, #f44336 0%, #e53935 100%)" 
+                          : "linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)",
                     color: "white",
-                    position: "relative",
-                    padding: isSubmitting ? "12px 12px" : "12px 12px", // Padding lớn hơn khi đang loading
-                    opacity: isSubmitting ? 0.8 : 1 // Mờ hơn khi đang loading
+                        padding: "15px 40px",
+                        borderRadius: "30px",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        letterSpacing: "0.5px",
+                        boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
                   }}
                   onClick={
                     isSubmitted ? handleRetry : submitTestAndUpdateProgress
                   }
-                  disabled={isSubmitting} // Vô hiệu hóa khi đang gửi bài
+                      disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
@@ -2007,13 +2049,6 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
                         marginRight: "10px",
                         verticalAlign: "middle"
                       }}></span>
-                      <style>
-                        {`
-                              @keyframes spin {
-                                to { transform: rotate(360deg); }
-                              }
-                            `}
-                      </style>
                       Đang gửi bài...
                     </>
                   ) : (
@@ -2023,12 +2058,10 @@ export const TestQuickConvert: React.FC<TestQuickConvertProps> = ({
               </div>
             </form>
           </div>
-
-
-        </form>
-
+            </>
+          )}
       </div>
     </div>
-    // </div>
+    </div>
   );
 };
