@@ -1,0 +1,180 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 200px);
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #eaedf2;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 5px;
+  text-align: center;
+  position: relative;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #3b82f6;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: absolute;
+  left: 0;
+  top: 5px;
+}
+
+.backButton:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.backButton svg {
+  margin-right: 6px;
+}
+
+.notificationTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 5px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaedf2;
+}
+
+.metaSection {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.metaItem {
+  display: flex;
+  margin-right: 25px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.metaLabel {
+  font-weight: 600;
+  font-size: 14px;
+  color: #64748b;
+  margin-right: 8px;
+}
+
+.metaValue {
+  font-size: 14px;
+  color: #334155;
+}
+
+.contentSection {
+  margin: 25px 0;
+  line-height: 1.7;
+  font-size: 16px;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.statusBadge {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  background-color: #4ade80;
+  color: #fff;
+  box-shadow: 0 2px 5px rgba(74, 222, 128, 0.3);
+}
+
+.statusBadgeUnread {
+  background-color: #f97316;
+  box-shadow: 0 2px 5px rgba(249, 115, 22, 0.3);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 16px;
+  color: #64748b;
+}
+
+.error {
+  padding: 20px;
+  background-color: #fee2e2;
+  border-radius: 8px;
+  color: #ef4444;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+/* Animation for the card */
+.card {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 15px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .pageTitle {
+    font-size: 24px;
+  }
+  
+  .notificationTitle {
+    font-size: 20px;
+  }
+  
+  .statusBadge {
+    top: 20px;
+    right: 20px;
+  }
+} 

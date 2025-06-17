@@ -138,21 +138,7 @@ const HeaderProfile: React.FC = () => {
             )}
           </div> */}
 
-          <div className="header-profile-user">
-            {/* <div className="header-profile-user-avatar">
-              <img
-                // src="/assets/images/avatar-default.png"
-                alt={userName}
-                onError={(e) => {
-                  e.currentTarget.src = "/assets/images/avatar-default.png";
-                }}
-              />
-            </div> */}
-            <div className="header-profile-user-info">
-              <span className="header-profile-user-name">{userName}</span>
-              <span className="header-profile-user-role">Học viên</span>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>

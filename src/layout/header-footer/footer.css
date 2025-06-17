@@ -1,0 +1,21 @@
+@media (max-width: 576px) {
+    .footer__wrp {
+      padding-top: 1rem !important;
+      padding-bottom: 1rem !important;
+    }
+    
+    .footer__copyright {
+      padding-top: 0.5rem !important;
+      padding-bottom: 0.5rem !important;
+    }
+    
+    .footer__item h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .footer__item p {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+  }

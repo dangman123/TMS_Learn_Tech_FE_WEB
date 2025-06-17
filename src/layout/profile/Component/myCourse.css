@@ -655,7 +655,23 @@
   border: 1px solid #dee2e6;
   font-size: 14px;
 }
+.form-select {
+  /* Loại bỏ mũi tên mặc định của Bootstrap */
+  background-image: none !important;
+  
+  /* Loại bỏ mũi tên mặc định của browser */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  /* Giảm padding-right vì không cần chỗ cho mũi tên */
+  padding-right: 0.75rem !important;
+}
 
+/* Loại bỏ mũi tên trên Internet Explorer */
+.form-select::-ms-expand {
+  display: none;
+}
 @media (max-width: 576px) {
   .exams-tab-controls {
     flex-direction: column;

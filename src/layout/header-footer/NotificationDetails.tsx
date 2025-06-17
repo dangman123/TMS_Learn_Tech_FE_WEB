@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { isTokenExpired } from "../util/fucntion/auth";
 import useRefreshToken from "../util/fucntion/useRefreshToken";
+import "./NotificationList.css"; // Reuse the existing CSS
 
-interface Notification {
-  notification: {
-    id: number;
-    title: string;
-    message: string;
-    topic: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedDate: string | null;
-    deleted: boolean;
-  };
-  readStatus: boolean;
+// Interface for the API response
+interface ApiResponse {
+  status: number;
+  message: string;
+  data: NotificationData;
 }
 
-const NotificationDetails: React.FC = ({ }) => {
+// Interface for the notification data
+interface NotificationData {
+  id: number;
+  title: string;
+  message: string;
+  topic: string;
+  createdAt: string;
+  status: boolean;
+}
+
+const NotificationDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const refresh = useRefreshToken();
-  const [notification, setNotification] = useState<Notification | null>(null);
+  const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const getUserData = () => {
     const authData = localStorage.getItem("authData");
     if (authData) {
@@ -28,10 +36,34 @@ const NotificationDetails: React.FC = ({ }) => {
     }
     return null;
   };
-  const user = getUserData();
 
+  // Helper function to get topic display name
+  const getTopicDisplayName = (topic: string): string => {
+    const topicMap: {[key: string]: string} = {
+      'LEARNING': 'Học tập',
+      'SYSTEM': 'Hệ thống',
+      'IMPORTANT': 'Quan trọng',
+      'PROMOTION': 'Ưu đãi'
+    };
+    
+    return topicMap[topic] || topic;
+  };
 
-  const fetchNotification = async (id: number) => {
+  // Format date for display
+  const formatDate = (dateString: string): string => {
+    return new Intl.DateTimeFormat("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(dateString));
+  };
+
+  const fetchNotification = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    
     try {
       let token = localStorage.getItem("authToken");
 
@@ -44,7 +76,7 @@ const NotificationDetails: React.FC = ({ }) => {
         localStorage.setItem("authToken", token);
       }
 
-      const url = `${process.env.REACT_APP_SERVER_HOST}/api/notifications/user/${user.id}/detail/${id}`;
+      const url = `${process.env.REACT_APP_SERVER_HOST}/api/notifications/detail/${id}`;
 
       const response = await fetch(url, {
         headers: {
@@ -54,86 +86,98 @@ const NotificationDetails: React.FC = ({ }) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch notifications");
+        throw new Error("Failed to fetch notification details");
       }
 
-      const data: Notification[] = await response.json();
-      setNotification(data[0]);
+      const result: ApiResponse = await response.json();
+      
+      if (result.status === 200 && result.data) {
+        setNotification(result.data);
+      } else {
+        throw new Error(result.message || "Failed to get notification data");
+      }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("Error fetching notification:", error);
+      setError(error instanceof Error ? error.message : "Unknown error occurred");
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
-    fetchNotification(Number(id));
+    if (id) {
+      fetchNotification(id);
+    }
   }, [id]);
 
-  const containerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-    padding: "20px",
-  };
-  const detailsStyle: React.CSSProperties = {
-    maxWidth: "800px",
-    width: "100%",
-    padding: "20px",
-    border: "1px solid #ddd",
-    borderRadius: "8px",
-    backgroundColor: "#fff",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    boxSizing: "border-box",
-  };
-  const filterButtonsStyle: React.CSSProperties = {
-    display: "flex",
-    gap: "10px",
-    marginBottom: "20px",
-    justifyContent: "space-between",
-  };
-  const filterButtonStyle = (isActive: boolean): React.CSSProperties => ({
-    background: "none",
-    border: "1px solid #007bff",
-    color: isActive ? "#fff" : "#007bff",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    transition: "background-color 0.2s, color 0.2s",
-    backgroundColor: isActive ? "#007bff" : "transparent",
-  });
-  const checkboxContainerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "20px",
-  };
-  const checkboxStyle: React.CSSProperties = {
-    marginRight: "10px",
-  };
-  const notificationListStyle: React.CSSProperties = {
-    marginTop: "20px",
-  };
-  const notificationItemStyle = (isUnread: boolean): React.CSSProperties => ({
-    padding: "10px",
-    borderBottom: "1px solid #eee",
-    backgroundColor: isUnread ? "#e6f7ff" : "#fff",
-    fontWeight: isUnread ? "bold" : "normal",
-  });
-  const notificationDetailStyle: React.CSSProperties = {
-    marginTop: "20px",
-    padding: "10px",
-    borderTop: "1px solid #ddd",
+  const handleGoBack = () => {
+    navigate(-1); 
   };
 
+  if (loading) {
+    return (
+      <div className="notification-container">
+        <div className="notification-details">
+          <div className="notification-header">Đang tải thông báo...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="notification-container">
+        <div className="notification-details">
+          <div className="notification-header">Lỗi</div>
+          <div className="notification-error">{error}</div>
+          <button onClick={handleGoBack} className="back-button">
+            Quay lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!notification) {
+    return (
+      <div className="notification-container">
+        <div className="notification-details">
+          <div className="notification-header">Không tìm thấy thông báo</div>
+        
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={containerStyle}>
-      <div style={detailsStyle}>
-        <h2 style={{ textAlign: "center" }}>Thông báo</h2>
-        <div style={filterButtonsStyle}></div>
-        <div style={notificationListStyle}>
-          <div
-            key={notification?.notification.id}
-            style={notificationItemStyle(!notification?.readStatus)}
-          >
-            {notification?.notification.message}
+    <div className="notification-container">
+      <div className="notification-details">
+        <div className="notification-header-wrapper">
+        
+          <h2 className="notification-header">Chi tiết thông báo</h2>
+        </div>
+
+        <div className="notification-detail-card">
+          <div className="notification-detail-header">
+            <h3 className="notification-detail-title">{notification.title}</h3>
+            <div className="notification-status-badge" title={notification.status ? "Đã đọc" : "Chưa đọc"}>
+              {notification.status ? "Đã đọc" : "Chưa đọc"}
+            </div>
+          </div>
+
+          <div className="notification-detail-meta">
+            <div className="meta-item">
+              <span className="meta-label">Phân loại:</span>
+              <span className="meta-value">{getTopicDisplayName(notification.topic)}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">Thời gian:</span>
+              <span className="meta-value">{formatDate(notification.createdAt)}</span>
+            </div>
+          </div>
+
+          <div className="notification-detail-content">
+            <p>{notification.message}</p>
           </div>
         </div>
       </div>

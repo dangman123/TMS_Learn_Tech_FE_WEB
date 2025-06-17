@@ -620,3 +620,188 @@ input:checked + .toggle-slider:before {
     align-items: flex-end;
   }
 }
+
+/* Notification Detail Popup Styling */
+.popup-meta {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.popup-topic, .popup-date {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.topic-label, .date-label {
+  font-weight: 500;
+  margin-right: 5px;
+  min-width: 80px;
+}
+
+.topic-value, .date-value {
+  color: #333;
+}
+
+.notification-message-detail {
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-line;
+  margin-bottom: 20px;
+}
+
+.notification-status {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: #4CAF50;
+}
+
+.notification-status .status-text {
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Make the title more prominent */
+.popup-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* Make the content area more spacious */
+.popup-content-notification {
+  padding: 20px;
+}
+
+/* Add these styles for the NotificationDetails component */
+
+/* Header with back button */
+.notification-header-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #007bff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  position: absolute;
+  left: 0;
+}
+
+.back-button svg {
+  margin-right: 5px;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Notification card */
+.notification-detail-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.notification-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.notification-detail-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  flex: 1;
+}
+
+.notification-status-badge {
+  background-color: #4CAF50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.notification-detail-meta {
+  margin-bottom: 20px;
+}
+
+.meta-item {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.meta-label {
+  font-weight: 500;
+  width: 100px;
+  color: #666;
+}
+
+.meta-value {
+  color: #333;
+}
+
+.notification-detail-content {
+  line-height: 1.6;
+  font-size: 16px;
+  color: #333;
+  white-space: pre-line;
+}
+
+.notification-detail-content p {
+  margin: 0;
+}
+
+.notification-error {
+  color: #f44336;
+  padding: 15px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}

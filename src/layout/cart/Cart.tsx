@@ -42,6 +42,8 @@ interface CartItem {
   image: string;
   timestamp: string;
   combos?: ComboRecommendation[]; // Add recommended combos that contain this course
+  expanded?: boolean; // Track if combo is expanded to show courses
+  comboDetails?: CourseBundleResponse; // Store combo details when expanded
 }
 
 interface ComboRecommendation {
@@ -79,6 +81,7 @@ function Cart() {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [walletInfo, setWalletInfo] = useState<WalletInfo | null>(null);
   const [selectAll, setSelectAll] = useState(false);
+  const [expandedCombos, setExpandedCombos] = useState<number[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,8 +95,9 @@ function Cart() {
 
   useEffect(() => {
     if (selectAll) {
-      setSelectedItems(cart.map(item => item.cartItemId));
-    } else if (selectedItems.length === cart.length && cart.length > 0) {
+      const selectableItems = getSelectableItems();
+      setSelectedItems(selectableItems);
+    } else if (selectedItems.length === getSelectableItems().length && cart.length > 0) {
       setSelectAll(true);
     }
   }, [selectAll, cart]);
@@ -284,18 +288,33 @@ function Cart() {
   };
 
   const toggleSelectItem = (cartItemId: number) => {
+    const item = cart.find(item => item.cartItemId === cartItemId);
+    
+    if (!item) return;
+    
+    // If trying to select a course that's part of a selected combo
+    if (item.type === "COURSE" && item.courseId && 
+        !selectedItems.includes(cartItemId) && 
+        isCourseInSelectedCombo(item.courseId)) {
+      
+      toast.info("Khóa học này đã được bao gồm trong combo đã chọn");
+      return;
+    }
+    
     setSelectedItems(prev => {
       if (prev.includes(cartItemId)) {
         const newSelected = prev.filter(id => id !== cartItemId);
-        if (newSelected.length !== cart.length) {
-          setSelectAll(false);
-        }
+        setSelectAll(false);
         return newSelected;
       } else {
         const newSelected = [...prev, cartItemId];
-        if (newSelected.length === cart.length) {
+        
+        // Check if all selectable items are now selected
+        const selectableItems = getSelectableItems();
+        if (newSelected.length === selectableItems.length) {
           setSelectAll(true);
         }
+        
         return newSelected;
       }
     });
@@ -304,7 +323,8 @@ function Cart() {
   const toggleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
-      setSelectedItems(cart.map(item => item.cartItemId));
+      const selectableItems = getSelectableItems();
+      setSelectedItems(selectableItems);
     } else {
       setSelectedItems([]);
     }
@@ -573,6 +593,124 @@ function Cart() {
     }
   };
 
+  // Toggle expansion for combo items
+  const toggleComboExpansion = async (cartItem: CartItem) => {
+    if (!cartItem.courseBundleId) return;
+    
+    const comboId = cartItem.courseBundleId;
+    
+    // If already expanded, collapse it
+    if (expandedCombos.includes(cartItem.cartItemId)) {
+      setExpandedCombos(prev => prev.filter(id => id !== cartItem.cartItemId));
+      return;
+    }
+    
+    try {
+      // Fetch combo details
+      const token = getToken();
+      if (!token) {
+        toast.error("Bạn cần đăng nhập để xem chi tiết combo");
+        return;
+      }
+      
+      const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/course-bundle/${comboId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error("Không thể tải thông tin combo");
+      }
+      
+      const responseData = await response.json();
+      
+      if (responseData.status === 200 && responseData.data) {
+        // Update cart item with combo details
+        const updatedCart = cart.map(item => {
+          if (item.cartItemId === cartItem.cartItemId) {
+            return {
+              ...item,
+              comboDetails: responseData.data
+            };
+          }
+          return item;
+        });
+        
+        setCart(updatedCart);
+        setExpandedCombos(prev => [...prev, cartItem.cartItemId]);
+      }
+    } catch (err) {
+      toast.error("Không thể tải thông tin chi tiết combo");
+      console.error("Lỗi khi tải thông tin combo:", err);
+    }
+  };
+
+  // Helper function to get combo items from cart
+  const getComboItems = (): CartItem[] => {
+    return cart.filter(item => item.type === "COMBO");
+  };
+
+  // Helper function to get all course IDs included in combos
+  const getCoursesInCombos = (comboItems: CartItem[]): number[] => {
+    const coursesInCombos: number[] = [];
+    
+    comboItems.forEach(comboItem => {
+      if (comboItem.comboDetails && comboItem.comboDetails.courses) {
+        comboItem.comboDetails.courses.forEach(course => {
+          coursesInCombos.push(course.id);
+        });
+      }
+    });
+    
+    return coursesInCombos;
+  };
+
+  // Helper function to get all selectable cart items
+  // (excluding courses that are already part of selected combos)
+  const getSelectableItems = (): number[] => {
+    // Get all combo items from cart
+    const comboItems = getComboItems();
+    
+    // Get selected combo items
+    const selectedCombos = comboItems.filter(combo => 
+      selectedItems.includes(combo.cartItemId)
+    );
+    
+    // Get all course IDs that are part of selected combos
+    const coursesInSelectedCombos = getCoursesInCombos(selectedCombos);
+    
+    // Filter cart to exclude courses that are part of selected combos
+    return cart.filter(item => {
+      if (item.type === "COURSE" && item.courseId && 
+          coursesInSelectedCombos.includes(item.courseId)) {
+        return false;
+      }
+      return true;
+    }).map(item => item.cartItemId);
+  };
+
+  // Helper function to check if a course is in any selected combo
+  const isCourseInSelectedCombo = (courseId: number | null): boolean => {
+    if (!courseId) return false;
+    
+    // Get all selected combo items
+    const selectedCombos = cart.filter(item => 
+      item.type === "COMBO" && 
+      selectedItems.includes(item.cartItemId) && 
+      item.comboDetails
+    );
+    
+    // Check if course is in any of the selected combos
+    for (const combo of selectedCombos) {
+      if (combo.comboDetails?.courses.some(course => course.id === courseId)) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   if (loading) {
     return (
       <div className="cart-container">
@@ -674,6 +812,14 @@ function Cart() {
                           {item.type === "COURSE" ? "Khóa học" : item.type === "COMBO" ? "Combo" : "Đề thi"}
                         </div>
                         <div className="item-actions">
+                          {item.type === "COMBO" && (
+                            <button
+                              onClick={() => toggleComboExpansion(item)}
+                              className="view-details-btn"
+                            >
+                              {expandedCombos.includes(item.cartItemId) ? "Ẩn chi tiết" : "Xem chi tiết"}
+                            </button>
+                          )}
                           <button
                             onClick={() => handleRemoveItem(item.cartItemId)}
                             className="remove-btn"
@@ -702,6 +848,38 @@ function Cart() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Combo details when expanded */}
+                  {item.type === "COMBO" && 
+                   expandedCombos.includes(item.cartItemId) && 
+                   item.comboDetails && (
+                    <div className="combo-details-wrapper">
+                      <div className="combo-details">
+                        <div className="combo-details-header">
+                          <FiGift className="combo-icon" />
+                          <h4>Khóa học trong combo này</h4>
+                        </div>
+                        <div className="combo-courses-list">
+                          {item.comboDetails.courses.map((course) => (
+                            <div key={course.id} className="combo-course-item">
+                              <div className="combo-course-image">
+                                <img src={course.imageUrl} alt={course.title} />
+                              </div>
+                              <div className="combo-course-info">
+                                <h5>{course.title}</h5>
+                                <div className="combo-course-author">
+                                  <span>Tác giả: {course.author}</span>
+                                </div>
+                                <div className="combo-course-price">
+                                  {formatCurrency(course.price)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Combo Recommendation Section - Now rendered outside cart-item */}
                   {item.type === "COURSE" && selectedItems.includes(item.cartItemId) && item.combos && item.combos.length > 0 && (
