@@ -46,6 +46,10 @@ const reviewStyles = `
     border: 1px solid #e0e0e0;
     border-radius: 8px;
   }
+
+  .review-item-top { display:flex; align-items:center; gap:12px; }
+  .review-date { color:#6c757d; font-size:14px; }
+  .review-item-content span { display:block; margin-top:4px; }
 `;
 export interface CourseContent {
   course: CoureseDetail; // Danh sách các bài học trong khóa học
@@ -97,6 +101,10 @@ export const CourseReview: React.FC<CourseContent> = ({course}) => {
   
   const id = extractCourseId();
   const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
+  // State to track which reviews are expanded (show full text)
+  const [expandedReviews, setExpandedReviews] = useState<Record<number, boolean>>({});
+  const toggleExpand = (id: number) =>
+    setExpandedReviews((prev) => ({ ...prev, [id]: !prev[id] }));
 
   // Check enrollment
   useEffect(() => {
@@ -160,14 +168,6 @@ export const CourseReview: React.FC<CourseContent> = ({course}) => {
       return;
     }
 
-    // if (isTokenExpired(token) || !token) {
-    //   token = await refresh();
-    //   if (!token) {
-    //     window.location.href = "/dang-nhap";
-    //     return;
-    //   }
-    //   localStorage.setItem("authToken", token);
-    // }
 
     try {
       const plainTextContent = content.replace(/<[^>]*>/g, "");
@@ -316,7 +316,12 @@ export const CourseReview: React.FC<CourseContent> = ({course}) => {
                   height={"50px"}
                 />
                 <div className="review-title">
-                  <div>{review.fullname}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontWeight: 600 }}>{review.fullname}</span>
+                    <span className="review-date" style={{ color: "#6c757d", fontSize: "14px" }}>
+                      {new Date(review.created_at).toLocaleDateString("vi-VN")}
+                    </span>
+                  </div>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <span className="review-start-user">
                       {[...Array(review.rating)].map((_, index) => (
@@ -341,7 +346,28 @@ export const CourseReview: React.FC<CourseContent> = ({course}) => {
                 className="review-item-content"
                 style={{ margin: "10px 50px 10px 50px" }}
               >
-                <p>{review.review}</p>
+                <p
+                  style={
+                    expandedReviews[review.id]
+                      ? {}
+                      : {
+                          display: "-webkit-box",
+                          WebkitLineClamp: 4,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }
+                  }
+                >
+                  {review.review}
+                </p>
+                {review.review.length > 200 && (
+                  <span
+                    onClick={() => toggleExpand(review.id)}
+                    style={{ color: "#007bff", cursor: "pointer" }}
+                  >
+                    {expandedReviews[review.id] ? "Thu gọn" : "Xem thêm"}
+                  </span>
+                )}
               </div>
               <hr style={{ margin: "15px 0px" }} />
             </div>
