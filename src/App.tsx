@@ -85,23 +85,28 @@ function App() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", function () {
-      var header = document.querySelector("header");
+    const handleScroll = () => {
+      const header = document.querySelector("header");
+
+      // Chỉ áp dụng hiệu ứng khi ở chế độ desktop (> 768px)
+      if (window.innerWidth <= 768) {
+        header?.classList.remove("menu-fixed", "animated", "fadeInDown");
+        return;
+      }
+
       if (window.scrollY > 0) {
         header?.classList.add("menu-fixed", "animated", "fadeInDown");
       } else {
         header?.classList.remove("menu-fixed", "animated", "fadeInDown");
       }
-    });
+    };
+
+    // Gắn sự kiện scroll
+    window.addEventListener("scroll", handleScroll);
+
+    // Dọn dẹp khi unmount
     return () => {
-      window.removeEventListener("scroll", function () {
-        var header = document.querySelector("header");
-        if (window.scrollY > 0) {
-          header?.classList.add("menu-fixed", "animated", "fadeInDown");
-        } else {
-          header?.classList.remove("menu-fixed", "animated", "fadeInDown");
-        }
-      });
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
