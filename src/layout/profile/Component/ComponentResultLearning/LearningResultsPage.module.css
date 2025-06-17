@@ -1116,4 +1116,64 @@
   margin-top: 10px;
   font-size: 14px;
   color: #6c757d;
+}
+/* Student prediction info styles */
+.studentPredictionInfo {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9ff;
+  border-radius: 10px;
+  border-left: 4px solid #4a6cf7;
+}
+
+.clusterInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clusterInfo h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #2d3748;
+}
+
+.clusterInfo p {
+  margin: 0;
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+/* Suggestion links and notes */
+.suggestionLinks {
+  margin-top: 5px;
+  margin-left: 20px;
+}
+
+.videoLink, .testLink {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  color: #4a6cf7;
+  text-decoration: none;
+  margin-right: 15px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background-color: rgba(74, 108, 247, 0.1);
+  transition: all 0.2s ease;
+}
+
+.videoLink:hover, .testLink:hover {
+  background-color: rgba(74, 108, 247, 0.2);
+  color: #2451b7;
+}
+
+.suggestionNote {
+  margin-top: 5px;
+  margin-left: 20px;
+  font-size: 13px;
+  color: #6c757d;
+  font-style: italic;
 } 

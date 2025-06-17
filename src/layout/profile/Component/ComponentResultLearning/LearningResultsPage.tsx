@@ -12,6 +12,63 @@ import {
 import CustomPieChart from './CustomPieChart';
 import { Modal, Button, Tab, Nav } from 'react-bootstrap';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+
+// Interface for JWT payload
+interface JwtPayload {
+    isHuitStudent: boolean;
+    [key: string]: any;
+}
+
+// Type for suggestion categories
+type SuggestionCategory =
+    | "studyAgain"
+    | "notCompleted"
+    | "lessonsToImprove"
+    | "learningSuggestions"
+    | "notAttempted"
+    | "quizToRetake";
+
+// Type for suggestion item
+interface SuggestionItem {
+    item: string;
+    videoLink: string | null;
+    testLink: string | null;
+    note: string | null;
+}
+
+// Interface for categorized suggestions
+interface CategorizedSuggestions {
+    studyAgain: SuggestionItem[];
+    notCompleted: SuggestionItem[];
+    lessonsToImprove: SuggestionItem[];
+    learningSuggestions: SuggestionItem[];
+    notAttempted: SuggestionItem[];
+    quizToRetake: SuggestionItem[];
+}
+
+// Interface for student prediction data
+interface StudentPrediction {
+    studentId: string;
+    accountId: number;
+    cluster: string;
+    clusterDescription: string;
+    clusterLabel: string;
+    learningPathSuggestion: string[];
+    prediction: number;
+    probability: number;
+    riskLevel: string;
+    createdAt: string;
+}
+
+// Interface for student information
+interface StudentInformation {
+    id: number;
+    studentId: string;
+    fullName: string;
+    courseData: any[];
+    [key: string]: any;
+}
 
 // Interfaces
 interface CourseData {
@@ -97,6 +154,13 @@ const LearningResultsPage: React.FC = () => {
     const [averageScore, setAverageScore] = useState<number>(0);
     const [passRate, setPassRate] = useState<number>(0);
 
+    // States for HUIT student prediction
+    const [hasPermission, setHasPermission] = useState<boolean>(false);
+    const [studentPrediction, setStudentPrediction] = useState<StudentPrediction | null>(null);
+    const [categorizedSuggestions, setCategorizedSuggestions] = useState<CategorizedSuggestions | null>(null);
+    const [studentInformation, setStudentInformation] = useState<StudentInformation | null>(null);
+    const [progressInfo, setProgressInfo] = useState<string | null>(null);
+
     // Phân trang
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage, setItemsPerPage] = useState<number>(5);
@@ -140,6 +204,333 @@ const LearningResultsPage: React.FC = () => {
     };
 
     const user = getUserData();
+    const authData = user;
+
+    // Dictionary for suggestion categories
+    const suggestionDictionary: Record<SuggestionCategory, { keywords: string[]; note: string; message: string }> = {
+        //Học lại 
+        studyAgain: {
+            keywords: ["Nên học lại", "Chưa hoàn thành", "Có bài cần làm lại"],
+            note: "Bạn có xu hướng tiếp thu hiệu quả qua hình ảnh – nên ưu tiên các video có sơ đồ, biểu đồ và hình minh họa trực quan.",
+            message: "Hãy ôn lại và làm lại bài học để đạt điểm tối thiểu.",
+        },
+
+        //Chưa học hoàn thành 
+        notCompleted: {
+            keywords: ["bạn chưa hoàn thành chương này", "chưa hoàn thành", "Chương chưa bắt đầu học"],
+            note: "Hãy tiếp tục học nhé! Hoàn thành chương học này để đạt kết quả tốt nhất.",
+            message: "Chương này chưa hoàn thành. Hãy tiếp tục học để đạt kết quả tốt nhất.",
+        },
+
+        //điểm chưa cao , có thể cải thiện ( điểm mức khá)
+        lessonsToImprove: {
+            keywords: ["có thể cải thiện hơn", "điểm chưa cao", "Một số bài có điểm chưa cao, nên ôn thêm"],
+            note: "Cần ôn lại các bài học này để nâng cao điểm số.",
+            message: "Điểm của bạn chưa cao, cần ôn lại để cải thiện điểm số.",
+        },
+
+        // Gợi ý học tập
+        learningSuggestions: {
+            keywords: ["gợi ý học tập", "phương pháp học", "học hiệu quả"],
+            note: "Áp dụng phương pháp học mới để cải thiện hiệu quả.",
+            message: "Áp dụng phương pháp học mới để cải thiện hiệu quả học tập.",
+        },
+
+        // Các bài học chưa làm
+        notAttempted: {
+            keywords: ["cần học và làm bài", "bài chưa làm", "chưa học", "Các bài chưa học/chưa làm"],
+            note: "Cần học và làm bài để hoàn thành khóa học.",
+            message: "Bạn chưa làm bài học này. Hãy bắt đầu ngay để hoàn thành khóa học.",
+        },
+
+        // Thông điệp cho Quiz nếu cần làm lại, điểm thấp
+        quizToRetake: {
+            keywords: ["Có bài cần làm lại", "Làm lại quiz", "Điểm quiz thấp", "cần cải thiện"],
+            note: "Ôn tập các bài học trong chương trước khi làm lại quiz để đạt điểm cao hơn.",
+            message: "Điểm quiz của bạn thấp. Hãy làm lại quiz sau khi ôn lại bài học trong chương.",
+        },
+    };
+
+    // Extract links and notes from suggestions
+    const extractDetails = (suggestion: string) => {
+        const videoLinkMatch = suggestion.match(/▶️.*?(http:\/\/[^\s]+)/);
+        const testLinkMatch = suggestion.match(/📝.*?(http:\/\/[^\s]+)/);
+        const noteMatch = suggestion.match(/🗒️ Ghi chú: (.*)/);
+
+        return {
+            videoLink: videoLinkMatch ? videoLinkMatch[1] : null,
+            testLink: testLinkMatch ? testLinkMatch[1] : null,
+            note: noteMatch ? noteMatch[1] : null,
+        };
+    };
+
+    // Get next three values from array
+    const getNextThreeValues = (array: any[], startIndex: number) => {
+        if (startIndex < 0 || startIndex >= array.length) {
+            return [];
+        }
+        const nextValues = array.slice(startIndex + 1, startIndex + 4);
+        return nextValues;
+    };
+
+    // Function to categorize suggestions from API
+    const categorizeSuggestions = (suggestions: string[]): CategorizedSuggestions => {
+        const categorizedSuggestions: CategorizedSuggestions = {
+            studyAgain: [],
+            notCompleted: [],
+            lessonsToImprove: [],
+            learningSuggestions: [],
+            notAttempted: [],
+            quizToRetake: [],
+        };
+
+        suggestions.forEach((suggestion, index) => {
+            let category: SuggestionCategory | null = null;
+
+            // Xác định danh mục dựa trên từ khóa
+            for (const [key, value] of Object.entries(suggestionDictionary)) {
+                if (value.keywords.some((keyword) => suggestion.includes(keyword))) {
+                    category = key as SuggestionCategory;
+                    break;
+                }
+            }
+
+            if (category === "notCompleted") {
+                let check = suggestion.includes("bạn chưa hoàn thành chương này")
+                    || suggestion.includes("hãy tiếp tục học nhé")
+                if (check) {
+                    return;
+                } else {
+                    const nextValues = getNextThreeValues(suggestions, index);
+                    const videoLink = nextValues
+                        .map((val) => extractDetails(val).videoLink)
+                        .find((link) => link !== null) || null;
+
+                    const testLink = nextValues
+                        .map((val) => extractDetails(val).testLink)
+                        .find((link) => link !== null) || null;
+
+                    const note = nextValues
+                        .map((val) => extractDetails(val).note)
+                        .find((note) => note !== null) || null;
+
+                    categorizedSuggestions.notCompleted.push({
+                        item: suggestion,
+                        videoLink,
+                        testLink: null,
+                        note,
+                    });
+                }
+            } else if (category === "lessonsToImprove") {
+                if (suggestion.includes("Một số bài có điểm chưa cao")) {
+                    categorizedSuggestions.lessonsToImprove.push({
+                        item: suggestion,
+                        videoLink: null,
+                        testLink: null,
+                        note: null,
+                    });
+                } else {
+                    // Thêm vào danh mục lessonsToImprove
+                    const nextValues = getNextThreeValues(suggestions, index);
+                    const videoLink = nextValues
+                        .map((val) => extractDetails(val).videoLink)
+                        .find((link) => link !== null) || null;
+
+                    const testLink = nextValues
+                        .map((val) => extractDetails(val).testLink)
+                        .find((link) => link !== null) || null;
+
+                    const note = nextValues
+                        .map((val) => extractDetails(val).note)
+                        .find((note) => note !== null) || null;
+
+                    categorizedSuggestions.lessonsToImprove.push({
+                        item: suggestion,
+                        videoLink,
+                        testLink,
+                        note,
+                    });
+                }
+            } else if (category === "notAttempted") {
+                if (suggestion.includes("Các bài chưa học/chưa làm")) {
+                    categorizedSuggestions.notAttempted.push({
+                        item: suggestion,
+                        videoLink: null,
+                        testLink: null,
+                        note: null,
+                    });
+                } else {
+                    const nextValues = getNextThreeValues(suggestions, index);
+                    const videoLink = nextValues
+                        .map((val) => extractDetails(val).videoLink)
+                        .find((link) => link !== null) || null;
+
+                    const testLink = nextValues
+                        .map((val) => extractDetails(val).testLink)
+                        .find((link) => link !== null) || null;
+
+                    const note = nextValues
+                        .map((val) => extractDetails(val).note)
+                        .find((note) => note !== null) || null;
+
+                    categorizedSuggestions.notAttempted.push({
+                        item: suggestion,
+                        videoLink,
+                        testLink: null,
+                        note,
+                    });
+                }
+            } else if (category === "studyAgain") {
+                const nextValues = getNextThreeValues(suggestions, index);
+                const videoLink = nextValues
+                    .map((val) => extractDetails(val).videoLink)
+                    .find((link) => link !== null) || null;
+
+                const testLink = nextValues
+                    .map((val) => extractDetails(val).testLink)
+                    .find((link) => link !== null) || null;
+
+                const note = nextValues
+                    .map((val) => extractDetails(val).note)
+                    .find((note) => note !== null) || null;
+
+                categorizedSuggestions.studyAgain.push({
+                    item: suggestion,
+                    videoLink,
+                    testLink,
+                    note,
+                });
+            } else if (category === "learningSuggestions") {
+                const nextValues = getNextThreeValues(suggestions, index);
+                const videoLink = nextValues
+                    .map((val) => extractDetails(val).videoLink)
+                    .find((link) => link !== null) || null;
+
+                const testLink = nextValues
+                    .map((val) => extractDetails(val).testLink)
+                    .find((link) => link !== null) || null;
+
+                const note = nextValues
+                    .map((val) => extractDetails(val).note)
+                    .find((note) => note !== null) || null;
+
+                categorizedSuggestions.learningSuggestions.push({
+                    item: suggestion,
+                    videoLink,
+                    testLink,
+                    note,
+                });
+            } else if (category === "quizToRetake") {
+                const nextValues = getNextThreeValues(suggestions, index);
+                const videoLink = nextValues
+                    .map((val) => extractDetails(val).videoLink)
+                    .find((link) => link !== null) || null;
+
+                const testLink = nextValues
+                    .map((val) => extractDetails(val).testLink)
+                    .find((link) => link !== null) || null;
+
+                const note = nextValues
+                    .map((val) => extractDetails(val).note)
+                    .find((note) => note !== null) || null;
+
+                categorizedSuggestions.quizToRetake.push({
+                    item: suggestion,
+                    videoLink,
+                    testLink,
+                    note,
+                });
+            }
+        });
+
+        return categorizedSuggestions;
+    };
+
+    // Fetch prediction data for HUIT students
+    useEffect(() => {
+        const fetchPredictionData = async () => {
+            const authToken = localStorage.getItem("authToken");
+            if (authToken) {
+                try {
+                    const decodedToken = jwtDecode(authToken) as JwtPayload;
+                    setHasPermission(decodedToken.isHuitStudent);
+                    if (decodedToken.isHuitStudent) {
+                        const token = await authTokenLogin(refreshToken, refresh, navigate);
+
+                        const response = await fetch(
+                            `${process.env.REACT_APP_SERVER_HOST}/api/prediction-result/student?accountId=${authData.id}`,
+                            {
+                                method: 'GET',
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            }
+                        );
+
+                        const data = await response.json();
+                        if (data.status === 200 && data.data) {
+                            setStudentPrediction(data.data);
+                            if (data.data.learningPathSuggestion) {
+                                const categorized = categorizeSuggestions(data.data.learningPathSuggestion);
+                                setCategorizedSuggestions(categorized);
+
+                                // Extract progress information from learningPathSuggestion
+                                const progressSuggestion = data.data.learningPathSuggestion.find((suggestion: string) => suggestion.includes('Tiến độ hoàn thành'));
+                                if (progressSuggestion) {
+                                    setProgressInfo(progressSuggestion);
+                                }
+                            }
+                            if (data.data.progressInfo) {
+                                setProgressInfo(data.data.progressInfo);
+                            }
+
+                            // Generate prediction data based on API response
+                            const newPredictionData: PredictionData = {
+                                riskLevel: data.data.riskLevel.toLowerCase() as 'high' | 'medium' | 'low',
+                                riskScore: Math.round(data.data.probability * 100),
+                                reasons: data.data.learningPathSuggestion
+                                    .filter((s: string) => s.includes('❗') || s.includes('cần cải thiện'))
+                                    .slice(0, 3),
+                                suggestions: data.data.learningPathSuggestion
+                                    .filter((s: string) => s.includes('Gợi ý') || s.includes('cần học'))
+                                    .slice(0, 4)
+                            };
+                            setPredictionData(newPredictionData);
+                        } else {
+                            console.warn("Lỗi logic từ API:", data.message);
+                        }
+
+                        try {
+                            const studentDataResponse = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/prediction-result/student-huit-item?id=${authData.id}`, {
+                                method: 'GET',
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            if (studentDataResponse.ok) {
+                                const studentData = await studentDataResponse.json();
+                                setStudentInformation(studentData.data);
+                            } else {
+                                console.error('Failed to fetch student course data');
+                            }
+                        } catch (error) {
+                            console.error('Error fetching student course data:', error);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Token không hợp lệ hoặc không thể giải mã.", error);
+                    setHasPermission(false);
+                }
+            } else {
+                setHasPermission(false);
+            }
+        };
+
+        fetchPredictionData();
+    }, []);
 
     // Fetch courses
     const fetchCourses = async () => {
@@ -474,6 +865,23 @@ const LearningResultsPage: React.FC = () => {
 
     // Function to regenerate prediction data
     const regeneratePrediction = () => {
+        // If we have student prediction data from API, use it
+        if (studentPrediction && hasPermission) {
+            const newPredictionData: PredictionData = {
+                riskLevel: studentPrediction.riskLevel.toLowerCase() as 'high' | 'medium' | 'low',
+                riskScore: Math.round(studentPrediction.probability * 100),
+                reasons: studentPrediction.learningPathSuggestion
+                    .filter(s => s.includes('❗') || s.includes('cần cải thiện'))
+                    .slice(0, 3),
+                suggestions: studentPrediction.learningPathSuggestion
+                    .filter(s => s.includes('Gợi ý') || s.includes('cần học'))
+                    .slice(0, 4)
+            };
+            setPredictionData(newPredictionData);
+            return;
+        }
+
+        // Otherwise use the original implementation
         if (progressData) {
             generatePredictionData(progressData);
         } else {
@@ -991,47 +1399,6 @@ const LearningResultsPage: React.FC = () => {
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {/* Gợi ý học tập */}
-                                            <div className={`${styles.card} ${styles.tipsCard}`}>
-                                                <div className={styles.cardHeader}>
-                                                    <h2 className={styles.cardTitle}>
-                                                        <Lightbulb className="me-2" />
-                                                        Gợi ý học tập
-                                                    </h2>
-                                                </div>
-                                                <div className={styles.cardBody}>
-                                                    <div className={styles.tipsList}>
-                                                        <div className={styles.tipItem}>
-                                                            <div className={styles.tipIcon}>
-                                                                <ArrowRight size={16} />
-                                                            </div>
-                                                            <div className={styles.tipContent}>
-                                                                Tập trung vào chủ đề <strong>{progressData.weakestTopic || 'CSS & Styling'}</strong> để cải thiện kết quả học tập.
-                                                            </div>
-                                                        </div>
-                                                        <div className={styles.tipItem}>
-                                                            <div className={styles.tipIcon}>
-                                                                <ArrowRight size={16} />
-                                                            </div>
-                                                            <div className={styles.tipContent}>
-                                                                Tập trung ôn lại các câu hỏi trả lời sai để cải thiện điểm số.
-                                                            </div>
-                                                        </div>
-                                                        <div className={styles.tipItem}>
-                                                            <div className={styles.tipIcon}>
-                                                                <ArrowRight size={16} />
-                                                            </div>
-                                                            <div className={styles.tipContent}>
-                                                                Hoàn thành thêm {10 - 7} bài kiểm tra còn lại để đánh giá toàn diện.
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <button className={styles.viewMoreButton} onClick={togglePredictionModal}>
-                                                        Xem thêm gợi ý <ArrowRight size={14} />
-                                                    </button>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -1041,7 +1408,6 @@ const LearningResultsPage: React.FC = () => {
                 )}
             </div>
 
-            {/* Prediction Modal */}
             <Modal
                 show={showPredictionModal}
                 onHide={togglePredictionModal}
@@ -1063,6 +1429,16 @@ const LearningResultsPage: React.FC = () => {
                 <Modal.Body>
                     {predictionData && (
                         <div className={styles.predictionContent}>
+                            {studentPrediction && hasPermission && (
+                                <div className={styles.studentPredictionInfo}>
+                                    <div className={styles.clusterInfo}>
+                                        <h4>Thông tin phân nhóm</h4>
+                                        <p>{studentPrediction.clusterLabel}</p>
+                                        <p>{studentPrediction.clusterDescription}</p>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className={`${styles.riskIndicator} ${predictionData.riskLevel === 'high' ? styles.highRisk :
                                 predictionData.riskLevel === 'medium' ? styles.mediumRisk :
                                     styles.lowRisk
@@ -1082,18 +1458,200 @@ const LearningResultsPage: React.FC = () => {
                                 </div>
                             </div>
 
+                            {categorizedSuggestions && (
+                                <>
+                                    {/* Gợi ý học tập */}
+                                    {categorizedSuggestions.learningSuggestions.length > 0 && (
+                                        <div className={styles.predictionSection}>
+                                            <h4>
+                                                <Lightbulb className="me-2" />
+                                                Gợi ý học tập
+                                            </h4>
+                                            <ul className={styles.suggestionsList}>
+                                                {categorizedSuggestions.learningSuggestions.map((suggestion, index) => (
+                                                    <li key={`learning-${index}`}>
+                                                        <ArrowRight className={styles.suggestionIcon} />
+                                                        {suggestion.item}
+                                                        {suggestion.note && (
+                                                            <div className={styles.suggestionNote}>
+                                                                <small>{suggestion.note}</small>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Bài học cần làm lại */}
+                                    {categorizedSuggestions.studyAgain.length > 0 && (
+                                        <div className={styles.predictionSection}>
+                                            <h4>
+                                                <ExclamationTriangle className="me-2" />
+                                                Bài học cần học lại
+                                            </h4>
+                                            <ul className={styles.reasonsList}>
+                                                {categorizedSuggestions.studyAgain.map((suggestion, index) => (
+                                                    <li key={`studyagain-${index}`}>
+                                                        <span className={styles.reasonBullet}>•</span>
+                                                        {suggestion.item}
+                                                        {suggestion.videoLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.videoLink} target="_blank" rel="noopener noreferrer" className={styles.videoLink}>
+                                                                    Xem bài học
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        {suggestion.testLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.testLink} target="_blank" rel="noopener noreferrer" className={styles.testLink}>
+                                                                    Làm bài kiểm tra
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Bài học chưa hoàn thành */}
+                                    {categorizedSuggestions.notCompleted.length > 0 && (
+                                        <div className={styles.predictionSection}>
+                                            <h4>
+                                                <Clock className="me-2" />
+                                                Chương học chưa hoàn thành
+                                            </h4>
+                                            <ul className={styles.suggestionsList}>
+                                                {categorizedSuggestions.notCompleted.map((suggestion, index) => (
+                                                    <li key={`notcompleted-${index}`}>
+                                                        <ArrowRight className={styles.suggestionIcon} />
+                                                        {suggestion.item}
+                                                        {suggestion.videoLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.videoLink} target="_blank" rel="noopener noreferrer" className={styles.videoLink}>
+                                                                    Bắt đầu học
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Bài học cần cải thiện */}
+                                    {categorizedSuggestions.lessonsToImprove.length > 0 && (
+                                        <div className={styles.predictionSection}>
+                                            <h4>
+                                                <GraphUp className="me-2" />
+                                                Bài học cần cải thiện điểm số
+                                            </h4>
+                                            <ul className={styles.suggestionsList}>
+                                                {categorizedSuggestions.lessonsToImprove.map((suggestion, index) => (
+                                                    <li key={`improve-${index}`}>
+                                                        <ArrowRight className={styles.suggestionIcon} />
+                                                        {suggestion.item}
+                                                        {suggestion.videoLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.videoLink} target="_blank" rel="noopener noreferrer" className={styles.videoLink}>
+                                                                    Xem lại bài học
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        {suggestion.testLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.testLink} target="_blank" rel="noopener noreferrer" className={styles.testLink}>
+                                                                    Làm lại bài kiểm tra
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Bài học chưa làm */}
+                                    {categorizedSuggestions.notAttempted.length > 0 && (
+                                        <div className={styles.predictionSection}>
+                                            <h4>
+                                                <BookHalf className="me-2" />
+                                                Bài học chưa làm
+                                            </h4>
+                                            <ul className={styles.suggestionsList}>
+                                                {categorizedSuggestions.notAttempted.map((suggestion, index) => (
+                                                    <li key={`notattempted-${index}`}>
+                                                        <ArrowRight className={styles.suggestionIcon} />
+                                                        {suggestion.item}
+                                                        {suggestion.videoLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.videoLink} target="_blank" rel="noopener noreferrer" className={styles.videoLink}>
+                                                                    Xem bài học
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Quiz cần làm lại */}
+                                    {categorizedSuggestions.quizToRetake.length > 0 && (
+                                        <div className={styles.predictionSection}>
+                                            <h4>
+                                                <ClipboardData className="me-2" />
+                                                Quiz cần làm lại
+                                            </h4>
+                                            <ul className={styles.suggestionsList}>
+                                                {categorizedSuggestions.quizToRetake.map((suggestion, index) => (
+                                                    <li key={`quiz-${index}`}>
+                                                        <ArrowRight className={styles.suggestionIcon} />
+                                                        {suggestion.item}
+                                                        {suggestion.videoLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.videoLink} target="_blank" rel="noopener noreferrer" className={styles.videoLink}>
+                                                                    Ôn tập
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        {suggestion.testLink && (
+                                                            <div className={styles.suggestionLinks}>
+                                                                <a href={suggestion.testLink} target="_blank" rel="noopener noreferrer" className={styles.testLink}>
+                                                                    Làm lại quiz
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {!categorizedSuggestions && (
+                                <>
                             <div className={styles.predictionSection}>
                                 <h4>
                                     <ExclamationTriangle className="me-2" />
                                     Các yếu tố ảnh hưởng
                                 </h4>
                                 <ul className={styles.reasonsList}>
-                                    {predictionData.reasons.map((reason, index) => (
+                                            {predictionData.reasons.length > 0 ? (
+                                                predictionData.reasons.map((reason, index) => (
                                         <li key={index}>
                                             <span className={styles.reasonBullet}>•</span>
                                             {reason}
                                         </li>
-                                    ))}
+                                                ))
+                                            ) : (
+                                                <li>
+                                                    <span className={styles.reasonBullet}>•</span>
+                                                    Không có yếu tố nguy cơ được phát hiện.
+                                                </li>
+                                            )}
                                 </ul>
                             </div>
 
@@ -1103,14 +1661,33 @@ const LearningResultsPage: React.FC = () => {
                                     Gợi ý cải thiện
                                 </h4>
                                 <ul className={styles.suggestionsList}>
-                                    {predictionData.suggestions.map((suggestion, index) => (
+                                            {predictionData.suggestions.length > 0 ? (
+                                                predictionData.suggestions.map((suggestion, index) => (
                                         <li key={index}>
                                             <ArrowRight className={styles.suggestionIcon} />
                                             {suggestion}
                                         </li>
-                                    ))}
+                                                ))
+                                            ) : (
+                                                <li>
+                                                    <ArrowRight className={styles.suggestionIcon} />
+                                                    Tiếp tục duy trì phương pháp học tập hiện tại.
+                                                </li>
+                                            )}
                                 </ul>
                             </div>
+                                </>
+                            )}
+
+                            {progressInfo && (
+                                <div className={styles.predictionSection}>
+                                    <h4>
+                                        <GraphUp className="me-2" />
+                                        Tiến độ học tập
+                                    </h4>
+                                    <p>{progressInfo}</p>
+                                </div>
+                            )}
 
                             <div className={styles.predictionActions}>
                                 <Button variant="primary" className={styles.actionButton}>
