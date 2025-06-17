@@ -83,10 +83,11 @@ function ExamList({ exams = [] }: ExamListProps) {
       <div key={exam.testId} className="col-xl-4 col-md-6">
         <div className="exam-card">
           <div className="exam-image">
-            <Link to={examDetailUrl} onClick={handleLinkClick}>
+            <Link to={examDetailUrl} onClick={handleLinkClick} style={{ width: "100%" ,objectFit: "cover" }}>
               <img
                 src={exam.imageUrl || "/placeholder-exam.png"}
                 alt={exam.title || "Exam image"}
+                
               />
             </Link>
             <span className="time-limit">

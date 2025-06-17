@@ -67,7 +67,7 @@ export const BlogDetail = () => {
   const refresh = useRefreshToken();
   const [rootComments, setRootComments] = useState<BlogComment[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [commentPage, setCommentPage] = useState(1);
+  const [commentPage, setCommentPage] = useState(0);
   const [commentContent, setCommentContent] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
 

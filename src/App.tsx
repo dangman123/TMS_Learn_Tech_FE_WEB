@@ -66,6 +66,7 @@ import TakeTest from "./layout/take-test/take-test";
 import ContentExampleDetail from "./layout/example/ComponentDetail/ContentExampleDetail";
 import OverView from "./layout/profile/Component/OverView/OverView";
 import { NotificationProvider } from "./layout/util/NotificationContext";
+import TakeTestQuestion from "./layout/take-test/take-test-question";
 const ProtectedAccountManagement = withAuth(AccountManagement);
 const ProtectedChechOut = withAuth(Checkout);
 
@@ -265,11 +266,11 @@ function App() {
                   }
                 />
                 <Route
-                  path="/take-test"
+                  path="/take-test-question/:testId"
                   element={
 
 
-                    <TakeTest />
+                    <TakeTestQuestion />
 
                   }
                 />

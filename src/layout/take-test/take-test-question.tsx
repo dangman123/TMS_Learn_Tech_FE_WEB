@@ -61,7 +61,7 @@ interface UserAnswer {
   isMarked: boolean;
 }
 
-const TakeTest: React.FC = () => {
+const TakeTestQuestion: React.FC = () => {
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
 
@@ -74,7 +74,7 @@ const TakeTest: React.FC = () => {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [showInstructions, setShowInstructions] = useState<boolean>(true);
+  const showInstructions = false;
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [testSubmitted, setTestSubmitted] = useState<boolean>(false);
   const [confirmSubmit, setConfirmSubmit] = useState<boolean>(false);
@@ -99,19 +99,26 @@ const TakeTest: React.FC = () => {
         );
 
         if (response.data.status === 200) {
-          setTestData(response.data.data);
-          setRemainingTime(response.data.data.duration);
+          const fetchedData = response.data.data;
+
+          // Nếu đề thi chưa có câu hỏi, hiển thị lỗi
+          if (!fetchedData.questionList || fetchedData.questionList.length === 0) {
+            setError("Đề thi hiện chưa có câu hỏi để làm.");
+            return;
+          }
+
+          setTestData(fetchedData);
+          setRemainingTime(fetchedData.duration);
 
           // Initialize user answers
-          const initialAnswers: UserAnswer[] =
-            response.data.data.questionList.map((q: Question) => ({
-              questionId: q.questionId,
-              selectedOption: null,
-              selectedOptions: [],
-              essayAnswer: "",
-              fillAnswer: "",
-              isMarked: false,
-            }));
+          const initialAnswers: UserAnswer[] = fetchedData.questionList.map((q: Question) => ({
+            questionId: q.questionId,
+            selectedOption: null,
+            selectedOptions: [],
+            essayAnswer: "",
+            fillAnswer: "",
+            isMarked: false,
+          }));
 
           setUserAnswers(initialAnswers);
         } else {
@@ -128,27 +135,32 @@ const TakeTest: React.FC = () => {
     fetchTestData();
   }, [testId]);
 
-  // Timer effect
+  // Timer effect: bắt đầu đếm ngược ngay khi đã có thời gian và bài chưa nộp
   useEffect(() => {
-    if (!showInstructions && remainingTime > 0 && !testSubmitted) {
-      timerRef.current = setInterval(() => {
-        setRemainingTime((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current as NodeJS.Timeout);
-            handleSubmitTest();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    if (remainingTime > 0 && !testSubmitted) {
+      // Nếu chưa có interval thì tạo
+      if (!timerRef.current) {
+        timerRef.current = setInterval(() => {
+          setRemainingTime((prev) => {
+            if (prev <= 1) {
+              clearInterval(timerRef.current as NodeJS.Timeout);
+              timerRef.current = null;
+              handleSubmitTest();
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
     }
 
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
-  }, [showInstructions, testSubmitted]);
+  }, [remainingTime, testSubmitted]);
 
   // Format time
   const formatTime = (seconds: number) => {
@@ -399,10 +411,7 @@ const TakeTest: React.FC = () => {
         );
 
         if (response.data.status === 200) {
-          // Use a longer timeout to ensure DOM is ready
-          setTimeout(() => {
-            setTestResult(response.data.data);
-          }, 100);
+          setTimeout(() => setTestResult(response.data.data), 0);
         } else {
           setError("Có lỗi khi nhận kết quả bài thi");
         }
@@ -417,12 +426,6 @@ const TakeTest: React.FC = () => {
       }
       setConfirmSubmit(true);
     }
-  };
-
-  // Chuyển sang trang làm bài khi người dùng bấm "Bắt đầu làm bài"
-  const handleStartTest = () => {
-    if (!testId) return;
-    navigate(`/take-test-question/${testId}`);
   };
 
   // Render question based on type
@@ -618,55 +621,12 @@ const TakeTest: React.FC = () => {
     );
   }
 
-  // Display instructions
-  if (showInstructions) {
-    return (
-      <div className={styles.instructionsContainer}>
-        <div className={styles.instructionsCard}>
-          <h1 className={styles.testTitle}>{testData.testTitle}</h1>
-
-          <div className={styles.testInfo}>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Thời gian:</span>
-              <span className={styles.infoValue}>
-                {testData.duration / 60} phút
-              </span>
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Số câu hỏi:</span>
-              <span className={styles.infoValue}>{testData.totalQuestion}</span>
-            </div>
-          </div>
-
-          <div
-            className={styles.testDescription}
-            dangerouslySetInnerHTML={{ __html: testData.description }}
-          />
-
-          <div className={styles.instructionsBox}>
-            <h3>Hướng dẫn làm bài</h3>
-            <ul>
-              <li>Bài thi sẽ tự động nộp khi hết thời gian.</li>
-              <li>Bạn có thể đánh dấu câu hỏi để xem lại sau.</li>
-              <li>Đảm bảo đã trả lời tất cả câu hỏi trước khi nộp bài.</li>
-              <li>Không được rời khỏi trang trong khi làm bài.</li>
-            </ul>
-          </div>
-
-          <button className={styles.startButton} onClick={handleStartTest}>
-            Bắt đầu làm bài
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Current question
   const currentQuestion = testData.questionList[currentQuestionIndex];
   const currentAnswer = userAnswers.find(
     (a) => a.questionId === currentQuestion.questionId
   );
- 
+
   return (
     <div className={styles.testContainer}>
       {" "}
@@ -778,10 +738,10 @@ const TakeTest: React.FC = () => {
             </button>
           </div>
           <div className={styles.questionContent}>
-            <div
+            {/* <div
               className={styles.questionText}
               dangerouslySetInnerHTML={{ __html: currentQuestion.content }}
-            />
+            /> */}
 
             {renderQuestionContent(currentQuestion, currentAnswer)}
           </div>
@@ -865,4 +825,4 @@ const TakeTest: React.FC = () => {
   );
 };
 
-export default TakeTest;
+export default TakeTestQuestion;

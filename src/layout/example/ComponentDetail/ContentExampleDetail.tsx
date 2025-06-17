@@ -820,7 +820,7 @@ const ExamDetail: React.FC = () => {
                         onClick={() => setShowReviewModal(true)}
                       >
                         <Edit className="exam-write-review-icon" size={18} />
-                        <span>Viết đánh giá</span>
+                        <span style={{ color: "white", fontWeight: "bold" }}>Viết đánh giá</span>
                       </button>
                     )}
                   </div>
@@ -954,7 +954,7 @@ const ExamDetail: React.FC = () => {
             >
               <X size={20} />
             </button>
-            <h3 style={{ marginBottom: "12px", fontSize: "20px" }}>Viết đánh giá</h3>
+            <h3 style={{ marginBottom: "12px", fontSize: "20px", color: "white", fontWeight: "bold" }}>Viết đánh giá</h3>
             <div
               className="review-modal-star"
               style={{ marginBottom: "12px" }}

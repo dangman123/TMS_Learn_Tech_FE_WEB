@@ -968,7 +968,7 @@
   .exam-sidebar {
     position: static;
     width: 90%;
-    margin-top: 0;
+    margin: 0 auto; /* Center horizontally on small screens */
   }
 }
 

@@ -88,7 +88,7 @@ interface ProgressData {
     completedLessons: number;
     totalLessons: number;
     completedTime: number;
-    totalTime: number;
+    totalTime?: number;
     lastActivity?: Date;
     strongestTopic?: string;
     weakestTopic?: string;
@@ -139,8 +139,7 @@ interface ProgressResponse {
 const LearningResultsPage: React.FC = () => {
     // States for data
     const [courses, setCourses] = useState<CourseData[]>([]);
-    const [selectedCourseId, setSelectedCourseId] = useState<string | null>(() => {
-        // Khôi phục selectedCourseId từ localStorage nếu có
+    const [selectedCourseId, setSelectedCourseId] = useState<string | null>(() => {// Khôi phục selectedCourseId từ localStorage nếu có
         const savedCourseId = localStorage.getItem("selectedCourseId");
         return savedCourseId || null;
     });
@@ -189,7 +188,6 @@ const LearningResultsPage: React.FC = () => {
         if (pageNumber < 1) return;
         if (pageNumber > totalPages) return;
         if (pageNumber === currentPage) return;
-
         // Chỉ cập nhật trang hiện tại, useEffect sẽ tự động gọi API
         setCurrentPage(pageNumber);
     };
@@ -453,8 +451,9 @@ const LearningResultsPage: React.FC = () => {
             if (authToken) {
                 try {
                     const decodedToken = jwtDecode(authToken) as JwtPayload;
-                    setHasPermission(decodedToken.isHuitStudent);
-                    if (decodedToken.isHuitStudent) {
+                    const isHuitStudentFlag = (decodedToken as any).isHuitStudent ?? (decodedToken as any).huitStudent ?? true;
+                    setHasPermission(isHuitStudentFlag);
+                    if (isHuitStudentFlag) {
                         const token = await authTokenLogin(refreshToken, refresh, navigate);
 
                         const response = await fetch(
@@ -469,7 +468,7 @@ const LearningResultsPage: React.FC = () => {
                         );
 
                         const data = await response.json();
-                        if (data.status === 200 && data.data) {
+                        if (data.status === 200 ) {
                             setStudentPrediction(data.data);
                             if (data.data.learningPathSuggestion) {
                                 const categorized = categorizeSuggestions(data.data.learningPathSuggestion);
@@ -708,22 +707,22 @@ const LearningResultsPage: React.FC = () => {
                 setTestResults(data.data || []);
             }
 
-            // Tạo progressData dựa trên dữ liệu đã lấy
+            // // Tạo progressData dựa trên dữ liệu đã lấy
             const newProgressData: ProgressData = {
                 courseId: parseInt(selectedCourseId),
                 progress: currentProgress,
                 completedLessons: newProgress?.lessonCompleted || 0,
                 totalLessons: newProgress?.totalLesson || 0,
                 completedTime: Math.floor(Math.random() * 1000) * 60,
-                totalTime: 3600 * 20,
-                lastActivity: new Date(Date.now() - Math.floor(Math.random() * 10) * 86400000),
-                strongestTopic: "JavaScript",
-                weakestTopic: "CSS & Styling",
+                // totalTime: 3600 * 20,
+                // lastActivity: new Date(Date.now() - Math.floor(Math.random() * 10) * 86400000),
+                // strongestTopic: "JavaScript",
+                // weakestTopic: "CSS & Styling",
                 averageScore: currentAverageScore,
                 passRate: currentPassRate
             };
 
-            setProgressData(newProgressData);
+            // setProgressData(newProgressData);
 
             // Reset tableInitialized khi đổi khóa học
             setTableInitialized(false);
@@ -790,48 +789,6 @@ const LearningResultsPage: React.FC = () => {
         }
     };
 
-    // Tạo dữ liệu dự đoán
-    const generatePredictionData = (progressData: ProgressData) => {
-        // Generate prediction data based on progress and scores
-        const riskScore = Math.floor(
-            (100 - progressData.progress) * 0.4 +
-            (100 - (progressData.averageScore || 0) * 10) * 0.4 +
-            (100 - (progressData.passRate || 0)) * 0.2
-        );
-
-        let riskLevel: 'high' | 'medium' | 'low' = 'low';
-        if (riskScore > 70) {
-            riskLevel = 'high';
-        } else if (riskScore > 40) {
-            riskLevel = 'medium';
-        }
-
-        const reasonsPool = [
-            "Tiến độ học tập chậm hơn so với trung bình của lớp.",
-            "Điểm số trong các bài kiểm tra gần đây có xu hướng giảm.",
-            "Thời gian tương tác với nội dung học tập không đều đặn.",
-            "Tỷ lệ hoàn thành bài tập về nhà thấp hơn mức trung bình.",
-            `Khó khăn trong chủ đề ${progressData.weakestTopic || 'CSS & Styling'}.`,
-            "Thời gian giữa các phiên học quá dài, ảnh hưởng đến việc ghi nhớ kiến thức."
-        ];
-
-        const suggestionsPool = [
-            "Tập trung hoàn thành các bài học còn lại trong tuần này.",
-            `Dành thêm thời gian cho chủ đề ${progressData.weakestTopic || 'CSS & Styling'}.`,
-            "Tham gia diễn đàn thảo luận để được hỗ trợ từ giảng viên và bạn học.",
-            "Lập lịch học tập đều đặn mỗi ngày để duy trì sự liên tục.",
-            "Thực hành giải thêm các bài tập nâng cao để củng cố kiến thức.",
-            "Xem lại các bài học đã hoàn thành để ôn tập và củng cố kiến thức.",
-            "Tham gia học nhóm để trao đổi kiến thức và giải quyết khó khăn."
-        ];
-
-        setPredictionData({
-            riskLevel: riskLevel,
-            riskScore: riskScore,
-            reasons: reasonsPool.sort(() => Math.random() - 0.5).slice(0, 3),
-            suggestions: suggestionsPool.sort(() => Math.random() - 0.5).slice(0, 4)
-        });
-    };
 
     // Initial data loading
     useEffect(() => {
@@ -863,10 +820,9 @@ const LearningResultsPage: React.FC = () => {
         setShowPredictionModal(!showPredictionModal);
     };
 
-    // Function to regenerate prediction data
     const regeneratePrediction = () => {
         // If we have student prediction data from API, use it
-        if (studentPrediction && hasPermission) {
+        if (studentPrediction) {
             const newPredictionData: PredictionData = {
                 riskLevel: studentPrediction.riskLevel.toLowerCase() as 'high' | 'medium' | 'low',
                 riskScore: Math.round(studentPrediction.probability * 100),
@@ -879,31 +835,6 @@ const LearningResultsPage: React.FC = () => {
             };
             setPredictionData(newPredictionData);
             return;
-        }
-
-        // Otherwise use the original implementation
-        if (progressData) {
-            generatePredictionData(progressData);
-        } else {
-            const newPredictionData: PredictionData = {
-                riskLevel: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low',
-                riskScore: Math.floor(Math.random() * 100),
-                reasons: [
-                    "Tiến độ học tập chậm hơn so với trung bình của lớp.",
-                    "Điểm số trong các bài kiểm tra gần đây có xu hướng giảm.",
-                    "Thời gian tương tác với nội dung học tập không đều đặn.",
-                    "Tỷ lệ hoàn thành bài tập về nhà thấp hơn mức trung bình.",
-                ].sort(() => Math.random() - 0.5).slice(0, 3),
-                suggestions: [
-                    "Tập trung hoàn thành các bài học còn lại trong tuần này.",
-                    "Dành thêm thời gian cho chủ đề CSS & Styling.",
-                    "Tham gia diễn đàn thảo luận để được hỗ trợ từ giảng viên và bạn học.",
-                    "Lập lịch học tập đều đặn mỗi ngày để duy trì sự liên tục.",
-                    "Thực hành giải thêm các bài tập nâng cao để củng cố kiến thức.",
-                ].sort(() => Math.random() - 0.5).slice(0, 4)
-            };
-
-            setPredictionData(newPredictionData);
         }
     };
 
@@ -1429,7 +1360,7 @@ const LearningResultsPage: React.FC = () => {
                 <Modal.Body>
                     {predictionData && (
                         <div className={styles.predictionContent}>
-                            {studentPrediction && hasPermission && (
+                            {studentPrediction && (
                                 <div className={styles.studentPredictionInfo}>
                                     <div className={styles.clusterInfo}>
                                         <h4>Thông tin phân nhóm</h4>
