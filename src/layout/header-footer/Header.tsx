@@ -19,6 +19,7 @@ import useRefreshToken from "../util/fucntion/useRefreshToken";
 import { isTokenExpired } from "../util/fucntion/auth";
 import topics from "../util/fucntion/topics";
 import { useLoading } from "../util/LoadingContext";
+import useCozeChat from "../../hooks/useCozeChat";
 
 
 interface CategoryCourse {
@@ -37,6 +38,11 @@ interface Notification {
 }
 
 const Header: React.FC = () => {
+  // Initialize Coze Chat
+  useCozeChat({
+    token: 'pat_CMP1918CZQKzApsczufSGxJaBdHjcqmwiaBxy6fKKlEamC4hc2WL3ZF8Fx4rAWBe',
+    title: 'TMS Tư Vấn'
+  });
 
   const [unreadCount, setUnreadCount] = useState(5);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -453,15 +459,23 @@ const Header: React.FC = () => {
   };
 
   const handleRouter = () => { };
-  // ... phần import và code phía trên giữ nguyên
 
-  // Phần render menu trong hàm return
   return (
-    <div className="header__container">
+    <div 
+      className="header__container"
+      style={{ 
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
+      }}
+    >
       <div className="header__main">
+        {/* Logo */}
         <a href="/" className="logo">
           <img src="../../assets/images/logo/logoTMS.png" alt="logo" />
         </a>
+        
+        {/* Main Menu */}
         <div className="main-menu">
           <nav>
             <ul>
@@ -705,16 +719,34 @@ const Header: React.FC = () => {
           </nav>
         </div>
 
+        {/* Mobile Menu */}
         <div className={`offcanvas-menu ${isMenuOpen ? "open" : ""}`}>
+          <div className="menu-header">
+            <div className="menu-title">Menu</div>
+          
+          </div>
+          
+          {isLoggedIn && (
+            <div className="user-info">
+              <div className="user-avatar">
+                <i className="fa-solid fa-user"></i>
+              </div>
+              <div className="user-name">{userName}</div>
+            </div>
+          )}
+          
           <ul>
             <li>
               <a href="/">Trang chủ</a>
             </li>
             <li>
-              <a href="/tai-lieu">Tài liệu</a>
+              <a href="/tai-lieu" className="has-children">Tài liệu</a>
             </li>
             <li>
-              <a href="/khoa-hoc">Khóa học</a>
+              <a href="/khoa-hoc" className="has-children">Khóa học</a>
+            </li>
+            <li>
+              <a href="/de-thi">Bài thi</a>
             </li>
             <li>
               <a href="/bai-viet">Bài viết</a>
@@ -722,6 +754,28 @@ const Header: React.FC = () => {
             <li>
               <a href="/ho-tro">Hỗ trợ</a>
             </li>
+            {isLoggedIn && (
+              <li>
+                <a href="/tai-khoan">Tài khoản</a>
+              </li>
+            )}
+            {isLoggedIn && (
+              <li>
+                <button onClick={handleLogout} className="logout-btn">
+                  Đăng xuất
+                </button>
+              </li>
+            )}
+            {!isLoggedIn && (
+              <>
+                <li>
+                  <a href="/dang-nhap">Đăng nhập</a>
+                </li>
+                <li>
+                  <a href="/dang-ky">Đăng ký</a>
+                </li>
+              </>
+            )}
           </ul>
         </div>
 
@@ -729,12 +783,12 @@ const Header: React.FC = () => {
           className={`offcanvas-overlay ${isMenuOpen ? "active" : ""}`}
           onClick={toggleMenu}
         ></div>
-        <div></div>
-        <div className="d-flex align-items-center gap-4 gap-xl-5">
 
+        {/* Right side icons */}
+        <div className="d-flex align-items-center gap-4 gap-xl-5">
           {isLoggedIn ? (
-            // Nếu đã đăng nhập, hiển thị icon User và tên người dùng
             <>
+              {/* Cart Icon */}
               <li className="text-white">
                 <a href="/gio-hang" className="gio-hang-icon">
                   <i className="fa-solid fa-cart-shopping icon-giohang"></i>
@@ -743,14 +797,16 @@ const Header: React.FC = () => {
                   )}
                 </a>
               </li>
+              
+              {/* Notification */}
               <NotificationDropdown
-
                 notifications={
                   Array.isArray(notifications) ? notifications : []
                 }
-
                 unreadCount={unreadCount}
               />
+              
+              {/* User Dropdown */}
               <div className="user-dropdown">
                 <div className="user-icon">
                   <a href="/tai-khoan">
@@ -771,7 +827,6 @@ const Header: React.FC = () => {
               </div>
             </>
           ) : (
-            // Nếu chưa đăng nhập, hiển thị các nút Đăng nhập và Đăng ký
             <div className="menu-btns d-none d-lg-flex">
               <a className="active" href="/dang-nhap">
                 Đăng nhập
@@ -780,7 +835,9 @@ const Header: React.FC = () => {
             </div>
           )}
         </div>
-        <button className="menubars" type="button" onClick={toggleMenu}>
+        
+        {/* Mobile menu toggle button */}
+        <button className={`menubars ${isMenuOpen ? "active" : ""}`} type="button" onClick={toggleMenu}>
           <span></span>
           <span></span>
           <span></span>
