@@ -3,14 +3,11 @@ import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
 
 function ResetPassword() {
   const [password, setPassword] = useState("");
-  const query = useQuery();
-  const token = query.get("token");
+  const location = useLocation();
+  const email = location.state?.email || "";
   const validatePassword = () => {
     if (!password) {
       toast.error("Mật khẩu cũ không được để trống.");
@@ -35,7 +32,7 @@ function ResetPassword() {
     }
     try {
       await axios.post(`${process.env.REACT_APP_SERVER_HOST}/api/account/reset-password`, {
-        token,
+        email,
         password,
       });
       toast.success("Cập nhật mật khẩu mới thành công !");
@@ -62,7 +59,7 @@ function ResetPassword() {
               <h3 style={{ marginBottom: "20px", textAlign: "center" }}>
                 Mật khẩu mới
               </h3>
-              <p style={{ textAlign: "center" }}>Vui lòng mật khẩu mới!</p>
+              <p style={{ textAlign: "center" }}>Vui lòng nhập mật khẩu mới!</p>
               <form onSubmit={handleSubmit}>
                 <input
                   className="form-control"
