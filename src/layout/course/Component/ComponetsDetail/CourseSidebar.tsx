@@ -159,9 +159,9 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
 
               localStorage.setItem("encryptedCourseId", encryptedCourseId);
               localStorage.setItem("encryptedChapterId", encryptedChapterId);
-              localStorage.setItem("encryptedLessonId", encryptedLessonId);
+                              localStorage.setItem("encryptedLessonId", encryptedLessonId);
 
-              window.location.href = `/khoa-hoc-thu/vao-hoc`;
+                window.location.href = `/tai-khoan/my-course`;
             } else {
               alert("Không thể thêm tiến trình học.");
             }
@@ -171,7 +171,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
         } else {
           const encryptedCourseId = encryptData(courseId);
           localStorage.setItem("encryptedCourseId", encryptedCourseId);
-          window.location.href = `/khoa-hoc-thu/vao-hoc`;
+          window.location.href = `/tai-khoan/my-course`;
         }
       } else {
         alert("Không thể lấy thông tin khóa học.");
@@ -456,7 +456,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
           href="#"
           className={`btn-one ${isInCart && !isEnrolled ? 'cart-button' : ''}`}
           onClick={handleCheck}
-        >
+        > 
           {course.purchased
             ? "Vào học"
             : isInCart

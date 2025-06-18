@@ -646,7 +646,7 @@ const MyCourse = () => {
                               className="btn btn-primary take-exam-button"
                               onClick={() => {
                                 // Navigate to exam page
-                                navigate(`/test/${exam.testId}`);
+                                navigate(`/take-test/${exam.testId}`);
                               }}
                             >
                               Làm bài thi <ChevronRight size={16} />

@@ -722,7 +722,7 @@ const LearningResultsPage: React.FC = () => {
                 passRate: currentPassRate
             };
 
-            // setProgressData(newProgressData);
+            setProgressData(newProgressData);
 
             // Reset tableInitialized khi đổi khóa học
             setTableInitialized(false);
@@ -1021,10 +1021,10 @@ const LearningResultsPage: React.FC = () => {
                                     ))}
                                 </div>
 
-                                {progressData && (
-                                    <div className={styles.dashboardContent}>
-                                        <div className={styles.mainColumn}>
-                                            {/* Điểm trung bình và Tỷ lệ bài kiểm tra đạt */}
+                                {/* Hiển thị bảng điều khiển bất kể có progressData hay không */}
+                                <div className={styles.dashboardContent}>
+                                    <div className={styles.mainColumn}>
+                                        {/* Điểm trung bình và Tỷ lệ bài kiểm tra đạt */}
                                             <div className={styles.card}>
                                                 <div className={styles.cardHeader}>
                                                     <h2 className={styles.cardTitle}>
@@ -1041,7 +1041,7 @@ const LearningResultsPage: React.FC = () => {
                                                             <div className={styles.overviewContent}>
                                                                 <div className={styles.overviewLabel}>Điểm trung bình</div>
                                                                 <div className={styles.overviewValue}>
-                                                                    {progressData.averageScore ? progressData.averageScore.toFixed(1) : '0.0'}/10
+                                                                    {(progressData?.averageScore || 0).toFixed(1)}/10
                                                                 </div>
                                                                 <div className={styles.overviewDescription}>Trên thang điểm 10</div>
                                                             </div>
@@ -1054,7 +1054,7 @@ const LearningResultsPage: React.FC = () => {
                                                             <div className={styles.overviewContent}>
                                                                 <div className={styles.overviewLabel}>Tỷ lệ bài kiểm tra đạt</div>
                                                                 <div className={styles.overviewValue}>
-                                                                    {progressData.passRate ? progressData.passRate.toFixed(0) : '0'}%
+                                                                    {(progressData?.passRate || 0).toFixed(0)}%
                                                                 </div>
                                                                 <div className={styles.overviewDescription}>Đạt điểm tối thiểu</div>
                                                             </div>
@@ -1273,7 +1273,7 @@ const LearningResultsPage: React.FC = () => {
                                                         <div className={styles.chartInfoItem}>
                                                             <div className={styles.chartInfoTitle}>Điểm trung bình</div>
                                                             <div className={styles.chartInfoValue}>
-                                                                {progressData.averageScore ? progressData.averageScore.toFixed(1) : '0.0'}
+                                                                {(progressData?.averageScore || 0).toFixed(1)}
                                                             </div>
                                                         </div>
                                                         <div className={styles.chartInfoItem}>
@@ -1332,7 +1332,6 @@ const LearningResultsPage: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                )}
                             </>
                         )}
                     </>

@@ -738,10 +738,10 @@ const TakeTestQuestion: React.FC = () => {
             </button>
           </div>
           <div className={styles.questionContent}>
-            {/* <div
+            <div
               className={styles.questionText}
               dangerouslySetInnerHTML={{ __html: currentQuestion.content }}
-            /> */}
+            />
 
             {renderQuestionContent(currentQuestion, currentAnswer)}
           </div>

@@ -58,7 +58,7 @@ import { CoursePageConvert } from "./layout/courseConvert/CoursePageConvert";
 
 import Spinner from "./layout/util/Spinner";
 import { LoadingProvider } from "./layout/util/LoadingContext";
-
+import VerifyOtpEmail from "./layout/login/VerifyOtpEmail";
 import VerifyOTP from "./layout/login/VerifyOTP";
 import ChooseRegisterMethod from "./layout/login/ChooseRegisterMethod";
 import VerifyOTPSMS from "./layout/login/VerifyOTPSMS";
@@ -341,11 +341,11 @@ function App() {
 
                 <Route path="/dang-ky" element={<Register />} />
                 <Route
-                  path="/dang-ky-method"
-                  element={<ChooseRegisterMethod />}
+                  path="/verify-otp-email"
+                  element={<VerifyOtpEmail />}
                 />
 
-                <Route path="/verify-otp-email" element={<VerifyOTP />} />
+     
                 <Route path="/verify-otp-sms" element={<VerifyOTPSMS />} />
                 {/* <Route path="/test" element={<Test_Admin />} />
           <Route path="/test2" element={<Test_Admin22 />} /> */}

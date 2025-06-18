@@ -27,22 +27,32 @@ const Login: React.FC = () => {
 
   
   const listenAndSendLoginData = (accountId:number) => {
-    // Bạn có thể gửi sự kiện qua WebSocket hoặc API để ghi lại hành động
-    const socket = new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`);
-    const stompClient = Stomp.over(socket);
+    try {
+      // Bạn có thể gửi sự kiện qua WebSocket hoặc API để ghi lại hành động
+      const socket = new SockJS(`${process.env.REACT_APP_SERVER_HOST}/ws`);
+      const stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function (frame: any) {  // Hoặc 'string' nếu bạn muốn chỉ định kiểu chuỗi
-      console.log('WebSocket connected: ' + frame);
+      stompClient.connect({}, function (frame: any) {  // Hoặc 'string' nếu bạn muốn chỉ định kiểu chuỗi
+        console.log('WebSocket connected: ' + frame);
 
-      // Gửi sự kiện đăng nhập qua WebSocket
-      const data = {
-        activityType: 'login',
-        accountId: accountId,
-        timestamp: new Date().toISOString(),
-      };
-      stompClient.send("/app/login", {}, JSON.stringify(data));
-    });
-
+        // Gửi sự kiện đăng nhập qua WebSocket
+        const data = {
+          activityType: 'login',
+          accountId: accountId,
+          timestamp: new Date().toISOString(),
+        };
+        stompClient.send("/app/login", {}, JSON.stringify(data));
+        
+        // Ngắt kết nối sau khi gửi thành công
+        setTimeout(() => {
+          stompClient.disconnect();
+        }, 1000);
+      }, function(error: any) {
+        console.error('WebSocket connection error:', error);
+      });
+    } catch (error) {
+      console.error('Lỗi khi kết nối WebSocket:', error);
+    }
   };
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +72,10 @@ const Login: React.FC = () => {
         localStorage.setItem("authToken", data.jwt);
         localStorage.setItem("authData", JSON.stringify(data.responsiveDTOJWT));
         localStorage.setItem("refreshToken", data.refreshToken);
-        toast.success("Đăng nhập thành công !");
+        toast.success("Đăng nhập thành công !", {
+          position: "top-right",
+          autoClose: 3000,
+        });
 
         setTimeout(() => {
           if (!data.jwt) {
@@ -86,11 +99,18 @@ const Login: React.FC = () => {
         }, 2500);
       } else {
         const data = await response.text();
-        toast.error(data);
+        toast.error(data, {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     } catch (error) {
       toast.error(
-        "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại sau."
+        "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại sau.",
+        {
+          position: "top-right",
+          autoClose: 3000,
+        }
       );
     }
   };
@@ -172,13 +192,13 @@ const Login: React.FC = () => {
                   </a>
                 </div>
               </form>
-              <div className="other-links">
+              {/* <div className="other-links">
                 <div className="text">Hoặc đăng nhập</div>
 
                 <a href="#" onClick={googleLogin}>
                   <i className="fab fa-google"></i>Google
                 </a>
-              </div>
+              </div> */}
               <div className="page-links">
                 <a href="/dang-ky">Đăng kí tài khoản mới</a>
               </div>
@@ -187,7 +207,13 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+      />
     </div>
   );
 };
