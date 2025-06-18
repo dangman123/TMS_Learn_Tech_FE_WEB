@@ -457,7 +457,7 @@ const LearningResultsPage: React.FC = () => {
                         const token = await authTokenLogin(refreshToken, refresh, navigate);
 
                         const response = await fetch(
-                            `${process.env.REACT_APP_SERVER_HOST}/api/prediction-result/student?accountId=${authData.id}`,
+                            `${process.env.REACT_APP_SERVER_HOST}/api/prediction-result/student?accountId=${authData.id}&courseId=${selectedCourseId}`,
                             {
                                 method: 'GET',
                                 headers: {
