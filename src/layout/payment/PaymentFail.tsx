@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import "./PaymentStyles.css";
 
 interface PaymentError {
   code: string;
@@ -74,14 +74,14 @@ export const PaymentFail = () => {
 
   return (
     <section
-      className={`payment-result-section payment-fail ${
+      className={`compact-payment-result-section payment-fail ${
         fadeIn ? "fade-in" : ""
       }`}
     >
       <div className="container">
-        <div className="payment-result-content">
-          <div className="result-header">
-            <div className="result-icon fail-icon">
+        <div className="compact-payment-result-content">
+          <div className="compact-result-header">
+            <div className="compact-result-icon fail-icon">
               <i className="fa fa-times-circle"></i>
             </div>
             <h2>Thanh toán thất bại</h2>
@@ -92,7 +92,7 @@ export const PaymentFail = () => {
 
           <div className="error-details">
             <div className="error-code">
-              <span>Mã lỗi:</span> {error?.code || "UNKNOWN_ERROR"}
+              <span>Mã lỗi:</span> {error ? error.code.replace(/_/g, " ") : "UNKNOWN_ERROR"}
             </div>
 
             <div className="error-suggestion">
@@ -103,16 +103,16 @@ export const PaymentFail = () => {
             </div>
           </div>
 
-          <div className="next-actions">
-            <button onClick={handleTryAgain} className="btn btn-primary">
+          <div className="compact-next-actions">
+            <button onClick={handleTryAgain} className="compact-btn btn-primary">
               <i className="fa fa-refresh"></i> Thử lại thanh toán
             </button>
-            <a href="/gio-hang" className="btn btn-outline">
+            <a href="/gio-hang" className="compact-btn btn-outline">
               <i className="fa fa-shopping-cart"></i> Quay lại giỏ hàng
             </a>
           </div>
 
-          <div className="additional-options">
+          <div className="compact-additional-info">
             <div className="option">
               <i className="fa fa-credit-card"></i>
               <div>

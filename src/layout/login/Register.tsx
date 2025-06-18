@@ -213,7 +213,40 @@ const Register: React.FC = () => {
     });
 
     if (validate()) {
-      navigate("/dang-ky-method", { state: { data: formData } });
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_HOST}/account/register-generate`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fullname: formData.fullname,
+              email: formData.email,
+              password: formData.password,
+              phone: formData.phone,
+              birthday: formData.birthday + " 00:00:00"
+            }),
+          }
+        );
+
+        if (response.ok) {
+          toast.success("Mã OTP đã được gửi đến email của bạn!");
+          navigate("/verify-otp-email", {
+            state: { email: formData.email, type: "REGISTER" }
+          });
+        } else {
+          const errorText = await response.text();
+          toast.error(errorText || "Có lỗi xảy ra trong quá trình đăng ký!");
+        }
+      } catch (error) {
+        console.error("Lỗi khi đăng ký:", error);
+        toast.error("Có lỗi xảy ra khi kết nối đến máy chủ!");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

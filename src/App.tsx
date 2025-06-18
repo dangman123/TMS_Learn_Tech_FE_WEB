@@ -58,7 +58,7 @@ import { CoursePageConvert } from "./layout/courseConvert/CoursePageConvert";
 
 import Spinner from "./layout/util/Spinner";
 import { LoadingProvider } from "./layout/util/LoadingContext";
-
+import VerifyOtpEmail from "./layout/login/VerifyOtpEmail";
 import VerifyOTP from "./layout/login/VerifyOTP";
 import ChooseRegisterMethod from "./layout/login/ChooseRegisterMethod";
 import VerifyOTPSMS from "./layout/login/VerifyOTPSMS";
@@ -66,6 +66,7 @@ import TakeTest from "./layout/take-test/take-test";
 import ContentExampleDetail from "./layout/example/ComponentDetail/ContentExampleDetail";
 import OverView from "./layout/profile/Component/OverView/OverView";
 import { NotificationProvider } from "./layout/util/NotificationContext";
+import TakeTestQuestion from "./layout/take-test/take-test-question";
 const ProtectedAccountManagement = withAuth(AccountManagement);
 const ProtectedChechOut = withAuth(Checkout);
 
@@ -85,23 +86,28 @@ function App() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", function () {
-      var header = document.querySelector("header");
+    const handleScroll = () => {
+      const header = document.querySelector("header");
+
+      // Chỉ áp dụng hiệu ứng khi ở chế độ desktop (> 768px)
+      if (window.innerWidth <= 768) {
+        header?.classList.remove("menu-fixed", "animated", "fadeInDown");
+        return;
+      }
+
       if (window.scrollY > 0) {
         header?.classList.add("menu-fixed", "animated", "fadeInDown");
       } else {
         header?.classList.remove("menu-fixed", "animated", "fadeInDown");
       }
-    });
+    };
+
+    // Gắn sự kiện scroll
+    window.addEventListener("scroll", handleScroll);
+
+    // Dọn dẹp khi unmount
     return () => {
-      window.removeEventListener("scroll", function () {
-        var header = document.querySelector("header");
-        if (window.scrollY > 0) {
-          header?.classList.add("menu-fixed", "animated", "fadeInDown");
-        } else {
-          header?.classList.remove("menu-fixed", "animated", "fadeInDown");
-        }
-      });
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -260,11 +266,11 @@ function App() {
                   }
                 />
                 <Route
-                  path="/take-test"
+                  path="/take-test-question/:testId"
                   element={
 
 
-                    <TakeTest />
+                    <TakeTestQuestion />
 
                   }
                 />
@@ -335,11 +341,11 @@ function App() {
 
                 <Route path="/dang-ky" element={<Register />} />
                 <Route
-                  path="/dang-ky-method"
-                  element={<ChooseRegisterMethod />}
+                  path="/verify-otp-email"
+                  element={<VerifyOtpEmail />}
                 />
 
-                <Route path="/verify-otp-email" element={<VerifyOTP />} />
+     
                 <Route path="/verify-otp-sms" element={<VerifyOTPSMS />} />
                 {/* <Route path="/test" element={<Test_Admin />} />
           <Route path="/test2" element={<Test_Admin22 />} /> */}

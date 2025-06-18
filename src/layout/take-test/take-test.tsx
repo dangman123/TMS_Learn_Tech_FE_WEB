@@ -419,12 +419,10 @@ const TakeTest: React.FC = () => {
     }
   };
 
-  // Start test
+  // Chuyển sang trang làm bài khi người dùng bấm "Bắt đầu làm bài"
   const handleStartTest = () => {
-    // Use setTimeout to prevent React suspense issues
-    setTimeout(() => {
-      setShowInstructions(false);
-    }, 0);
+    if (!testId) return;
+    navigate(`/take-test-question/${testId}`);
   };
 
   // Render question based on type
@@ -668,7 +666,7 @@ const TakeTest: React.FC = () => {
   const currentAnswer = userAnswers.find(
     (a) => a.questionId === currentQuestion.questionId
   );
-
+ 
   return (
     <div className={styles.testContainer}>
       {" "}

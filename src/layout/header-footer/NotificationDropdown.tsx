@@ -23,10 +23,59 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   unreadCount = 0,
 }) => {
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [isMarkingRead, setIsMarkingRead] = useState(false);
   const navigate = useNavigate();
 
-  const handleFilterChange = (filterType: "all" | "unread") => {
-    window.location.href = "/notification-all";
+  const handleFilterChange = async (filterType: "all" | "unread") => {
+    if (filterType === "all") {
+      window.location.href = "/notification-all";
+    } else {
+      // Đánh dấu tất cả thông báo là đã đọc
+      try {
+        setIsMarkingRead(true);
+        const token = localStorage.getItem("authToken");
+        
+        if (!token) {
+          console.error("Không tìm thấy token xác thực");
+          return;
+        }
+
+        // Get user ID from localStorage
+        const authDataStr = localStorage.getItem('authData');
+        if (!authDataStr) {
+          console.error("Không tìm thấy thông tin người dùng");
+          return;
+        }
+
+        const authData = JSON.parse(authDataStr);
+        const userId = authData.id;
+        
+        if (!userId) {
+          console.error("Không tìm thấy ID người dùng");
+          return;
+        }
+        
+        const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/notifications/read-all?userId=${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          // Đánh dấu thành công
+          // Refresh trang hoặc chuyển hướng để cập nhật UI
+          window.location.href = "/notification-all";
+        } else {
+          console.error("Lỗi khi đánh dấu thông báo đã đọc:", await response.text());
+        }
+      } catch (error) {
+        console.error("Lỗi khi gọi API đánh dấu đã đọc:", error);
+      } finally {
+        setIsMarkingRead(false);
+      }
+    }
   };
 
   const handleDetailClick = (notification: Notification) => {
@@ -70,8 +119,9 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                 className={`filter-button ${
                   filter === "unread" ? "active" : ""
                 }`}
+                disabled={isMarkingRead}
               >
-                Đánh dấu đã đọc
+                {isMarkingRead ? "Đang xử lý..." : "Đánh dấu đã đọc"}
               </button>
             </div>
           </div>

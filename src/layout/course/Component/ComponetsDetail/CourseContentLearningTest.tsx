@@ -19,6 +19,7 @@ export interface Video {
   videoTitle: string; // Tiêu đề video
   videoDuration: number;
   viewTest: boolean;
+  preview:boolean;
 }
 
 // Interface cho Lesson (Bài học)
@@ -96,7 +97,7 @@ const CourseContentLearningTest: React.FC<CourseContent> = ({ chapters }) => {
                     <span>{video.videoTitle}</span>
                     <span >
                       <span>
-                        {video.viewTest ? (
+                        {video.preview ? (
                           <a
                             href=""
                             onClick={(e) => {

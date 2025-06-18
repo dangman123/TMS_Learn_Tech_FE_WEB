@@ -327,7 +327,7 @@ const HorizontalOverview: React.FC<OverviewProps> = ({
       {paymentSuccess !== null && (
         <div className={`payment-notification ${paymentSuccess ? 'success' : 'error'}`}>
           <div className="notification-content">
-            <div className={`notification-icon ${paymentSuccess ? 'success-icon' : 'error-icon'}`}>
+            <div className={`notification-iconn ${paymentSuccess ? 'success-icon' : 'error-icon'}`}>
               {paymentSuccess ? '✓' : '✕'}
             </div>
             <div className="notification-message">

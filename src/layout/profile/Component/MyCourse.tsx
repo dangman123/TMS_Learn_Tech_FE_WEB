@@ -536,19 +536,20 @@ const MyCourse = () => {
             <span>Đã hoàn thành</span>
           </div>
           <div
-            className={`tab ${activeTab === "activate" ? "active" : ""}`}
-            onClick={() => setActiveTab("activate")}
-          >
-            <Key size={18} />
-            <span>Kích hoạt khóa học</span>
-          </div>
-          <div
             className={`tab ${activeTab === "exams" ? "active" : ""}`}
             onClick={() => setActiveTab("exams")}
           >
             <FileEarmarkText size={18} />
             <span>Đề thi của tôi</span>
           </div>
+          <div
+            className={`tab ${activeTab === "activate" ? "active" : ""}`}
+            onClick={() => setActiveTab("activate")}
+          >
+            <Key size={18} />
+            <span>Kích hoạt khóa học</span>
+          </div>
+  
         </div>
 
         {/* Tab content */}
@@ -596,9 +597,10 @@ const MyCourse = () => {
                   <div className="exams-size-selector">
                     <label>Hiển thị:</label>
                     <select
-                      className="form-select form-select-sm"
+                      className="form-select form-select-sm no-arrow"
                       value={examsSize}
                       onChange={(e) => handleExamsSizeChange(Number(e.target.value))}
+                      
                     >
                       <option value={4}>4 đề thi / trang</option>
                       <option value={8}>8 đề thi / trang</option>
@@ -644,7 +646,7 @@ const MyCourse = () => {
                               className="btn btn-primary take-exam-button"
                               onClick={() => {
                                 // Navigate to exam page
-                                navigate(`/test/${exam.testId}`);
+                                navigate(`/take-test/${exam.testId}`);
                               }}
                             >
                               Làm bài thi <ChevronRight size={16} />
@@ -681,7 +683,7 @@ const MyCourse = () => {
                         ) : (
                           // Logic phân trang cho nhiều trang
                           <>
-                            {/* Luôn hiển thị trang đầu tiên */}
+                            {/* Luôn   trang đầu tiên */}
                             <button
                               className={`pagination-number ${0 === examsPage ? "active" : ""}`}
                               onClick={() => handleExamsPageChange(0)}

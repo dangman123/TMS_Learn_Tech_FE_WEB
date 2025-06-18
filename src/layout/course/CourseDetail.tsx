@@ -14,12 +14,14 @@ import CourseContentLearningTest from "./Component/ComponetsDetail/CourseContent
 import axios from "axios";
 import { toast } from "react-toastify";
 import useCozeChat from "../../hooks/useCozeChat";
+import { AuthData } from "./ConfirmPuchase";
 
 export interface Video {
   videoId: number; // ID của video
   videoTitle: string; // Tiêu đề video
   videoDuration: number;
   viewTest: boolean;
+  preview: boolean;
 }
 
 // Interface cho Lesson (Bài học)
@@ -84,21 +86,38 @@ function CourseDetail() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const authData = localStorage.getItem("authData");
-  const fetchLessons = async (courseId: string): Promise<void> => {
+  
+  const getUserData = (): AuthData | null => {
+    const authData = localStorage.getItem("authData");
+    if (!authData) return null;
+
     try {
-      const response = await axios.get<Chapter[]>(
-        `${process.env.REACT_APP_SERVER_HOST}/api/courses/${courseId}/lessons-view`
-      );
+      return JSON.parse(authData) as AuthData;
+    } catch (error) {
+      console.error("Lỗi khi lấy authData:", error);
+      return null;
+    }
+  };
+  const fetchLessons = async (courseId: string, accountId?: number): Promise<void> => {
+    try {
+      const url = accountId
+        ? `${process.env.REACT_APP_SERVER_HOST}/api/courses/${courseId}/lessons-view?accountId=${accountId}`
+        : `${process.env.REACT_APP_SERVER_HOST}/api/courses/${courseId}/lessons-view`;
+      const response = await axios.get<Chapter[]>(url);
       setChapters(response.data);
     } catch (error) {
       toast.error("Lỗi tải dữ liệu");
     }
   };
   useEffect(() => {
+    const storedAuthData = localStorage.getItem("authData");
+    const parsedAuthData: AuthData | null = storedAuthData ? JSON.parse(storedAuthData) as AuthData : null;
+
     if (id) {
-      fetchLessons(id);
+      fetchLessons(id, parsedAuthData?.id);
     }
-    fetch(GET_USER_COURSE_DETAIL_BY_COURSE_ID(Number(id)))
+
+    fetch(`${process.env.REACT_APP_SERVER_HOST}/api/courses/${id}?accountId=${parsedAuthData?.id ?? ""}`)
       .then((response) => response.json())
       .then((responseData) => {
         if (responseData && responseData.data) {
@@ -138,7 +157,7 @@ function CourseDetail() {
           <div className="col-lg-8 order-2 order-lg-1" >
             <CourseContent course={course} reviews={reviews} />
             <CourseContentLearningTest chapters={chapters} />
-            <CourseReview />
+            <CourseReview  course= {course}/>
           </div>
 
           <div className="col-lg-4 order-1 order-lg-2">

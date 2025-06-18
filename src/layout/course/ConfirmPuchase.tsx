@@ -43,7 +43,7 @@ interface CartApiResponse {
   data: CartItem[];
 }
 
-interface AuthData {
+export interface AuthData {
   id: number;
   fullname: string;
   email: string;
@@ -253,7 +253,7 @@ function ConfirmPurchase() {
       bankCode: "",
       items: items,
       embedData: {
-        redirecturl: " http://localhost:3001/thanh-toan/logic"// Redirect back to current origin
+        redirecturl: `${window.location.origin}/thanh-toan/logic`// Redirect back to current origin
       },
       callback_url: "http://103.166.143.198:8080/api/payment/zalo-callback"
     };

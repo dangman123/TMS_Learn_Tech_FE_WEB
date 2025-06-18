@@ -18,9 +18,14 @@ import {
   FileText,
   Globe,
   ShoppingCart,
+  X,
 } from "lucide-react";
 import "./examDetail.css";
 import { sendActionActivity } from "../../../service/WebSocketActions";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ExamData {
   testId: number;
@@ -55,9 +60,9 @@ interface Review {
   review: string;
   updated_at: string;
   created_at: string;
-  account_id: number;
-  course_id: number | null;
-  test_id: number;
+  accountId: number;
+  course_id?: number | null;
+  test_id?: number;
   fullname: string;
   image: string;
 }
@@ -84,6 +89,12 @@ const ExamDetail: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsTotalPages, setReviewsTotalPages] = useState(0);
   const [isInCart, setIsInCart] = useState<boolean>(false);
+
+  // Review form states
+  const [rating, setRating] = useState(0);
+  const [reviewContent, setReviewContent] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   // Lấy userId từ localStorage nếu user đã đăng nhập
   const getUserId = (): number | null => {
@@ -354,6 +365,80 @@ const ExamDetail: React.FC = () => {
   const goToCart = () => {
     navigate("/gio-hang");
   };
+
+  // Submit review
+  const handleSubmitReview = async () => {
+    const userId = getUserId();
+    if (!userId) {
+      toast.error("Vui lòng đăng nhập để đánh giá.");
+      return;
+    }
+    if (rating === 0 || reviewContent.trim() === "") {
+      toast.warning("Vui lòng nhập đủ thông tin đánh giá.");
+      return;
+    }
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      const plainText = reviewContent.replace(/<[^>]*>/g, "");
+      const body = {
+        rating,
+        review: plainText,
+        accountId: userId,
+        testId: Number(testId),
+      };
+      const res = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/reviews/exam`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        toast.success("Đánh giá thành công! Cảm ơn bạn.");
+        setRating(0);
+        setReviewContent("");
+        setShowReviewModal(false);
+        // Refresh reviews list
+        setCurrentPage(0);
+      } else if (res.status === 400) {
+        toast.warning("Bạn đã đánh giá đề thi này!");
+      } else {
+        toast.error("Không thể gửi đánh giá, vui lòng thử lại.");
+      }
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi gửi đánh giá.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  // Modal CSS
+  const reviewModalStyles = `
+    .review-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .review-modal-content { background:#fff; border-radius:10px; width:600px; max-width:90%; padding:24px; position:relative; animation:scaleIn 0.3s ease; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+    @keyframes scaleIn { from { transform:scale(0.8); opacity:0;} to { transform:scale(1); opacity:1;} }
+    .review-modal-close { position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; color:#6c757d; transition:color 0.2s; }
+    .review-modal-close:hover { color:#000; }
+    .review-modal-star span { cursor:pointer; font-size:28px; margin-right:4px; }
+    .review-modal-content .ck-editor__editable_inline { min-height: 200px; padding: 12px; }
+  `;
+
+  // inject once
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = reviewModalStyles;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -729,10 +814,15 @@ const ExamDetail: React.FC = () => {
                       Đánh giá của bạn sẽ giúp cải thiện chất lượng đề thi và
                       giúp người học khác có lựa chọn phù hợp
                     </p>
-                    <button className="exam-write-review-button">
-                      <Edit className="exam-write-review-icon" size={18} />
-                      <span>Viết đánh giá</span>
-                    </button>
+                    {!showReviewModal && (
+                      <button
+                        className="exam-write-review-button"
+                        onClick={() => setShowReviewModal(true)}
+                      >
+                        <Edit className="exam-write-review-icon" size={18} />
+                        <span style={{ color: "white", fontWeight: "bold" }}>Viết đánh giá</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -846,6 +936,77 @@ const ExamDetail: React.FC = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div
+          className="review-modal-overlay"
+          onClick={() => setShowReviewModal(false)}
+        >
+          <div
+            className="review-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="review-modal-close"
+              onClick={() => setShowReviewModal(false)}
+            >
+              <X size={20} />
+            </button>
+            <h3 style={{ marginBottom: "12px", fontSize: "20px", color: "white", fontWeight: "bold" }}>Viết đánh giá</h3>
+            <div
+              className="review-modal-star"
+              style={{ marginBottom: "12px" }}
+            >
+              {[...Array(5)].map((_, idx) => (
+                <span
+                  key={idx}
+                  style={{ color: idx < rating ? "#FFD700" : "#ccc" }}
+                  onClick={() => setRating(idx + 1)}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <CKEditor
+              editor={ClassicEditor}
+              data={reviewContent}
+              config={{
+                removePlugins: [
+                  "CKFinder",
+                  "Image",
+                  "MediaEmbed",
+                  "ImageToolbar",
+                  "ImageUpload",
+                  "ImageCaption",
+                  "EasyImage",
+                ],
+                toolbar: [
+                  "bold",
+                  "italic",
+                  "bulletedList",
+                  "numberedList",
+                  "blockQuote",
+                  "undo",
+                ],
+              }}
+              onChange={(event: any, editor: any) => {
+                const data = editor.getData();
+                setReviewContent(data);
+              }}
+            />
+            <button
+              className="btn-one blue float-end"
+              style={{ marginTop: "12px" }}
+              disabled={submittingReview}
+              onClick={handleSubmitReview}
+            >
+              {submittingReview ? "Đang gửi..." : "Gửi đánh giá"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -5,7 +5,6 @@ import useRefreshToken from "../util/fucntion/useRefreshToken";
 import "./NotificationList.css";
 
 interface Notification {
-
   id: number;
   title: string;
   message: string;
@@ -27,7 +26,7 @@ const NotificationList: React.FC = () => {
     useState<Notification | null>(null);
   const [activeTab, setActiveTab] = useState("important");
   const [loading, setLoading] = useState(true);
-  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -104,10 +103,9 @@ const NotificationList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Close menu when clicking outside
+    // Close popup when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setActiveMenuId(null);
         setShowSettings(false);
       }
       if (
@@ -129,33 +127,108 @@ const NotificationList: React.FC = () => {
     setVisibleCount(5); // Reset số lượng hiển thị khi chuyển tab
   };
 
-  const getUnreadCount = (topic: string) => {
+  // Updated function to filter notifications based on topic
+  const getFilteredNotifications = () => {
+    if (!Array.isArray(notifications)) {
+      return [];
+    }
+    
+    if (activeTab === "important") {
+      return notifications.filter(notification => 
+        notification.topic !== "SYSTEM" && 
+        notification.topic !== "GENERAL"
+      );
+    } else if (activeTab === "system") {
+      return notifications.filter(notification => 
+        notification.topic === "SYSTEM" || 
+        notification.topic === "GENERAL"
+      );
+    }
+    
+    return [];
+  };
+
+  const getUnreadCount = (tab: string) => {
     // Ensure notifications is an array
     if (!Array.isArray(notifications)) {
       console.error("notifications is not an array:", notifications);
       return 0;
     }
 
-    return notifications.filter(
-      (notification) =>
-        notification.topic === topic && !notification.status
-    ).length;
+    if (tab === "important") {
+      return notifications.filter(
+        (notification) =>
+          notification.topic !== "SYSTEM" &&
+          notification.topic !== "GENERAL" &&
+          !notification.status
+      ).length;
+    } else if (tab === "system") {
+      return notifications.filter(
+        (notification) =>
+          (notification.topic === "SYSTEM" || 
+           notification.topic === "GENERAL") &&
+          !notification.status
+      ).length;
+    }
+    
+    return 0;
   };
 
   const handleShowMore = () => setVisibleCount((prev) => prev + 5);
 
-  const handleNotificationClick = (notification: Notification) => {
-    setSelectedNotification(notification);
-    if (!notification.status) {
-      markAsRead(getUserData().id, notification.id);
-      setNotifications((prev) =>
-        prev.map((notif) =>
-          notif.id === notification.id
-            ? { ...notif, status: true }
-            : notif
-        )
-      );
-      setUnreadCount((prev) => prev - 1);
+  const handleNotificationClick = async (notification: Notification) => {
+    setDetailLoading(true);
+    try {
+      let token = localStorage.getItem("authToken");
+
+      if (isTokenExpired(token) || !token) {
+        token = await refresh();
+        if (!token) {
+          window.location.href = "/dang-nhap";
+          return;
+        }
+        localStorage.setItem("authToken", token);
+      }
+
+      // Fetch detailed notification
+      const url = `${process.env.REACT_APP_SERVER_HOST}/api/notifications/detail/${notification.id}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch notification details");
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 200 && result.data) {
+        setSelectedNotification(result.data);
+      } else {
+        // Fallback to the list item if detailed fetch fails
+        setSelectedNotification(notification);
+      }
+      
+      // Mark as read if not already
+      if (!notification.status) {
+        markAsRead(getUserData().id, notification.id);
+        setNotifications((prev) =>
+          prev.map((notif) =>
+            notif.id === notification.id
+              ? { ...notif, status: true }
+              : notif
+          )
+        );
+        setUnreadCount((prev) => prev - 1);
+      }
+    } catch (error) {
+      console.error("Error fetching notification details:", error);
+      setSelectedNotification(notification);
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -220,11 +293,12 @@ const NotificationList: React.FC = () => {
         token = await refresh();
         if (!token) {
           window.location.href = "/dang-nhap";
-          return;
+          return false;
         }
         localStorage.setItem("authToken", token);
       }
 
+      // Using the new API endpoint format from the provided code
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_HOST}/api/notifications/${notificationId}/read`,
         {
@@ -232,44 +306,19 @@ const NotificationList: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-          },
-
+          }
         }
       );
 
       if (!response.ok) {
         throw new Error("Failed to mark notification as read");
       }
+      
+      return true;
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      return false;
     }
-  };
-
-  const toggleMenu = (id: number, event: React.MouseEvent) => {
-    event.stopPropagation();
-    // Đóng menu trước đó nếu có
-    if (activeMenuId !== null && activeMenuId !== id) {
-      setActiveMenuId(null);
-    }
-    // Hiển thị/đóng menu hiện tại
-    setActiveMenuId(activeMenuId === id ? null : id);
-
-    // Lấy vị trí để tính toán xem còn đủ không gian bên phải không
-    setTimeout(() => {
-      const menuElement = document.querySelector(
-        ".notification-menu"
-      ) as HTMLElement;
-      if (menuElement) {
-        const rect = menuElement.getBoundingClientRect();
-        const windowWidth = window.innerWidth;
-
-        // Nếu menu vượt quá bên phải của màn hình
-        if (rect.right > windowWidth) {
-          menuElement.style.left = "auto";
-          menuElement.style.right = "30px";
-        }
-      }
-    }, 10);
   };
 
   const toggleSettingsMenu = (event: React.MouseEvent) => {
@@ -294,12 +343,12 @@ const NotificationList: React.FC = () => {
         token = await refresh();
         if (!token) {
           window.location.href = "/dang-nhap";
-          return;
+          return false;
         }
         localStorage.setItem("authToken", token);
       }
 
-      const user = getUserData();
+      // Using the direct notification ID in the endpoint
       const url = `${process.env.REACT_APP_SERVER_HOST}/api/notifications/${notificationId}`;
 
       const response = await fetch(url, {
@@ -327,8 +376,11 @@ const NotificationList: React.FC = () => {
             !notification.status
         ).length
       );
+      
+      return true;
     } catch (error) {
       console.error("Error deleting notification:", error);
+      return false;
     }
   };
 
@@ -349,6 +401,18 @@ const NotificationList: React.FC = () => {
     return `${message.substring(0, 198)}...`;
   };
 
+  // Helper function to get topic display name
+  const getTopicDisplayName = (topic: string): string => {
+    const topicMap: {[key: string]: string} = {
+      'LEARNING': 'Học tập',
+      'SYSTEM': 'Hệ thống',
+      'IMPORTANT': 'Quan trọng',
+      'GENERAL': 'Hệ thống'
+    };
+    
+    return topicMap[topic] || topic;
+  };
+
   if (loading) {
     return (
       <div className="notification-container">
@@ -358,6 +422,9 @@ const NotificationList: React.FC = () => {
       </div>
     );
   }
+
+  // Get filtered notifications based on active tab
+  const filteredNotifications = getFilteredNotifications();
 
   return (
     <div className="notification-container">
@@ -374,16 +441,6 @@ const NotificationList: React.FC = () => {
               Quan trọng
               {getUnreadCount("important") > 0 && (
                 <span className="tab-badge">{getUnreadCount("important")}</span>
-              )}
-            </button>
-            <button
-              className={`tab-button ${activeTab === "promotion" ? "active" : ""
-                }`}
-              onClick={() => handleTabChange("promotion")}
-            >
-              Ưu đãi
-              {getUnreadCount("promotion") > 0 && (
-                <span className="tab-badge">{getUnreadCount("promotion")}</span>
               )}
             </button>
             <button
@@ -412,13 +469,13 @@ const NotificationList: React.FC = () => {
         </div>
 
         <div className="notification-list">
-          {notifications.length === 0 ? (
+          {filteredNotifications.length === 0 ? (
             <div className="empty-notification">
               <div className="empty-notification-icon">📭</div>
               <p>Không có thông báo nào</p>
             </div>
           ) : (
-            notifications.slice(0, visibleCount).map((notification) => (
+            filteredNotifications.slice(0, visibleCount).map((notification) => (
               <div
                 key={notification.id}
                 className={`notification-item ${notification.status ? "read" : "unread"
@@ -431,104 +488,6 @@ const NotificationList: React.FC = () => {
                     <span className="notification-time">
                       {formatDate(notification.createdAt)}
                     </span>
-                    <div className="three-dots-container">
-                      <span
-                        className="three-dots-icon"
-                        onClick={(e) =>
-                          toggleMenu(notification.id, e)
-                        }
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          fill="currentColor"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                        </svg>
-                      </span>
-                      {activeMenuId === notification.id && (
-                        <div className="notification-menu">
-                          {!notification.status ? (
-                            <div
-                              className="menu-item"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                markAsRead(
-                                  getUserData().id,
-                                  notification.id
-                                );
-                                setNotifications((prev) =>
-                                  prev.map((notif) =>
-                                    notif.id ===
-                                      notification.id
-                                      ? { ...notif, status: true }
-                                      : notif
-                                  )
-                                );
-                                setUnreadCount((prev) => prev - 1);
-                                setActiveMenuId(null);
-                              }}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0" />
-                              </svg>
-                              Đánh dấu đã đọc
-                            </div>
-                          ) : (
-                            <div
-                              className="menu-item"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Logic for marking as unread would go here
-                                setActiveMenuId(null);
-                              }}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5zm8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z" />
-                              </svg>
-                              Đánh dấu chưa đọc
-                            </div>
-                          )}
-                          <div
-                            className="menu-item"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteNotification(notification.id);
-                              setActiveMenuId(null);
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              fill="currentColor"
-                              viewBox="0 0 16 16"
-                            >
-                              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                              <path
-                                fill-rule="evenodd"
-                                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
-                              />
-                            </svg>
-                            Xóa thông báo
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -567,7 +526,7 @@ const NotificationList: React.FC = () => {
           )}
         </div>
 
-        {notifications.length > visibleCount && (
+        {filteredNotifications.length > visibleCount && (
           <button onClick={handleShowMore} className="notification-show-more">
             Hiển thị thêm
           </button>
@@ -577,19 +536,36 @@ const NotificationList: React.FC = () => {
       {selectedNotification && (
         <div className="notification-popup" onClick={() => closePopup()}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <div className="popup-content-notification">
-              <div className="popup-header-notification">
-                <div className="popup-title">
-                  {selectedNotification.title}
+            {detailLoading ? (
+              <div className="loading-spinner">Đang tải...</div>
+            ) : (
+              <div className="popup-content-notification">
+                <div className="popup-header-notification">
+                  <div className="popup-title">
+                    {selectedNotification.title}
+                  </div>
+                  <div className="popup-meta">
+                    <div className="popup-topic">
+                      <span className="topic-label">Phân loại:</span> 
+                      <span className="topic-value">{getTopicDisplayName(selectedNotification.topic)}</span>
+                    </div>
+                    <div className="popup-date">
+                      <span className="date-label">Thời gian:</span>
+                      <span className="date-value">{formatDate(selectedNotification.createdAt)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="popup-date">
-                  {formatDate(selectedNotification.createdAt)}
+                <div className="popup-bottom-notification">
+                  <p className="notification-message-detail">{selectedNotification.message}</p>
                 </div>
+                {selectedNotification.status !== undefined && (
+                  <div className="notification-status">
+                    <span className="status-indicator"></span>
+                    <span className="status-text">{selectedNotification.status ? 'Đã đọc' : 'Chưa đọc'}</span>
+                  </div>
+                )}
               </div>
-              <div className="popup-bottom-notification">
-                <p>{selectedNotification.message}</p>
-              </div>
-            </div>
+            )}
             <button onClick={closePopup} className="popup-close">
               Đóng
             </button>

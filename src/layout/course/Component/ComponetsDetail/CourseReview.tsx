@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { isTokenExpired } from "../../../util/fucntion/auth";
 import useRefreshToken from "../../../util/fucntion/useRefreshToken";
 import { toast, ToastContainer } from "react-toastify";
+import { CoureseDetail } from "../../../../model/CoureseDetail";
 
 interface Review {
   id: number;
@@ -21,11 +22,39 @@ interface Review {
   test_id?: number | null;
 }
 
-interface CourseReviewProps {
-  reviews: Review[];
-}
+// Custom CSS for review UI
+const reviewStyles = `
+  .review-item {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .review-item-top img { border-radius: 50%; object-fit: cover; }
+  .review-title div:first-child { font-weight: 600; color: #344767; }
+  .review-start-user i { color: #ffd700; margin-right: 2px; }
+  .pagination { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:10px; }
+  .pagination button { border:none; background:none; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:6px; font-size:14px; color:#495057; transition:all 0.2s; }
+  .pagination button:hover { background:#e9ecef; }
+  .pagination button.active { background:#4e73df; color:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
 
-export const CourseReview: React.FC = () => {
+  /* CKEditor editable area */
+  .review-form .ck-editor__editable_inline {
+    min-height: 120px;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+  }
+
+  .review-item-top { display:flex; align-items:center; gap:12px; }
+  .review-date { color:#6c757d; font-size:14px; }
+  .review-item-content span { display:block; margin-top:4px; }
+`;
+export interface CourseContent {
+  course: CoureseDetail; // Danh sách các bài học trong khóa học
+}
+export const CourseReview: React.FC<CourseContent> = ({course}) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const [rating, setRating] = useState(0);
@@ -71,6 +100,26 @@ export const CourseReview: React.FC = () => {
   };
   
   const id = extractCourseId();
+  const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
+  // State to track which reviews are expanded (show full text)
+  const [expandedReviews, setExpandedReviews] = useState<Record<number, boolean>>({});
+  const toggleExpand = (id: number) =>
+    setExpandedReviews((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  // Check enrollment
+  useEffect(() => {
+    const user = getUserData();
+    if (!id || !user) return;
+    fetch(
+      `${process.env.REACT_APP_SERVER_HOST}/api/enrollments/check?courseId=${id}&accountId=${user.id}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setIsEnrolled(data.data === true);
+      })
+      .catch(() => setIsEnrolled(false));
+  }, [id]);
+
   const fetchReviews = async () => {
     try {
       setLoading(true);
@@ -119,14 +168,6 @@ export const CourseReview: React.FC = () => {
       return;
     }
 
-    // if (isTokenExpired(token) || !token) {
-    //   token = await refresh();
-    //   if (!token) {
-    //     window.location.href = "/dang-nhap";
-    //     return;
-    //   }
-    //   localStorage.setItem("authToken", token);
-    // }
 
     try {
       const plainTextContent = content.replace(/<[^>]*>/g, "");
@@ -173,39 +214,24 @@ export const CourseReview: React.FC = () => {
     }
   };
 
+  // Inject styles once
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = reviewStyles;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <div className="courses-details__item-left" style={{ backgroundColor: "white", padding: "20px", borderRadius: "10px", marginTop: "10px" }}>
       <div className="title-course">
         <h3 className="mt-20 mb-20" style={{ textAlign:"center" }}>Review Khóa Học</h3>
       </div>
-      {/* <div
-        className="open-post-review"
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "10px",
-          fontWeight: "700",
-          fontSize: "18px",
-          gap: "6px",
-        }}
-        onClick={() => setIsFormVisible(!isFormVisible)}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          className="bi bi-plus-circle"
-          viewBox="0 0 16 16"
-        >
-          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-        </svg>
-        <span style={{ marginLeft: "5px" }}>Tạo đánh giá</span>
-      </div> */}
+     
 
-      {/* {isFormVisible && (
+      {course.purchased && (
         <div
           className="review-form"
           style={{ marginTop: "10px", fontSize: "16px" }}
@@ -273,12 +299,12 @@ export const CourseReview: React.FC = () => {
             {submitting ? "Đang gửi..." : "Gửi đánh giá"}
           </button>
         </div>
-      )} */}
+      )}
       <hr style={{ width: "100%" }} />
 
       <div className="course-review-bottom">
         {currentReviews.length === 0 ? (
-          <p>No reviews available.</p>
+          <p>Không có dữ liệu đánh giá.</p>
         ) : (
           currentReviews.map((review) => (
             <div key={review.id} className="review-item">
@@ -290,7 +316,12 @@ export const CourseReview: React.FC = () => {
                   height={"50px"}
                 />
                 <div className="review-title">
-                  <div>{review.fullname}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontWeight: 600 }}>{review.fullname}</span>
+                    <span className="review-date" style={{ color: "#6c757d", fontSize: "14px" }}>
+                      {new Date(review.created_at).toLocaleDateString("vi-VN")}
+                    </span>
+                  </div>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <span className="review-start-user">
                       {[...Array(review.rating)].map((_, index) => (
@@ -315,7 +346,28 @@ export const CourseReview: React.FC = () => {
                 className="review-item-content"
                 style={{ margin: "10px 50px 10px 50px" }}
               >
-                <p>{review.review}</p>
+                <p
+                  style={
+                    expandedReviews[review.id]
+                      ? {}
+                      : {
+                          display: "-webkit-box",
+                          WebkitLineClamp: 4,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }
+                  }
+                >
+                  {review.review}
+                </p>
+                {review.review.length > 200 && (
+                  <span
+                    onClick={() => toggleExpand(review.id)}
+                    style={{ color: "#007bff", cursor: "pointer" }}
+                  >
+                    {expandedReviews[review.id] ? "Thu gọn" : "Xem thêm"}
+                  </span>
+                )}
               </div>
               <hr style={{ margin: "15px 0px" }} />
             </div>
@@ -323,36 +375,38 @@ export const CourseReview: React.FC = () => {
         )}
 
         {/* Phân trang */}
-        <div className="pagination-container">
-          <ul className="pagination">
-            <li>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <Icon.ChevronLeft />
-              </button>
-            </li>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <li key={index}>
+        {totalPages > 1 && (
+          <div className="pagination-container">
+            <ul className="pagination">
+              <li>
                 <button
-                  onClick={() => handlePageChange(index + 1)}
-                  className={currentPage === index + 1 ? "active" : ""}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
                 >
-                  {index + 1}
+                  <Icon.ChevronLeft />
                 </button>
               </li>
-            ))}
-            <li>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <Icon.ChevronRight />
-              </button>
-            </li>
-          </ul>
-        </div>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <li key={index}>
+                  <button
+                    onClick={() => handlePageChange(index + 1)}
+                    className={currentPage === index + 1 ? "active" : ""}
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li style={{marginBottom:"20px"}}>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  <Icon.ChevronRight />
+                </button>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
       <ToastContainer />
     </div>

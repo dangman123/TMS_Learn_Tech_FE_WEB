@@ -14,4 +14,5 @@ export interface CoureseDetail {
   updatedAt: string;
   course_category_id: number;
   accountId: number;
+  purchased: boolean;
 }
