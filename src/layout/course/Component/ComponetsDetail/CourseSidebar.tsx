@@ -457,7 +457,7 @@ export const CourseSidebar: React.FC<CourseSidebarProps> = ({
           className={`btn-one ${isInCart && !isEnrolled ? 'cart-button' : ''}`}
           onClick={handleCheck}
         >
-          {isEnrolled
+          {course.purchased
             ? "Vào học"
             : isInCart
               ? "Đến giỏ hàng"
