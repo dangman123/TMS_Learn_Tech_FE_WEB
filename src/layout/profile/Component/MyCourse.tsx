@@ -13,6 +13,8 @@ import {
   Key,
   ChevronRight,
   FileEarmarkText,
+  Award,
+  Eye,
 } from "react-bootstrap-icons";
 import DialogFormInformation from "../../util/DialogFormInformation";
 import { showSuccess, showError, showWarning, showInfo } from "../../util/notificationService";
@@ -29,6 +31,7 @@ interface CourseUserProfile {
   completedDate?: boolean;
   statusCompleted: string;
   createdAt: string;
+  certificateUrl?: string | null;
 }
 
 const MyCourse = () => {
@@ -188,16 +191,44 @@ const MyCourse = () => {
       const data = await response.json();
 
       if (data && typeof data === "object") {
-        // Giả định dữ liệu có thêm trường để đánh dấu khóa học đã hoàn thành
-        const coursesWithStatus = data.content.map(
-          (course: CourseUserProfile) => ({
-            ...course,
-            completed: course.statusCompleted === "Completed", // Đây chỉ là giả lập, cần thay bằng dữ liệu thực
+        // Add completed flag and fetch certificate for each course
+        const mappedCourses: CourseUserProfile[] = await Promise.all(
+          data.content.map(async (course: CourseUserProfile) => {
+            const completed = course.statusCompleted === "Completed";
+            let certificateUrl: string | null = null;
+            try {
+              const certRes = await fetch(
+                `${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/enrollment/${userId}/${course.id}`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              if (certRes.ok) {
+                const contentType = certRes.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                  const certData = await certRes.json();
+                  if (certData && certData.data) {
+                    if (typeof certData.data === 'string') {
+                      certificateUrl = certData.data;
+                    } else if (typeof certData.data === 'object') {
+                      certificateUrl = certData.data.certificateUrl || certData.data.url || null;
+                    }
+                  }
+                } else {
+                  // API trả về text thuần (URL)
+                  const urlText = await certRes.text();
+                  certificateUrl = urlText ? urlText.trim() : null;
+                }
+              }
+            } catch (err) {
+              console.error("Error fetch certificate", err);
+            }
+            return { ...course, completed, certificateUrl };
           })
         );
 
-        setCourses(coursesWithStatus);
-        setFilteredCourses(coursesWithStatus);
+        setCourses(mappedCourses);
+        setFilteredCourses(mappedCourses);
 
         setTotalPages(data.totalPages);
       } else {
@@ -475,6 +506,53 @@ const MyCourse = () => {
     );
   };
 
+  const handleViewCertificate = async (course: CourseUserProfile) => {
+    // If URL available, open directly
+    if (course.certificateUrl) {
+      window.open(course.certificateUrl, '_blank');
+      return;
+    }
+
+    let token = localStorage.getItem('authToken');
+    if (isTokenExpired(token)) {
+      token = await refresh();
+      if (!token) {
+        navigate('/dang-nhap');
+        return;
+      }
+      localStorage.setItem('authToken', token);
+    }
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/enrollment/${userId}/${course.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        let url: string | null = null;
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          if (data && data.data) {
+            url = typeof data.data === 'string' ? data.data : (data.data.certificateUrl || data.data.url);
+          }
+        } else {
+          url = (await res.text()).trim();
+        }
+
+        if (url) {
+          window.open(url, '_blank');
+        } else {
+          toast.info('Chứng chỉ chưa sẵn sàng.');
+        }
+      } else {
+        toast.error('Không thể lấy chứng chỉ.');
+      }
+    } catch (error) {
+      console.error('Error fetching certificate', error);
+      toast.error('Đã xảy ra lỗi khi lấy chứng chỉ');
+    }
+  };
+
   return (
     <div className="container-fluid">
       {" "}
@@ -549,7 +627,7 @@ const MyCourse = () => {
             <Key size={18} />
             <span>Kích hoạt khóa học</span>
           </div>
-  
+
         </div>
 
         {/* Tab content */}
@@ -600,7 +678,7 @@ const MyCourse = () => {
                       className="form-select form-select-sm no-arrow"
                       value={examsSize}
                       onChange={(e) => handleExamsSizeChange(Number(e.target.value))}
-                      
+
                     >
                       <option value={4}>4 đề thi / trang</option>
                       <option value={8}>8 đề thi / trang</option>
@@ -645,11 +723,19 @@ const MyCourse = () => {
                             <button
                               className="btn btn-primary take-exam-button"
                               onClick={() => {
-                                // Navigate to exam page
                                 navigate(`/take-test/${exam.testId}`);
                               }}
                             >
                               Làm bài thi <ChevronRight size={16} />
+                            </button>
+                            <button
+                              className="btn btn-outline-secondary view-exam-button"
+                              onClick={() => {
+                                navigate(`/de-thi/${exam.testId}`);
+                              }}
+                              style={{ marginLeft: '8px' }}
+                            >
+                              <Eye size={16} /> Xem
                             </button>
                           </div>
                         </div>
@@ -817,6 +903,14 @@ const MyCourse = () => {
                           >
                             Chi tiết
                           </a>
+                          {course.completedDate && (
+                            <button
+                              className="btn btn-success details-button"
+                              onClick={() => handleViewCertificate(course)}
+                            >
+                              <Award size={16} /> Chứng&nbsp;chỉ
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
