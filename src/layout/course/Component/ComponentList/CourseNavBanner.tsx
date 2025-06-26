@@ -57,8 +57,7 @@ const CourseNav: React.FC<CourseNavProps> = ({
   onSearchChange,
 }) => {
   const [bannerList, setBannerList] = useState<Banner[]>([]);
-  const [activeCategory, setActiveCategory] = useState<number | null>(null);
-
+ 
   useEffect(() => {
     fetchBannerList();
   }, []);
@@ -66,7 +65,7 @@ const CourseNav: React.FC<CourseNavProps> = ({
   const fetchBannerList = async () => {
     try {
       const response = await fetch(
-        "http://103.166.143.198:8080/api/banner-voucher/list",
+        `${process.env.REACT_APP_SERVER_HOST}/api/banner-voucher/list`,
         {
           method: "GET",
           headers: {
@@ -86,28 +85,9 @@ const CourseNav: React.FC<CourseNavProps> = ({
     }
   };
 
-  const handleReloadDataCap1 = (category: Category) => {
-    localStorage.setItem(
-      "danhmuckhoahoc",
-      removeVietnameseTones(category.name)
-    );
-    localStorage.setItem("danhmuckhoahocVN", category.name);
-    localStorage.setItem("iddanhmuckhoahoc", category.id.toString());
-    localStorage.removeItem("iddanhmuckhoahoc");
-    window.location.href = "/khoa-hoc/" + removeVietnameseTones(category.name);
-  };
 
-  const handleReloadDataCap2 = (category: Category, subCategory: Category) => {
-    localStorage.setItem(
-      "danhmuckhoahoc",
-      removeVietnameseTones(subCategory.name)
-    );
-    localStorage.setItem("danhmuckhoahocVN", subCategory.name);
-    localStorage.setItem("iddanhmuckhoahoccap1", category.id.toString());
-    localStorage.setItem("iddanhmuckhoahoccap2", subCategory.id.toString());
-    window.location.href =
-      "/khoa-hoc/" + removeVietnameseTones(subCategory.name);
-  };
+
+
 
   return (
     <div className="course-nav-container">

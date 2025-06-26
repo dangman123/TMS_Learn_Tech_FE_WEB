@@ -6,7 +6,7 @@ import Index from "./layout/homepage/Index";
 import Document from "./layout/document/Document";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Document_Detail from "./layout/document/Document-detail";
-import Breadcum from "./layout/util/Breadcum";
+// import Breadcum from "./layout/util/Breadcum";
 import { useState } from "react";
 import AccountManagement from "./layout/profile/AccountManagement";
 import Loading from "./layout/util/Loading";

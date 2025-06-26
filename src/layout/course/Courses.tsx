@@ -6,9 +6,9 @@ import CourseListRow from "./Component/ComponentList/CourseListRow";
 import Combo from "./Component/Combo/Combo";
 import {
   GET_COURSES_BY_CATEGORIES,
-  GET_USER_CATEGORY_LEVEL_1,
-  GET_USER_CATEGORY_LEVEL_2,
-  GET_USER_CATEGORY_LEVEL_3,
+  // GET_USER_CATEGORY_LEVEL_1,
+  // GET_USER_CATEGORY_LEVEL_2,
+  // GET_USER_CATEGORY_LEVEL_3,
   GET_USER_COURSE,
 } from "../../api/api";
 import { CourseList as CourseListUser } from "../../model/CourseList";
@@ -16,6 +16,7 @@ import { CourseList as CourseListUser } from "../../model/CourseList";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import useCozeChat from "../../hooks/useCozeChat";
+import { el } from "date-fns/locale";
 
 interface ApiResponse {
   content: CourseListUser[];
@@ -30,6 +31,13 @@ export interface Category {
   type: string;
 }
 
+interface CategoryTree extends Category {
+  id: number;
+  name: string;
+  level: number;
+  children: CategoryTree[];
+}
+
 function Courses() {
   // Initialize Coze Chat
   useCozeChat({
@@ -38,6 +46,8 @@ function Courses() {
   });
 
   const courseCategoryId = localStorage.getItem("iddanhmuckhoahoc");
+  const levelDanhMuc = localStorage.getItem("level");
+
   const [courses, setCourses] = useState<CourseListUser[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -46,28 +56,24 @@ function Courses() {
   const [selectedCategories, setSelectedCategories] = useState<number>();
   const [loading, setLoading] = useState(true);
   const coursesPerPage = 6;
-
-  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<
-    Category[]
-  >([]);
-  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<
-    Category[]
-  >([]);
-  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<
-    Category[]
-  >([]);
+  const [coursesCategoriesTree, setCoursesCategoriesTree] = useState<CategoryTree[]>([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        let url: string;
+        let url = "";
 
+        
         if (courseCategoryId) {
-          // Nếu có courseCategoryId trong URL, gọi API lấy khóa học theo danh mục
-          url = GET_COURSES_BY_CATEGORIES(Number(courseCategoryId));
-        } else {
-          // Nếu không có danh mục được chọn, gọi API không có phân loại
+          if (levelDanhMuc === "3") {
+            url = GET_COURSES_BY_CATEGORIES(Number(courseCategoryId), null, null);
+          } else if (levelDanhMuc === "2") {
+            url = GET_COURSES_BY_CATEGORIES(null, Number(courseCategoryId), null);
+          } else if (levelDanhMuc === "1") {
+            url = GET_COURSES_BY_CATEGORIES(null, null, Number(courseCategoryId));
+          }
+        }else{
           url = GET_USER_COURSE(currentPage, coursesPerPage);
         }
 
@@ -111,35 +117,15 @@ function Courses() {
 
   useEffect(() => {
     const fetchCourseCategories = async () => {
-      // startLoading();
       try {
-        const level1Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_1
+        // Fetch course categories using the tree API
+        const response = await axios.get<{ data: CategoryTree[] }>(
+          `${process.env.REACT_APP_SERVER_HOST}/api/categories/tree?level=1&type=COURSE`
         );
-        const level1Filtered = level1Response.data.filter(
-          (category) => category.type === "COURSE"
-        );
-        setLevel1CategoriesCourse(level1Filtered);
-
-        const level2Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_2
-        );
-        const level2Filtered = level2Response.data.filter(
-          (category) => category.type === "COURSE"
-        );
-        setLevel2CategoriesCourse(level2Filtered);
-
-        const level3Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_3
-        );
-        const level3Filtered = level3Response.data.filter(
-          (category) => category.type === "COURSE"
-        );
-        setLevel3CategoriesCourse(level3Filtered);
-
-        // stopLoading();
+        if (response.data && response.data.data) {
+          setCoursesCategoriesTree(response.data.data);
+        }
       } catch (error) {
-        // stopLoading();
         console.error("Error fetching categories:", error);
       }
     };
@@ -162,6 +148,31 @@ function Courses() {
     }
   };
 
+  // Flatten categories tree to get level1, level2, and level3 arrays
+  const extractCategoriesByLevel = () => {
+    const level1: Category[] = [];
+    const level2: Category[] = [];
+    const level3: Category[] = [];
+
+    coursesCategoriesTree.forEach(cat1 => {
+      level1.push(cat1);
+      if (cat1.children && cat1.children.length > 0) {
+        cat1.children.forEach(cat2 => {
+          level2.push(cat2);
+          if (cat2.children && cat2.children.length > 0) {
+            cat2.children.forEach(cat3 => {
+              level3.push(cat3);
+            });
+          }
+        });
+      }
+    });
+
+    return { level1, level2, level3 };
+  };
+
+  const { level1, level2, level3 } = extractCategoriesByLevel();
+
   return (
     <section
       className="courses-area pb-120"
@@ -175,9 +186,9 @@ function Courses() {
             <div className="row">
               <div className="col-md-12">
                 <CourseNav
-                  level1CategoriesCourse={level1CategoriesCourse}
-                  level2CategoriesCourse={level2CategoriesCourse}
-                  level3CategoriesCourse={level3CategoriesCourse}
+                  level1CategoriesCourse={level1}
+                  level2CategoriesCourse={level2}
+                  level3CategoriesCourse={level3}
                   categories={categories}
                   onSearchChange={handleSearchChange}
                 />

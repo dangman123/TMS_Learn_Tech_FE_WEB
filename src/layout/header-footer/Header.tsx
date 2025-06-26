@@ -3,14 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import NotificationDropdown from "./NotificationDropdown";
-import { Category } from "../../model/Category";
-import {
-  GET_USER_CATEGORY_LEVEL_1,
-  GET_USER_CATEGORY_LEVEL_2,
-  GET_USER_CATEGORY_LEVEL_3,
+// import { Category } from "../../model/Category";
 
-  // token_default,
-} from "../../api/api";
 import { DocumentModel } from "../../model/DocumentModel";
 import "./Header.css";
 import { Client } from "@stomp/stompjs";
@@ -21,13 +15,14 @@ import topics from "../util/fucntion/topics";
 import { useLoading } from "../util/LoadingContext";
 import useCozeChat from "../../hooks/useCozeChat";
 
-
-interface CategoryCourse {
+// Tree-structured category interface
+interface CategoryTree {
   id: number;
   name: string;
-  create_at: Date;
-  update_at: Date;
+  level: number;
+  children: CategoryTree[];
 }
+
 interface Notification {
   id: number;
   title: string;
@@ -96,30 +91,9 @@ const Header: React.FC = () => {
     };
   }, []);
 
-  const [courseCategories, setCourseCategories] = useState<CategoryCourse[]>(
-    []
-  );
-  const [level1Categories, setLevel1Categories] = useState<Category[]>([]);
-  const [level2Categories, setLevel2Categories] = useState<Category[]>([]);
-  const [level3Categories, setLevel3Categories] = useState<Category[]>([]);
-
-  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<
-    Category[]
-  >([]);
-  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<
-    Category[]
-  >([]);
-  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<
-    Category[]
-  >([]);
-
+  const [categoriesTree, setCategoriesTree] = useState<CategoryTree[]>([]);
+  const [coursesCategoriesTree, setCoursesCategoriesTree] = useState<CategoryTree[]>([]);
   const [documentsSearch, setDocumentsSearch] = useState<DocumentModel[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredDocuments, setFilteredDocuments] = useState<DocumentModel[]>(
-    []
-  );
-  const [showResults, setShowResults] = useState(false);
-
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const [cartItemCount, setCartItemCount] = useState<number>(0);
@@ -226,30 +200,11 @@ const Header: React.FC = () => {
     const fetchCategories = async () => {
       // startLoading();
       try {
-        const level1Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_1
-        );
-        const level1Filtered = level1Response.data.filter(
-          (category) => category.type === "DOCUMENT"
-        );
-        setLevel1Categories(level1Filtered);
-
-        const level2Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_2
-        );
-        const level2Filtered = level2Response.data.filter(
-          (category) => category.type === "DOCUMENT"
-        );
-        setLevel2Categories(level2Filtered);
-
-        const level3Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_3
-        );
-        const level3Filtered = level3Response.data.filter(
-          (category) => category.type === "DOCUMENT"
-        );
-        setLevel3Categories(level3Filtered);
-
+        // Fetch document categories using the tree API
+        const response = await axios.get<{ data: CategoryTree[] }>(`${process.env.REACT_APP_SERVER_HOST}/api/categories/tree?level=1&type=DOCUMENT`);
+        if (response.data && response.data.data) {
+          setCategoriesTree(response.data.data);
+        }
         // stopLoading();
       } catch (error) {
         // stopLoading();
@@ -260,30 +215,11 @@ const Header: React.FC = () => {
     const fetchCourseCategories = async () => {
       // startLoading();
       try {
-        const level1Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_1
-        );
-        const level1Filtered = level1Response.data.filter(
-          (category) => category.type === "COURSE"
-        );
-        setLevel1CategoriesCourse(level1Filtered);
-
-        const level2Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_2
-        );
-        const level2Filtered = level2Response.data.filter(
-          (category) => category.type === "COURSE"
-        );
-        setLevel2CategoriesCourse(level2Filtered);
-
-        const level3Response = await axios.get<Category[]>(
-          GET_USER_CATEGORY_LEVEL_3
-        );
-        const level3Filtered = level3Response.data.filter(
-          (category) => category.type === "COURSE"
-        );
-        setLevel3CategoriesCourse(level3Filtered);
-
+        // Fetch course categories using the tree API
+        const response = await axios.get<{ data: CategoryTree[] }>(`${process.env.REACT_APP_SERVER_HOST}/api/categories/tree?level=1&type=COURSE`);
+        if (response.data && response.data.data) {
+          setCoursesCategoriesTree(response.data.data);
+        }
         // stopLoading();
       } catch (error) {
         // stopLoading();
@@ -295,15 +231,6 @@ const Header: React.FC = () => {
       // startLoading();
       try {
         let token = localStorage.getItem("authToken");
-        // Kiểm tra xem token có hết hạn không, nếu hết hạn thì refresh
-        // if (isTokenExpired(token)) {
-        //   token = await refresh();
-        //   if (!token) {
-        //     window.location.href = "/dang-nhap";
-        //     return;
-        //   }
-        //   localStorage.setItem("authToken", token);
-        // }
 
         const user = getUserData();
         const url = `${process.env.REACT_APP_SERVER_HOST}/api/notifications/user/${user.id}`;
@@ -364,78 +291,6 @@ const Header: React.FC = () => {
     }
   }, []);
 
-  // Group categories
-  const groupedCategoriesLevel2 = level2Categories.reduce((acc, category) => {
-    if (category.parentId) {
-      acc[category.parentId] = acc[category.parentId] || [];
-      acc[category.parentId].push(category);
-    }
-    return acc;
-  }, {} as Record<number, Category[]>);
-
-  const groupedCategoriesLevel3 = level3Categories.reduce((acc, category) => {
-    if (category.parentId) {
-      acc[category.parentId] = acc[category.parentId] || [];
-      acc[category.parentId].push(category);
-    }
-    return acc;
-  }, {} as Record<number, Category[]>);
-
-  // Group categories
-  const groupedCategoriesLevel2Course = level2CategoriesCourse.reduce(
-    (acc, category) => {
-      if (category.parentId) {
-        acc[category.parentId] = acc[category.parentId] || [];
-        acc[category.parentId].push(category);
-      }
-      return acc;
-    },
-    {} as Record<number, Category[]>
-  );
-
-  const groupedCategoriesLevel3Course = level3CategoriesCourse.reduce(
-    (acc, category) => {
-      if (category.parentId) {
-        acc[category.parentId] = acc[category.parentId] || [];
-        acc[category.parentId].push(category);
-      }
-      return acc;
-    },
-    {} as Record<number, Category[]>
-  );
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
-    if (value.trim() === "") {
-      setShowResults(false); // Ẩn kết quả khi input trống
-      setFilteredDocuments([]);
-    } else {
-      setShowResults(true); // Hiển thị kết quả khi có từ khóa
-
-      // Tìm kiếm trong danh sách tài liệu đã tải trước
-      const results = documentsSearch.filter((document) =>
-        document.documentTitle.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredDocuments(results);
-    }
-  };
-
-  const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && searchTerm.trim() !== "") {
-      navigate(`/tim-kiem?keyword=${searchTerm}`);
-    }
-  };
-
-  // Ẩn kết quả tìm kiếm khi người dùng rời khỏi ô input
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Sử dụng setTimeout để đảm bảo rằng onClick của phần tử kết quả không bị bỏ qua
-    setTimeout(() => {
-      setShowResults(false);
-    }, 200);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("authData");
@@ -461,9 +316,9 @@ const Header: React.FC = () => {
   const handleRouter = () => { };
 
   return (
-    <div 
+    <div
       className="header__container"
-      style={{ 
+      style={{
         position: 'sticky',
         top: 0,
         zIndex: 1000
@@ -474,7 +329,7 @@ const Header: React.FC = () => {
         <a href="/" className="logo">
           <img src="../../assets/images/logo/logoTMS.png" alt="logo" />
         </a>
-        
+
         {/* Main Menu */}
         <div className="main-menu">
           <nav>
@@ -494,8 +349,8 @@ const Header: React.FC = () => {
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
-                  {/* Hiển thị danh mục TÀI LIỆU cấp 1 */}
-                  {level1Categories.map((level1) => (
+                  {/* Hiển thị danh mục TÀI LIỆU sử dụng cấu trúc cây */}
+                  {categoriesTree.map((level1) => (
                     <li key={level1.id} className="level1-item">
                       <a
                         href={`/tai-lieu/${removeVietnameseTones(level1.name)}`}
@@ -515,39 +370,39 @@ const Header: React.FC = () => {
                         {level1.name}
                       </a>
                       {/* Hiển thị danh mục TÀI LIỆU cấp 2 */}
-                      <ul className="sub-sub-menu">
-                        {groupedCategoriesLevel2[level1.id]?.map((level2) => (
-                          <li key={level2.id} className="level2-item">
-                            <a
-                              href={`/tai-lieu/${removeVietnameseTones(
-                                level2.name
-                              )}`}
-                              onClick={() => {
-                                localStorage.setItem(
-                                  "danhmuctailieu",
-                                  removeVietnameseTones(level2.name)
-                                );
-                                localStorage.setItem(
-                                  "iddanhmuctailieu",
+                      {level1.children && level1.children.length > 0 && (
+                        <ul className="sub-sub-menu">
+                          {level1.children.map((level2) => (
+                            <li key={level2.id} className="level2-item">
+                              <a
+                                href={`/tai-lieu/${removeVietnameseTones(
                                   level2.name
-                                );
-                                localStorage.setItem(
-                                  "iddanhmuctailieu",
-                                  level1.id.toString()
-                                );
-                                localStorage.setItem(
-                                  "iddanhmuctailieu",
-                                  level2.id.toString()
-                                );
-                              }}
-                            >
-                              {level2.name}
-                            </a>
-                            {/* Hiển thị danh mục TÀI LIỆU cấp 3 nếu có */}
-                            {groupedCategoriesLevel3[level2.id]?.length > 0 && (
-                              <ul className="sub-sub-sub-menu">
-                                {groupedCategoriesLevel3[level2.id]?.map(
-                                  (level3) => (
+                                )}`}
+                                onClick={() => {
+                                  localStorage.setItem(
+                                    "danhmuctailieu",
+                                    removeVietnameseTones(level2.name)
+                                  );
+                                  localStorage.setItem(
+                                    "iddanhmuctailieu",
+                                    level2.name
+                                  );
+                                  localStorage.setItem(
+                                    "iddanhmuctailieu",
+                                    level1.id.toString()
+                                  );
+                                  localStorage.setItem(
+                                    "iddanhmuctailieu",
+                                    level2.id.toString()
+                                  );
+                                }}
+                              >
+                                {level2.name}
+                              </a>
+                              {/* Hiển thị danh mục TÀI LIỆU cấp 3 nếu có */}
+                              {level2.children && level2.children.length > 0 && (
+                                <ul className="sub-sub-sub-menu">
+                                  {level2.children.map((level3) => (
                                     <li key={level3.id} className="level3-item">
                                       <a
                                         href={`/tai-lieu/${removeVietnameseTones(
@@ -579,13 +434,13 @@ const Header: React.FC = () => {
                                         {level3.name}
                                       </a>
                                     </li>
-                                  )
-                                )}
-                              </ul>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -596,14 +451,14 @@ const Header: React.FC = () => {
                   href="/khoa-hoc"
                   onClick={() => {
                     localStorage.removeItem("iddanhmuckhoahoc");
-                    localStorage.removeItem("iddanhmuckhoahoc");
+                    localStorage.removeItem("level");
                   }}
                 >
                   Khóa học
                   <i className="fa-solid fa-angle-down"></i>
                 </a>
                 <ul className="sub-menu">
-                  {level1CategoriesCourse.map((level1) => (
+                  {coursesCategoriesTree.map((level1) => (
                     <li key={level1.id} className="level1-item">
                       <a
                         href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
@@ -619,14 +474,17 @@ const Header: React.FC = () => {
                             "iddanhmuckhoahoc",
                             level1.id.toString()
                           );
-                          localStorage.removeItem("iddanhmuckhoahoc");
+                          localStorage.setItem("level", "1");
+                          // localStorage.removeItem("iddanhmuckhoahoc");
+                          // localStorage.removeItem("level");
+
                         }}
                       >
                         {level1.name}
                       </a>
-                      <ul className="sub-sub-menu">
-                        {groupedCategoriesLevel2Course[level1.id]?.map(
-                          (level2) => (
+                      {level1.children && level1.children.length > 0 && (
+                        <ul className="sub-sub-menu">
+                          {level1.children.map((level2) => (
                             <li key={level2.id} className="level2-item">
                               <a
                                 href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
@@ -641,71 +499,72 @@ const Header: React.FC = () => {
                                     "danhmuckhoahocVN",
                                     level2.name
                                   );
-                                  localStorage.setItem(
-                                    "iddanhmuckhoahoc",
-                                    level1.id.toString()
-                                  );
+                                  // localStorage.setItem(
+                                  //   "iddanhmuckhoahoc",
+                                  //   level1.id.toString()
+                                  // );
                                   localStorage.setItem(
                                     "iddanhmuckhoahoc",
                                     level2.id.toString()
                                   );
+                                  localStorage.setItem("level", "2");
                                 }}
                               >
                                 {level2.name}
                               </a>
                               {/* Thêm danh mục cấp 3 khóa học ở đây nếu có */}
-                              {groupedCategoriesLevel3Course[level2.id]
-                                ?.length > 0 && (
-
-                                  <ul className="sub-sub-sub-menu">
-                                    {groupedCategoriesLevel3Course[
-                                      level2.id
-                                    ]?.map((level3) => (
-                                      <li key={level3.id} className="level3-item">
-                                        <a
-                                          href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
+                              {level2.children && level2.children.length > 0 && (
+                                <ul className="sub-sub-sub-menu">
+                                  {level2.children.map((level3) => (
+                                    <li key={level3.id} className="level3-item">
+                                      <a
+                                        href={`/khoa-hoc/danh-muc/${removeVietnameseTones(
+                                          level3.name
+                                        )}`}
+                                        onClick={() => {
+                                          localStorage.setItem(
+                                            "danhmuckhoahoc",
+                                            removeVietnameseTones(level3.name)
+                                          );
+                                          localStorage.setItem(
+                                            "danhmuckhoahoc",
                                             level3.name
-                                          )}`}
-                                          onClick={() => {
-                                            localStorage.setItem(
-                                              "danhmuckhoahoc",
-                                              removeVietnameseTones(level3.name)
-                                            );
-                                            localStorage.setItem(
-                                              "danhmuckhoahoc",
-                                              level3.name
-                                            );
-                                            localStorage.setItem(
-                                              "iddanhmuckhoahoc",
-                                              level1.id.toString()
-                                            );
-                                            localStorage.setItem(
-                                              "iddanhmuckhoahoc",
-                                              level2.id.toString()
-                                            );
-                                            localStorage.setItem(
-                                              "iddanhmuckhoahoc",
-                                              level3.id.toString()
-                                            );
-                                          }}
-                                        >
-                                          {level3.name}
-                                        </a>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
+                                          );
+                                          // localStorage.setItem(
+                                          //   "iddanhmuckhoahoc",
+                                          //   level1.id.toString()
+                                          // );
+                                          // localStorage.setItem(
+                                          //   "iddanhmuckhoahoc",
+                                          //   level2.id.toString()
+                                          // );
+                                          localStorage.setItem(
+                                            "iddanhmuckhoahoc",
+                                            level3.id.toString()
+                                          );
+                                          localStorage.setItem("level", "3");
+                                        }}
+                                      >
+                                        {level3.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                             </li>
-                          )
-                        )}
-                      </ul>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                 </ul>
               </li>
               <li>
-                <a href="/de-thi" onClick={handleRouter}>
+                <a href="/de-thi" onClick={() => {
+                  localStorage.removeItem("iddanhmucdethi");
+                  localStorage.removeItem("levelDethi");
+                  localStorage.removeItem("danhmucdethi");
+                }}>
                   Bài thi
                 </a>
               </li>
@@ -723,9 +582,9 @@ const Header: React.FC = () => {
         <div className={`offcanvas-menu ${isMenuOpen ? "open" : ""}`}>
           <div className="menu-header">
             <div className="menu-title">Menu</div>
-          
+
           </div>
-          
+
           {isLoggedIn && (
             <div className="user-info">
               <div className="user-avatar">
@@ -734,7 +593,7 @@ const Header: React.FC = () => {
               <div className="user-name">{userName}</div>
             </div>
           )}
-          
+
           <ul>
             <li>
               <a href="/">Trang chủ</a>
@@ -797,7 +656,7 @@ const Header: React.FC = () => {
                   )}
                 </a>
               </li>
-              
+
               {/* Notification */}
               <NotificationDropdown
                 notifications={
@@ -805,7 +664,7 @@ const Header: React.FC = () => {
                 }
                 unreadCount={unreadCount}
               />
-              
+
               {/* User Dropdown */}
               <div className="user-dropdown">
                 <div className="user-icon">
@@ -835,7 +694,7 @@ const Header: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Mobile menu toggle button */}
         <button className={`menubars ${isMenuOpen ? "active" : ""}`} type="button" onClick={toggleMenu}>
           <span></span>

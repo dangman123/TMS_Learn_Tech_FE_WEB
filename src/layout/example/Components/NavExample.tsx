@@ -47,14 +47,14 @@ const NavExample = () => {
         if (response.data && response.data.data) {
           // Get all level 2+ categories (skip level 1)
           const processedCategories: CategoryNode[] = [];
-          
+
           response.data.data.forEach(topLevel => {
             // Add level 2 categories from each top level category
             if (topLevel.children && topLevel.children.length > 0) {
               processedCategories.push(...topLevel.children);
             }
           });
-          
+
           setCategories(processedCategories);
 
           // Set selected category from localStorage if exists
@@ -79,7 +79,7 @@ const NavExample = () => {
     allCategories: CategoryNode[]
   ) => {
     const expandedIds: number[] = [];
-    
+
     // Find the category with the given ID recursively
     const findCategoryAndParents = (categories: CategoryNode[]): boolean => {
       for (const category of categories) {
@@ -88,13 +88,13 @@ const NavExample = () => {
           expandedIds.push(category.id);
           return true;
         }
-        
+
         // Check in children
         if (category.children && category.children.length > 0) {
           const foundInChildren = findCategoryAndParents(category.children);
           if (foundInChildren) {
             expandedIds.push(category.id);
-            
+
             // If it's a top level category, mark it as expanded
             if (category.level === 2) {
               setTopLevelExpanded((prev) => ({
@@ -102,25 +102,26 @@ const NavExample = () => {
                 [category.id]: true,
               }));
             }
-            
+
             return true;
           }
         }
       }
-      
+
       return false;
     };
-    
+
     findCategoryAndParents(allCategories);
-    
+
     setExpandedCategories(expandedIds);
     setSelectedCategory(categoryId);
   };
 
-  const handleCategoryClick = (id: number, name: string) => {
+  const handleCategoryClick = (id: number, name: string, level: number) => {
     setSelectedCategory(id);
     localStorage.setItem("iddanhmucdethi", id.toString());
-    localStorage.setItem("danhmucdethi", id.toString());
+    localStorage.setItem("danhmucdethi", name.toString());
+    localStorage.setItem("levelDethi", level.toString());
     window.location.href = `/de-thi/${removeVietnameseTones(name)}`;
   };
 
@@ -174,17 +175,17 @@ const NavExample = () => {
           }
           return true;
         }
-        
+
         if (category.children && category.children.length > 0) {
           if (findChildren(category.children)) {
             return true;
           }
         }
       }
-      
+
       return false;
     };
-    
+
     const addAllChildren = (categories: CategoryNode[]) => {
       for (const category of categories) {
         result.push(category.id);
@@ -193,7 +194,7 @@ const NavExample = () => {
         }
       }
     };
-    
+
     findChildren(categories);
     return result;
   };
@@ -217,9 +218,8 @@ const NavExample = () => {
           return (
             <li
               key={category.id}
-              className={`category-item ${
-                isSelected ? "active" : ""
-              } depth-${level - 2}`} // Adjust depth to start at 0
+              className={`category-item ${isSelected ? "active" : ""
+                } depth-${level - 2}`} // Adjust depth to start at 0
             >
               <div className="category-row">
                 {hasChildCategories && (
@@ -247,7 +247,7 @@ const NavExample = () => {
                   className="category-name"
                   onClick={(e) => {
                     e.preventDefault();
-                    handleCategoryClick(category.id, category.name);
+                    handleCategoryClick(category.id, category.name, category.level);
                   }}
                 >
                   {level === 2 ? (

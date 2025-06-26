@@ -61,16 +61,7 @@ const EmptyState = () => (
 function ExamList({ exams = [] }: ExamListProps) {
   const navigate = useNavigate();
 
-  // Handler khi click vào đề thi
-  const handleExamClick = useCallback(
-    (exam: ExamListUser) => {
-      if (exam.status === "INACTIVE") return;
-      const examSlug = slugify(exam.title);
-      localStorage.setItem("danhmucdethi", examSlug);
-      navigate(`/de-thi/${examSlug}-${exam.testId}`);
-    },
-    [navigate]
-  );
+
 
   // Render card cho mỗi đề thi
   const renderExamCard = (exam: ExamListUser) => {

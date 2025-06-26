@@ -6,7 +6,7 @@ import "./ListRow.css";
 
 interface CourseListRowProps {
   title: string;
-  type: "popular" | "discount";
+  type: "popular" | "discount" | "category";
 }
 
 const CourseListRow: React.FC<CourseListRowProps> = ({ title, type }) => {

@@ -6,6 +6,8 @@ import axios from "axios";
 
 // Thiết lập đường dẫn đến worker từ thư mục công cộng
 GlobalWorkerOptions.workerSrc = "/pdfjs-dist/build/pdf.worker.min.mjs";
+
+
 interface ListDocumentProps {
   documents: DocumentModel[];
 }

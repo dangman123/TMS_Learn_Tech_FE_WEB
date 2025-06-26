@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ExamList as ExamListType, ApiResponse } from "../../model/ExamList";
 import ExamList from "./Components/ContentExample";
-import { GET_USER_EXAM } from "../../api/api";
+import { GET_USER_EXAM, GET_USER_EXAM_BY_CATEGORY_ID } from "../../api/api";
 
 function Exam() {
   const categoryId = localStorage.getItem("iddanhmucdethi");
+  const level = localStorage.getItem("levelDethi");
   const [exams, setExams] = useState<ExamListType[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -16,7 +17,19 @@ function Exam() {
     const fetchExams = async () => {
       setLoading(true);
       try {
-        const url = GET_USER_EXAM(currentPage, examsPerPage);
+        let url = "";
+        if (categoryId) {
+          if (level === "2") {
+            url = GET_USER_EXAM_BY_CATEGORY_ID(Number(categoryId), null, null, currentPage, examsPerPage);
+          } else if (level === "3") {
+            url = GET_USER_EXAM_BY_CATEGORY_ID(null, Number(categoryId), null, currentPage, examsPerPage);
+          } else if (level === "4") {
+            url = GET_USER_EXAM_BY_CATEGORY_ID(null, null, Number(categoryId), currentPage, examsPerPage);
+          }
+        } else {
+          url = GET_USER_EXAM(currentPage, examsPerPage);
+        }
+
         const response = await axios.get<ApiResponse>(url);
 
         if (response.data && response.data.data) {
@@ -50,9 +63,8 @@ function Exam() {
                 <a
                   href="#0"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  className={`border-none ${
-                    currentPage === 0 ? "disabled" : ""
-                  }`}
+                  className={`border-none ${currentPage === 0 ? "disabled" : ""
+                    }`}
                   aria-disabled={currentPage === 0}
                 >
                   <i className="fa-regular fa-arrow-left primary-color transition"></i>
@@ -70,9 +82,8 @@ function Exam() {
                 <a
                   href="#0"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  className={`border-none ${
-                    currentPage === totalPages - 1 ? "disabled" : ""
-                  }`}
+                  className={`border-none ${currentPage === totalPages - 1 ? "disabled" : ""
+                    }`}
                   aria-disabled={currentPage === totalPages - 1}
                 >
                   <i className="fa-regular fa-arrow-right primary-color transition"></i>

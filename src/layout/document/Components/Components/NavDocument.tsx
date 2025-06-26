@@ -11,28 +11,30 @@ import "./navDocument.css";
 import { useNavigate } from "react-router-dom";
 import { DocumentModel } from "../../../../model/DocumentModel";
 
-type Category = {
+interface CategoryTree {
   id: number;
   name: string;
-  parentId: number | null;
-  type: string; // Thêm trường type vào định nghĩa Category
-};
+  level: number;
+  children: CategoryTree[] | null;
+  type?: string;
+  parentId?: number | null;
+}
 
 const NavDocument = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesTree, setCategoriesTree] = useState<CategoryTree[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
   // Thêm state để quản lý trạng thái đóng/mở của menu cấp cao nhất
   const [topLevelExpanded, setTopLevelExpanded] = useState<
     Record<number, boolean>
   >({});
-  
+
   // Thêm state cho chức năng tìm kiếm
   const [documentsSearch, setDocumentsSearch] = useState<DocumentModel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDocuments, setFilteredDocuments] = useState<DocumentModel[]>([]);
   const [showResults, setShowResults] = useState(false);
-  
+
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLDivElement>(null);
   const [searchPosition, setSearchPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -51,22 +53,18 @@ const NavDocument = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_SERVER_HOST}/categories-all`
-        );
+        // Sử dụng API cấu trúc cây mới
+        const response = await axios.get<{ status: number, message: string, data: CategoryTree[] }>(`${process.env.REACT_APP_SERVER_HOST}/api/categories/tree?level=1&type=DOCUMENT`);
 
-        // Lọc chỉ lấy những danh mục có type là "DOCUMENT"
-        const documentCategories = response.data.filter(
-          (category: Category) => category.type === "DOCUMENT"
-        );
+        if (response.data && response.data.data) {
+          setCategoriesTree(response.data.data);
 
-        setCategories(documentCategories);
-
-        // Tự động mở rộng danh mục hiện tại và danh mục cha của nó
-        const currentCategoryId = localStorage.getItem("danhmuckhoahoc");
-        if (currentCategoryId) {
-          const id = parseInt(currentCategoryId, 10);
-          expandCategoryAndParents(id, documentCategories);
+          // Tự động mở rộng danh mục hiện tại và danh mục cha của nó
+          const currentCategoryId = localStorage.getItem("iddanhmuctailieu");
+          if (currentCategoryId) {
+            const id = parseInt(currentCategoryId, 10);
+            expandCategoryAndParents(id);
+          }
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -78,7 +76,7 @@ const NavDocument = () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_SERVER_HOST}/api/general_documents/data`);
         const data = await response.json();
-        
+
         // Chuyển đổi dữ liệu API thành mảng các DocumentModel
         const documentModels: DocumentModel[] = data.map((item: any) => ({
           documentId: item[0],
@@ -90,7 +88,7 @@ const NavDocument = () => {
           download_count: item[6],
           name: item[7],
         }));
-        
+
         setDocumentsSearch(documentModels);
       } catch (error) {
         console.error("Error fetching search data:", error);
@@ -101,35 +99,67 @@ const NavDocument = () => {
     fetchSearchData();
   }, []);
 
-  // Hàm để mở rộng danh mục hiện tại và tất cả danh mục cha của nó
-  const expandCategoryAndParents = (
-    categoryId: number,
-    allCategories: Category[]
-  ) => {
-    const expandedIds: number[] = [];
-    let category = allCategories.find((cat) => cat.id === categoryId);
+  // Hàm tìm category theo ID trong cấu trúc cây
+  const findCategoryById = (id: number, categories: CategoryTree[] = categoriesTree): CategoryTree | null => {
+    for (const category of categories) {
+      if (category.id === id) {
+        return category;
+      }
 
-    // Thêm categoryId hiện tại
-    if (category) expandedIds.push(categoryId);
-
-    // Thêm tất cả các danh mục cha
-    while (category && category.parentId) {
-      expandedIds.push(category.parentId);
-      const parentId = category.parentId; // Lưu parentId vào biến tạm
-      category = allCategories.find((cat) => cat.id === parentId);
-
-      // Nếu là danh mục cấp cao nhất (parentId = null) và category tồn tại
-      if (category && category.parentId === null) {
-        const topLevelId = category.id; // Lưu id vào biến tạm
-        setTopLevelExpanded((prev) => ({
-          ...prev,
-          [topLevelId]: true,
-        }));
+      if (category.children && category.children.length > 0) {
+        const found = findCategoryById(id, category.children);
+        if (found) return found;
       }
     }
 
-    setExpandedCategories(expandedIds);
-    setSelectedCategory(categoryId);
+    return null;
+  };
+
+  // Hàm tìm đường dẫn từ category ID đến gốc (dùng cho việc mở rộng)
+  const findPathToRoot = (id: number, categories: CategoryTree[] = categoriesTree, path: number[] = []): number[] => {
+    for (const category of categories) {
+      if (category.id === id) {
+        return [...path, id];
+      }
+
+      if (category.children && category.children.length > 0) {
+        const foundPath = findPathToRoot(id, category.children, [...path, category.id]);
+        if (foundPath.length > 0) return foundPath;
+      }
+    }
+
+    return [];
+  };
+
+  // Hàm để mở rộng danh mục hiện tại và tất cả danh mục cha của nó
+  const expandCategoryAndParents = (
+    categoryId: number,
+  ) => {
+    const pathToRoot = findPathToRoot(categoryId);
+
+    if (pathToRoot.length > 0) {
+      setExpandedCategories(prev => {
+        // Kết hợp danh sách cũ với danh sách mới, loại bỏ các phần tử trùng lặp
+        const combined = Array.from(new Set([...prev, ...pathToRoot]));
+        return combined;
+      });
+
+      // Đối với các danh mục cấp cao nhất, cập nhật trạng thái mở rộng
+      const topLevelIds = pathToRoot.filter(id => {
+        // Tìm category trong danh sách gốc
+        return categoriesTree.some(cat => cat.id === id);
+      });
+
+      if (topLevelIds.length > 0) {
+        const newTopLevelExpanded = { ...topLevelExpanded };
+        topLevelIds.forEach(id => {
+          newTopLevelExpanded[id] = true;
+        });
+        setTopLevelExpanded(newTopLevelExpanded);
+      }
+
+      setSelectedCategory(categoryId);
+    }
   };
 
   const handleNameClick = (id: number, name: string) => {
@@ -181,31 +211,29 @@ const NavDocument = () => {
   };
 
   // Hàm lấy tất cả danh mục con (bao gồm cả các cấp lồng nhau)
-  const getAllChildCategories = (parentId: number): number[] => {
+  const getAllChildCategories = (categoryId: number): number[] => {
     const result: number[] = [];
 
-    // Kiểm tra nếu categories là undefined hoặc rỗng
-    if (!categories || categories.length === 0) {
-      return result;
-    }
-
-    const getChildren = (id: number) => {
-      const children = categories.filter((cat) => cat.parentId === id);
-      // Kiểm tra nếu children tồn tại
-      if (children && children.length > 0) {
-        children.forEach((child) => {
-          result.push(child.id);
-          getChildren(child.id);
-        });
-      }
+    const collectChildIds = (categories: CategoryTree[]) => {
+      categories.forEach(category => {
+        result.push(category.id);
+        if (category.children && category.children.length > 0) {
+          collectChildIds(category.children);
+        }
+      });
     };
 
-    getChildren(parentId);
+    const category = findCategoryById(categoryId);
+    if (category && category.children) {
+      collectChildIds(category.children);
+    }
+
     return result;
   };
 
-  const hasChildren = (categoryId: number) => {
-    return categories.some((cat) => cat.parentId === categoryId);
+  // Kiểm tra xem một danh mục có danh mục con hay không
+  const hasChildren = (category: CategoryTree): boolean => {
+    return category.children !== null && category.children !== undefined && category.children.length > 0;
   };
 
   // Thêm các hàm xử lý tìm kiếm
@@ -258,11 +286,11 @@ const NavDocument = () => {
     if (showResults) {
       updateSearchResultsPosition();
     }
-    
+
     // Thêm event listener để cập nhật vị trí khi cuộn trang
     window.addEventListener('scroll', updateSearchResultsPosition);
     window.addEventListener('resize', updateSearchResultsPosition);
-    
+
     return () => {
       window.removeEventListener('scroll', updateSearchResultsPosition);
       window.removeEventListener('resize', updateSearchResultsPosition);
@@ -274,28 +302,24 @@ const NavDocument = () => {
     updateSearchResultsPosition();
   };
 
-  const renderCategories = (parentId: number | null, level = 0) => {
-    const filteredCategories = categories.filter(
-      (category) => category.parentId === parentId
-    );
-
-    if (filteredCategories.length === 0) return null;
+  // Hàm render danh mục sử dụng trực tiếp cấu trúc cây
+  const renderCategoryTree = (categories: CategoryTree[], level = 0) => {
+    if (!categories || categories.length === 0) return null;
 
     return (
       <ul className="category-list">
-        {filteredCategories.map((category) => {
+        {categories.map((category) => {
           const isTopLevelExpanded =
             level === 0 ? topLevelExpanded[category.id] || false : true;
           const isExpanded = expandedCategories.includes(category.id);
           const isSelected = selectedCategory === category.id;
-          const hasChildCategories = hasChildren(category.id);
+          const hasChildCategories = hasChildren(category);
 
           return (
             <li
               key={category.id}
-              className={`category-item ${
-                isSelected ? "active" : ""
-              } depth-${level}`}
+              className={`category-item ${isSelected ? "active" : ""
+                } depth-${level}`}
             >
               <div className="category-row">
                 {hasChildCategories && (
@@ -339,7 +363,7 @@ const NavDocument = () => {
                 isExpanded &&
                 (level === 0 ? isTopLevelExpanded : true) && (
                   <div className="nested-categories">
-                    {renderCategories(category.id, level + 1)}
+                    {renderCategoryTree(category.children!, level + 1)}
                   </div>
                 )}
             </li>
@@ -355,7 +379,7 @@ const NavDocument = () => {
         <div className="document-header">
           <h3 className="document-title">Danh mục tài liệu</h3>
         </div>
-        
+
         <div className="document-search">
           <div className="search-input-container" ref={searchInputRef}>
             <input
@@ -368,7 +392,7 @@ const NavDocument = () => {
               onBlur={handleBlur}
               className="document-search-input"
             />
-            <button 
+            <button
               onClick={() => navigate(`/tim-kiem?keyword=${searchTerm}`)}
               className="document-search-button"
             >
@@ -376,10 +400,12 @@ const NavDocument = () => {
             </button>
           </div>
         </div>
-        
-        <div className="document-body">{renderCategories(null)}</div>
+
+        <div className="document-body">
+          {renderCategoryTree(categoriesTree)}
+        </div>
       </div>
-      
+
       {/* Kết quả tìm kiếm được đặt ở cấp cao nhất của component */}
       {showResults && searchTerm && filteredDocuments.length > 0 && (
         <div className="document-search-results" style={{
@@ -406,7 +432,7 @@ const NavDocument = () => {
               </a>
             </div>
           ))}
-          
+
           {filteredDocuments.length > 0 && (
             <div className="document-search-view-all">
               <a href={`/tim-kiem?keyword=${searchTerm}`}>

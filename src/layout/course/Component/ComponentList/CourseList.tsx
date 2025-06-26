@@ -9,13 +9,6 @@ import NavCourse from "./NavCourse";
 import { CourseList as CourseListUser } from "../../../../model/CourseList";
 import { formatCurrency } from "../../../util/formatCurrency";
 
-// API Endpoints
-import {
-  GET_USER_CATEGORY_LEVEL_1,
-  GET_USER_CATEGORY_LEVEL_2,
-  GET_USER_CATEGORY_LEVEL_3,
-} from "../../../../api/api";
-
 // Types
 type CourseListProps = {
   courses: CourseListUser[];
@@ -27,6 +20,13 @@ interface Category {
   level: number;
   parentId: number | null;
   type: string;
+}
+
+interface CategoryTree extends Category {
+  id: number;
+  name: string;
+  level: number;
+  children: CategoryTree[];
 }
 
 // Utilities
@@ -45,15 +45,10 @@ const removeVietnameseTones = (str: string): string => {
 function CourseList({ courses }: CourseListProps) {
   // State
   const [loading, setLoading] = useState(true);
-  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<
-    Category[]
-  >([]);
-  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<
-    Category[]
-  >([]);
-  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<
-    Category[]
-  >([]);
+  const [coursesCategoriesTree, setCoursesCategoriesTree] = useState<CategoryTree[]>([]);
+  const [level1CategoriesCourse, setLevel1CategoriesCourse] = useState<Category[]>([]);
+  const [level2CategoriesCourse, setLevel2CategoriesCourse] = useState<Category[]>([]);
+  const [level3CategoriesCourse, setLevel3CategoriesCourse] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCourses, setFilteredCourses] = useState<CourseListUser[]>(courses);
 
@@ -61,13 +56,13 @@ function CourseList({ courses }: CourseListProps) {
   useEffect(() => {
     fetchCourseCategories();
   }, []);
-  
+
   // Filter courses when search term or courses change
   useEffect(() => {
     if (!searchTerm) {
       setFilteredCourses(courses);
     } else {
-      const filtered = courses.filter((course) => 
+      const filtered = courses.filter((course) =>
         course.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredCourses(filtered);
@@ -82,38 +77,49 @@ function CourseList({ courses }: CourseListProps) {
   // Data fetching
   const fetchCourseCategories = async () => {
     try {
-      // Fetch level 1 categories
-      const level1Response = await axios.get<Category[]>(
-        GET_USER_CATEGORY_LEVEL_1
+      // Fetch categories using the tree API
+      const response = await axios.get<{ data: CategoryTree[] }>(
+        `${process.env.REACT_APP_SERVER_HOST}/api/categories/tree?level=1&type=COURSE`
       );
-      const level1Filtered = level1Response.data.filter(
-        (category) => category.type === "COURSE"
-      );
-      setLevel1CategoriesCourse(level1Filtered);
 
-      // Fetch level 2 categories
-      const level2Response = await axios.get<Category[]>(
-        GET_USER_CATEGORY_LEVEL_2
-      );
-      const level2Filtered = level2Response.data.filter(
-        (category) => category.type === "COURSE"
-      );
-      setLevel2CategoriesCourse(level2Filtered);
+      if (response.data && response.data.data) {
+        // setCoursesCategoriesTree(response.data.data);
 
-      // Fetch level 3 categories
-      const level3Response = await axios.get<Category[]>(
-        GET_USER_CATEGORY_LEVEL_3
-      );
-      const level3Filtered = level3Response.data.filter(
-        (category) => category.type === "COURSE"
-      );
-      setLevel3CategoriesCourse(level3Filtered);
+        // Extract categories by level
+        const { level1, level2, level3 } = extractCategoriesByLevel(response.data.data);
+        setLevel1CategoriesCourse(level1);
+        setLevel2CategoriesCourse(level2);
+        setLevel3CategoriesCourse(level3);
+      }
 
       setLoading(false);
     } catch (error) {
       console.error("Error fetching categories:", error);
       setLoading(false);
     }
+  };
+
+  // Helper function to extract categories by level
+  const extractCategoriesByLevel = (tree: CategoryTree[]) => {
+    const level1: Category[] = [];
+    const level2: Category[] = [];
+    const level3: Category[] = [];
+
+    tree.forEach(cat1 => {
+      level1.push(cat1);
+      if (cat1.children && cat1.children.length > 0) {
+        cat1.children.forEach(cat2 => {
+          level2.push(cat2);
+          if (cat2.children && cat2.children.length > 0) {
+            cat2.children.forEach(cat3 => {
+              level3.push(cat3);
+            });
+          }
+        });
+      }
+    });
+
+    return { level1, level2, level3 };
   };
 
   // Helper methods
@@ -125,7 +131,7 @@ function CourseList({ courses }: CourseListProps) {
     );
   };
 
-  const handleCourseClick = (courseId: number, categoryId: number, courseTitle: string) => {
+  const handleCourseClick = (courseId: number, categoryId: number, categoryIdLevel1: number, categoryIdLevel2: number, courseTitle: string) => {
     if (!courseId) {
       console.error("Khóa học không hợp lệ!");
       return;
@@ -139,10 +145,10 @@ function CourseList({ courses }: CourseListProps) {
 
     const courseSlug = removeVietnameseTones(courseTitle);
     localStorage.setItem("tenkhoahoc", courseSlug);
-    
+
     // Tạo URL bao gồm tên khóa học và ID, đảm bảo có dấu gạch ngang giữa chúng
     window.location.href = `/khoa-hoc/${courseSlug}-${courseId}`;
-    
+
     // Log để debug
     console.log(`Chuyển hướng đến: /khoa-hoc/${courseSlug}-${courseId}`);
   };
@@ -151,36 +157,36 @@ function CourseList({ courses }: CourseListProps) {
   const renderEmptyState = () => (
     <div id="listCourseProductCat" className="row">
       <div className="col-12">
-        <div 
-          className="empty-state-container text-center" 
-          style={{ 
-            width: "100%", 
-            margin: "60px auto", 
-            padding: "40px 20px", 
-            backgroundColor: "#f7f9fc", 
-            borderRadius: "16px", 
+        <div
+          className="empty-state-container text-center"
+          style={{
+            width: "100%",
+            margin: "60px auto",
+            padding: "40px 20px",
+            backgroundColor: "#f7f9fc",
+            borderRadius: "16px",
             boxShadow: "0 8px 30px rgba(0,0,0,0.06)",
             border: "1px solid #e6eef9"
           }}
         >
           <div className="empty-state-icon mb-4">
-            <i 
-              className="fas fa-search" 
-              style={{ 
-                fontSize: "60px", 
-                color: "#2eb97e", 
-                padding: "30px", 
-                backgroundColor: "rgba(46, 185, 126, 0.1)", 
+            <i
+              className="fas fa-search"
+              style={{
+                fontSize: "60px",
+                color: "#2eb97e",
+                padding: "30px",
+                backgroundColor: "rgba(46, 185, 126, 0.1)",
                 borderRadius: "50%",
                 marginBottom: "15px"
               }}
             ></i>
           </div>
-          
+
           <h3 style={{ fontSize: "24px", fontWeight: "700", color: "#333", marginBottom: "16px" }}>
             Không tìm thấy khóa học nào
           </h3>
-          
+
           <p style={{ fontSize: "16px", color: "#666", maxWidth: "400px", margin: "0 auto" }}>
             Hiện không có khóa học nào phù hợp với tiêu chí tìm kiếm của bạn. Vui lòng thử lại với bộ lọc khác!
           </p>
@@ -194,9 +200,8 @@ function CourseList({ courses }: CourseListProps) {
       {[...Array(5)].map((_, index) => (
         <i
           key={index}
-          className={`fa-sharp fa-solid fa-star ${
-            index < Math.floor(rating) ? "" : "disabled"
-          }`}
+          className={`fa-sharp fa-solid fa-star ${index < Math.floor(rating) ? "" : "disabled"
+            }`}
         ></i>
       ))}
     </div>
@@ -266,7 +271,7 @@ function CourseList({ courses }: CourseListProps) {
               to="#"
               onClick={(e) => {
                 e.preventDefault();
-                handleCourseClick(course.id!, Number((course as any).courseCategoryId), course.title);
+                handleCourseClick(course.id!, Number((course as any).courseCategoryId), Number((course as any).courseCategoryIdLevel1), Number((course as any).courseCategoryIdLevel2), course.title);
               }}
             >
               <img
@@ -319,7 +324,7 @@ function CourseList({ courses }: CourseListProps) {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleCourseClick(course.id!, Number((course as any).courseCategoryId), course.title);
+                  handleCourseClick(course.id!, Number((course as any).courseCategoryId), Number((course as any).courseCategoryIdLevel1), Number((course as any).courseCategoryIdLevel2), course.title);
                 }}
                 className="primary-hover"
                 title={course.title}
@@ -394,9 +399,8 @@ function CourseList({ courses }: CourseListProps) {
                 {[...Array(5)].map((_, index) => (
                   <i
                     key={index}
-                    className={`fa-sharp fa-solid fa-star ${
-                      index < Math.floor((course as any).rating) ? "" : "disabled"
-                    }`}
+                    className={`fa-sharp fa-solid fa-star ${index < Math.floor((course as any).rating) ? "" : "disabled"
+                      }`}
                     style={{ fontSize: "14px" }}
                   ></i>
                 ))}
@@ -422,14 +426,14 @@ function CourseList({ courses }: CourseListProps) {
       <div className="col-xl-9 col-lg-8 col-md-12">
         {/* Search bar */}
         <div className="search-container mb-4" style={{ width: "100%" }}>
-          <div className="search-bar" style={{ 
+          <div className="search-bar" style={{
             display: "flex",
             maxWidth: "500px",
             margin: "0 auto 20px",
             position: "relative",
             borderRadius: "8px",
             overflow: "hidden",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.1)" 
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
           }}>
             <input
               type="text"

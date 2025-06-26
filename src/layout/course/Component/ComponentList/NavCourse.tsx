@@ -10,6 +10,7 @@ import {
 type Category = {
   id: number;
   name: string;
+  level: number;
   parentId: number | null;
   type: string; // Trường type để kiểm tra là COURSE
 };
@@ -93,10 +94,11 @@ const NavCourse = () => {
     setSelectedCategory(categoryId);
   };
 
-  const handleNameClick = (id: number, name: string) => {
+  const handleNameClick = (id: number, name: string, level: number) => {
     setSelectedCategory(id);
     localStorage.setItem("iddanhmuckhoahoc", id.toString());
     localStorage.setItem("danhmuckhoahoc", removeVietnameseTones(name));
+    localStorage.setItem("level", level.toString());
     window.location.href = `/khoa-hoc/danh-muc/${removeVietnameseTones(name)}`;
   };
 
@@ -169,7 +171,7 @@ const NavCourse = () => {
     return categories.some((cat) => cat.parentId === categoryId);
   };
 
-  const renderCategories = (parentId: number | null, level = 0) => {
+  const renderCategories = (parentId: number | null, level: number) => {
     const filteredCategories = categories.filter(
       (category) => category.parentId === parentId
     );
@@ -188,9 +190,8 @@ const NavCourse = () => {
           return (
             <li
               key={category.id}
-              className={`category-item ${
-                isSelected ? "active" : ""
-              } depth-${level}`}
+              className={`category-item ${isSelected ? "active" : ""
+                } depth-${level}`}
             >
               <div className="category-row">
                 {hasChildCategories && (
@@ -218,7 +219,7 @@ const NavCourse = () => {
                   className="category-name"
                   onClick={(e) => {
                     e.preventDefault();
-                    handleNameClick(category.id, category.name);
+                    handleNameClick(category.id, category.name, level);
                   }}
                 >
                   {level === 0 ? (
@@ -250,7 +251,7 @@ const NavCourse = () => {
         <div className="document-header">
           <h3 className="document-title">Danh mục khóa học</h3>
         </div>
-        <div className="document-body">{renderCategories(null)}</div>
+        <div className="document-body">{renderCategories(null, 1)}</div>
       </div>
     </div>
   );

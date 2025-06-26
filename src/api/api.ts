@@ -1,9 +1,3 @@
-import React from "react";
-
-const username = "thanhngoc@gmail.com";
-const password = "Thanh1309@";
-export const token_default = btoa(`${username}:${password}`); // Mã hóa Base64
-// export const SERVER = `${process.env.REACT_APP_SERVER_HOST}`;
 
 //ADMIN
 export const GET_ACCOUNT = `${process.env.REACT_APP_SERVER_HOST}/accounts`;
@@ -11,10 +5,7 @@ export const POST_ADMIN_DOCUMENT = `${process.env.REACT_APP_SERVER_HOST}/documen
 export const POST_ACCOUNT_REGISTER = `${process.env.REACT_APP_SERVER_HOST}/account/dang-ky`;
 export const POST_ACCOUNT_LOGIN = `${process.env.REACT_APP_SERVER_HOST}/account/dang-nhap`;
 
-//ADMIN_DOCUMENT
-export const ADMIN_DOCUMENT_GET_CATEGORY_LEVEL1 = `${process.env.REACT_APP_SERVER_HOST}/categories/level1`;
-export const ADMIN_DOCUMENT_GET_CATEGORY_LEVEL2 = `${process.env.REACT_APP_SERVER_HOST}/categories/level2`;
-export const ADMIN_DOCUMENT_GET_CATEGORY_LEVEL3 = `${process.env.REACT_APP_SERVER_HOST}/categories/level3`;
+
 
 export const ADMIN_STATUS_GeneralDocument = `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/status`;
 export const ADMIN_UNSTATUS_GeneralDocument = `${process.env.REACT_APP_SERVER_HOST}/api/general_documents/unstatus`;
@@ -228,11 +219,7 @@ export const ADMIN_SHOW_NOTIFICATION = `${process.env.REACT_APP_SERVER_HOST}/api
 // export const ADMIN_POST_NOTIFICATION_AND_SEND = `${process.env.REACT_APP_SERVER_HOST}/api/notifications/show`;
 export const ADMIN_ACCOFCOURSE = `${process.env.REACT_APP_SERVER_HOST}/api/enrolled-course/accounts/courses`;
 
-//Header
-export const GET_USER_CATEGORY_LEVEL_1 = `${process.env.REACT_APP_SERVER_HOST}/categories/level1`;
-export const GET_USER_CATEGORY_LEVEL_2 = `${process.env.REACT_APP_SERVER_HOST}/categories/level2`;
-export const GET_USER_CATEGORY_LEVEL_3 = `${process.env.REACT_APP_SERVER_HOST}/categories/level3`;
-// export const GET_USER_CATEGORY_COURSE = `${process.env.REACT_APP_SERVER_HOST}/course_categories`;
+
 
 //HOME-PAGE
 export const GET_USER_TOP6_COURSE = `${process.env.REACT_APP_SERVER_HOST}/api/courses/top6`;
@@ -259,23 +246,24 @@ export const GET_USER_DOCUMENT_BY_CATEGORY_ID = (
 // COURSE
 export const GET_USER_COURSE = (page: number, size: number) =>
   `${process.env.REACT_APP_SERVER_HOST}/api/courses/public/filter?page=${page}&size=${size}`;
-export const GET_USER_COURSE_BY_CATEGORY_ID = (
-  id: number,
-  page: number,
-  size: number
-) =>
-  `${process.env.REACT_APP_SERVER_HOST}/api/courses/category/${id}?page=${page}&size=${size}`;
-export const GET_COURSES_BY_CATEGORIES = (
-  categoryId: number,
 
+export const GET_COURSES_BY_CATEGORIES = (
+  categoryIdLevel3: number | null,
+  categoryIdLevel2: number | null,
+  categoryIdLevel1: number | null,
 ) =>
-  `${process.env.REACT_APP_SERVER_HOST}/api/courses/public/filter?type=category&categoryIds=${categoryId}`;
+  `${process.env.REACT_APP_SERVER_HOST}/api/courses/public/filter?categoryIds=${categoryIdLevel3 ?? 0}&categoryIdLevel1=${categoryIdLevel1 ?? 0}&categoryIdLevel2=${categoryIdLevel2 ?? 0}`;
+
 export const ADMIN_STATUS_COURSE = `${process.env.REACT_APP_SERVER_HOST}/api/courses/status`;
 export const ADMIN_UNSTATUS_COURSE = `${process.env.REACT_APP_SERVER_HOST}/api/courses/unstatus`;
 //EXAM
 export const GET_USER_CATEGORY_EXAM = `${process.env.REACT_APP_SERVER_HOST}/api/courses/get-all-result-list-course`;
 export const GET_USER_EXAM = (page: number, size: number) =>
   `${process.env.REACT_APP_SERVER_HOST}/api/tests/exam/public?page=${page}&size=${size}`;
+
+export const GET_USER_EXAM_BY_CATEGORY_ID =
+  (categoryIdLevel2: number | null, categoryIdLevel3: number | null, categoryIdLevel4: number | null, page: number, size: number) =>
+  `${process.env.REACT_APP_SERVER_HOST}/api/tests/exam/public?categoryIdLevel2=${categoryIdLevel2 ?? 0}&categoryIdLevel3=${categoryIdLevel3 ?? 0}&categoryIdLevel4=${categoryIdLevel4 ?? 0}&page=${page}&size=${size}`;
 //COURSE - DETAIL
 export const GET_USER_COURSE_DETAIL_BY_COURSE_ID = (id: number) =>
   `${process.env.REACT_APP_SERVER_HOST}/api/courses/${id}`;
